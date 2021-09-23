@@ -2,13 +2,12 @@ from fastapi import FastAPI
 import uvicorn
 import click
 
-from app.infrastructure.web.endpoints.public import example
+from app.infrastructure.web.endpoints.public import example, auth
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
-from app.dependencies import (
-    get_client_session,
-    get_event_loop,
-)
+from app.infrastructure.db.core import get_or_create_database
+from app.dependencies import get_event_loop, get_client_session
+
 
 from app.settings import settings
 
@@ -19,6 +18,7 @@ def setup_app():
         description="Endpoints for Pelleum mobile appliaction to utilize.",
     )
     app.include_router(example.example_public_router, prefix="/public")
+    app.include_router(auth.auth_router, prefix="/public/auth")
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
 
@@ -32,6 +32,7 @@ fastapi_app = setup_app()
 async def startup_event():
     await get_event_loop()
     await get_client_session()
+    await get_or_create_database()
 
 
 @fastapi_app.on_event("shutdown")
@@ -40,9 +41,10 @@ async def shutdown_event():
     client_session = await get_client_session()
     await client_session.close()
 
-    # # Close database connection once db exists
-    # DATABASE = await get_or_create_database()
-    # await DATABASE.disconnect()
+    # Close database connection once db exists
+    DATABASE = await get_or_create_database()
+    if DATABASE.is_connected:
+        await DATABASE.disconnect()
 
 
 @click.command()

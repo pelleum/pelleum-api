@@ -1,17 +1,18 @@
-import logging
+from app.dependencies import logger
 import databases
-from fire_rank.settings import Settings
+from app.settings import settings
+
 
 DATABASE = None
 
 
-async def get_or_create_database(s: Settings):
+async def get_or_create_database():
     global DATABASE
     if DATABASE is not None:
         return DATABASE
 
-    logging.info("Created DB!")
-    DATABASE = databases.DATABASE(s.database_url, min_size=5)
-    logging.info("Connected!")
+    DATABASE = databases.Database(settings.database_url, min_size=5)
+
     await DATABASE.connect()
+    logger.info("Connected to Database!")
     return DATABASE
