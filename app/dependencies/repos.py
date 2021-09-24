@@ -1,5 +1,3 @@
-import databases
-from app.usecases.schemas import database
 from app.infrastructure.db.core import get_or_create_database
 from app.infrastructure.db.repos.user_repo import UsersRepo
 

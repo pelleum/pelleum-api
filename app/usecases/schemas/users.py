@@ -11,22 +11,13 @@ class UserCreate(UserBase):
     password: str
 
 
-class UserCreatePasswordHashed(UserBase):
-    hashed_password: str
-
-
 class UserUpdate(BaseModel):
-    email: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
+    email: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
 
 
-class UserUpdatePasswordHashed(BaseModel):
-    email: Optional[str]
-    username: Optional[str]
-    hashed_password: Optional[str]
-
-
-class UserCreateResponse(UserBase):
+class UserResponse(UserBase):
+    user_id: str
     is_active: bool
     is_verified: bool

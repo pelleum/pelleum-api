@@ -16,8 +16,8 @@ class Settings(BaseSettings):
 
     token_url: str
     json_web_token_secret: str
-    algorithm: str
-    access_token_expire_minutes: int
+    json_web_token_algorithm: str
+    access_token_expire_minutes: float
 
     class Config:
         env_file = DOTENV_FILE

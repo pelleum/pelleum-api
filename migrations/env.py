@@ -6,11 +6,11 @@ from alembic import context
 import pathlib
 import sys
 
-sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
-
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
 from app.infrastructure.db.models.users import USERS
+
+sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
 
 
 # this is the Alembic Config object, which provides

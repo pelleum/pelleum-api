@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 from app.usecases.schemas import users
 from app.usecases.schemas.database import UserInDB
+from passlib.context import CryptContext
 
 
 class IUserRepo(ABC):
     @abstractmethod
-    async def create(self, new_user: users.UserCreatePasswordHashed) -> UserInDB:
+    async def create(
+        self, new_user: users.UserCreate, password_context: CryptContext
+    ) -> UserInDB:
         pass
 
     @abstractmethod
@@ -18,7 +21,10 @@ class IUserRepo(ABC):
         pass
 
     @abstractmethod
-    async def update_user_with_filter(
-        self, updated_user: users.UserUpdatePasswordHashed, user_id: str
+    async def update(
+        self,
+        updated_user: users.UserUpdate,
+        user_id: str,
+        password_context: CryptContext,
     ) -> UserInDB:
         pass

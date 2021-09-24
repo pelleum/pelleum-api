@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class JWTResponse(BaseModel):
@@ -8,3 +9,7 @@ class JWTResponse(BaseModel):
 
 class AuthDataToCreateToken(BaseModel):
     sub: str
+
+
+class JWTData(BaseModel):
+    username: Optional[str] = None

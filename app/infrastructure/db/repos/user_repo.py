@@ -5,13 +5,18 @@ from databases import Database
 from app.infrastructure.db.models.users import USERS
 import uuid
 from sqlalchemy import and_
+from passlib.context import CryptContext
 
 
 class UsersRepo(IUserRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, new_user: users.UserCreatePasswordHashed) -> UserInDB:
+    async def create(
+        self, new_user: users.UserCreate, password_context: CryptContext
+    ) -> UserInDB:
+
+        hashed_password = password_context.hash(new_user.password)
 
         user_id = str(uuid.uuid4())
 
@@ -19,10 +24,10 @@ class UsersRepo(IUserRepo):
             user_id=user_id,
             email=new_user.email,
             username=new_user.username,
-            hashed_password=new_user.hashed_password,
+            hashed_password=hashed_password,
             is_active=True,
             is_superuser=False,
-            is_verified=False
+            is_verified=False,
         )
 
         await self.db.execute(create_user_insert_stmt)
@@ -58,9 +63,16 @@ class UsersRepo(IUserRepo):
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
             )
 
-    async def update_user_with_filter(
-        self, updated_user: users.UserUpdatePasswordHashed, user_id: str
+    async def update(
+        self,
+        updated_user: users.UserUpdate,
+        user_id: str,
+        password_context: CryptContext,
     ) -> UserInDB:
+
+        if updated_user.password:
+            hashed_password = password_context.hash(updated_user.password)
+            updated_user.password = hashed_password
 
         query = USERS.update()
 

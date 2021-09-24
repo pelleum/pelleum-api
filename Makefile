@@ -10,6 +10,9 @@ requirements.txt:
 black:
 	black $(python_code)
 
+lint:
+	pylint app
+
 run-dev:
 	python -m app --reload
 

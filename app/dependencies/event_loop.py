@@ -7,7 +7,7 @@ loop = None
 
 
 async def get_event_loop():
-    global loop
+    global loop  # pylint: disable = global-statement
     if loop is None:
         loop = asyncio.get_event_loop()
 
