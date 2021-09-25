@@ -15,7 +15,7 @@ from app.dependencies import (
 from app.libraries import pelleum_errors
 from app.usecases.schemas import auth
 from app.usecases.schemas import users
-from app.infrastructure.db.repos.user_repo import UsersRepo
+from app.usecases.interfaces.user_repo import IUserRepo
 
 
 auth_router = APIRouter(tags=["auth"])
@@ -24,7 +24,7 @@ auth_router = APIRouter(tags=["auth"])
 @auth_router.post("/token", response_model=auth.JWTResponse)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    users_repo: UsersRepo = Depends(get_users_repo),
+    users_repo: IUserRepo = Depends(get_users_repo),
 ) -> auth.JWTResponse:
 
     user: UserInDB = await users_repo.retrieve_user_with_filter(
@@ -52,7 +52,7 @@ async def login_for_access_token(
     response_model=users.UserResponse,
 )
 async def create_new_user(
-    body: users.UserCreate = Body(...), users_repo: UsersRepo = Depends(get_users_repo)
+    body: users.UserCreate = Body(...), users_repo: IUserRepo = Depends(get_users_repo)
 ) -> users.UserResponse:
 
     await validate_password(password=body.password)
@@ -90,7 +90,7 @@ async def create_new_user(
     response_model=users.UserResponse,
 )
 async def update_user(
-    body: users.UserCreate = Body(...), users_repo: UsersRepo = Depends(get_users_repo)
+    body: users.UserCreate = Body(...), users_repo: IUserRepo = Depends(get_users_repo)
 ) -> users.UserResponse:
 
     password_context: CryptContext = await get_password_context()

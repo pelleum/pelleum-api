@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from app.usecases.schemas import auth
 from datetime import datetime, timedelta
 from app.libraries.pelleum_errors import inactive_user_error, invalid_credentials
-from app.infrastructure.db.repos.user_repo import UsersRepo
+from app.usecases.interfaces.user_repo import IUserRepo
 import re
 
 from app.dependencies import get_users_repo  # pylint: disable = cyclic-import
@@ -60,7 +60,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 async def verify_user_exists(username: str):
-    users_repo: UsersRepo = await get_users_repo()
+    users_repo: IUserRepo = await get_users_repo()
     user: UserInDB = await users_repo.retrieve_user_with_filter(username=username)
     if user is None:
         raise invalid_credentials
