@@ -31,7 +31,7 @@ push:
 	docker push $(docker_username)/$(docker_image):latest
 
 generate-migrations:
-	alembic -x db_url=postgresql://postgres:postgres@localhost:5432/pelleum-dev revision --autogenerate --rev-id "0001" -m "Initial users schema added"
+	alembic revision --autogenerate --rev-id "0002" -m "My migration message"
 
 migrate:
-	alembic -x db_url=postgresql://postgres:postgres@localhost:5432/pelleum-dev upgrade "0001"
+	alembic upgrade head

@@ -9,6 +9,8 @@ from app.dependencies import (
     verify_password,
     create_access_token,
     get_current_active_user,
+    validate_password,
+    validate_email,
 )
 from app.libraries import pelleum_errors
 from app.usecases.schemas import auth
@@ -53,19 +55,26 @@ async def create_new_user(
     body: users.UserCreate = Body(...), users_repo: UsersRepo = Depends(get_users_repo)
 ) -> users.UserResponse:
 
+    await validate_password(password=body.password)
+    await validate_email(email=body.email)
+
     password_context: CryptContext = await get_password_context()
 
     email_already_exists: UserInDB = await users_repo.retrieve_user_with_filter(
         email=body.email
     )
     if email_already_exists:
-        raise pelleum_errors.email_already_exists
+        raise await pelleum_errors.AccountAlreadyExists(
+            detail="An account with this email already exists. Please choose another email."
+        ).account_exists()
 
     username_already_exists: UserInDB = await users_repo.retrieve_user_with_filter(
         username=body.username
     )
     if username_already_exists:
-        raise pelleum_errors.username_already_exists
+        raise await pelleum_errors.AccountAlreadyExists(
+            detail="An account with this username already exists. Please choose another username."
+        ).account_exists()
 
     new_user: UserInDB = await users_repo.create(
         new_user=body, password_context=password_context

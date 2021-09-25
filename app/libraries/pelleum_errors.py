@@ -15,11 +15,37 @@ invalid_credentials = HTTPException(
 
 inactive_user_error = HTTPException(status_code=400, detail="Inactive user")
 
-email_already_exists = HTTPException(
-    status_code=403,
-    detail="An account with this email already exists. Please choose another email.",
-)
-username_already_exists = HTTPException(
-    status_code=403,
-    detail="An account with this username already exists. Please choose another username.",
-)
+
+class AccountAlreadyExists:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def account_exists(self):
+        return HTTPException(
+            status_code=403,
+            detail=self.detail
+            if self.detail
+            else "An account with this username or email already exists.",
+        )
+
+
+class PasswordValidationError:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def invalid_password(self):
+        return HTTPException(
+            status_code=400,
+            detail=self.detail if self.detail else "The submitted password is invalid.",
+        )
+
+
+class EmailValidationError:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def invalid_email(self):
+        return HTTPException(
+            status_code=400,
+            detail=self.detail if self.detail else "The submitted email is invalid.",
+        )

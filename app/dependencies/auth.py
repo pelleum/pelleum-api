@@ -1,3 +1,4 @@
+from app.libraries import pelleum_errors
 from app.usecases.schemas.database import UserInDB
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -8,6 +9,7 @@ from app.usecases.schemas import auth
 from datetime import datetime, timedelta
 from app.libraries.pelleum_errors import inactive_user_error, invalid_credentials
 from app.infrastructure.db.repos.user_repo import UsersRepo
+import re
 
 from app.dependencies import get_users_repo  # pylint: disable = cyclic-import
 
@@ -69,3 +71,52 @@ async def get_current_active_user(current_user: UserInDB = Depends(get_current_u
     if not current_user.is_active:
         raise inactive_user_error
     return current_user
+
+
+async def validate_password(password: str) -> None:
+    """This function checks the validity of the password sent in upon user creation"""
+
+    # fmt: off
+    special_symbols = special_symbols = (
+        "!", "#", "$",",", "%", "&", "'", "(", ")", "*", "+",
+        "-", ".", "/", ":", ";", "<", "=", ">", "?", "@",
+        "[", "]", "^", "_", "`", "{", "|", "}", "~"
+    )
+    # fmt: on
+
+    if len(password) < 8:
+        raise await pelleum_errors.PasswordValidationError(
+            detail="Password must be at least 8 characters long."
+        ).invalid_password()
+
+    if not any(char.isdigit() for char in password):
+        raise await pelleum_errors.PasswordValidationError(
+            detail="Password must contain at least 1 digit."
+        ).invalid_password()
+
+    if not any(char.isupper() for char in password):
+        raise await pelleum_errors.PasswordValidationError(
+            detail="Password must contain at least one uppercase letter."
+        ).invalid_password()
+
+    if not any(char.islower() for char in password):
+        raise await pelleum_errors.PasswordValidationError(
+            detail="Password must contain at least one lowercase letter."
+        ).invalid_password()
+
+    if not any(char in special_symbols for char in password):
+        raise await pelleum_errors.PasswordValidationError(
+            detail="Password must contain at least one special character."
+        ).invalid_password()
+
+
+async def validate_email(email: str) -> None:
+    """This function checks the validity of the email sent in upon user creation"""
+
+    # Regular expression for validating an email (look into what this is doing)
+    regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+
+    if not re.fullmatch(regex, email):
+        raise await pelleum_errors.EmailValidationError(
+            detail="Email format is invalid. Please submit a valid email."
+        ).invalid_email()

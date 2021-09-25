@@ -1,17 +1,17 @@
 from logging.config import fileConfig
-
+from os import getenv
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 import pathlib
 import sys
 
-# Import Tables
-from app.infrastructure.db.metadata import METADATA
-from app.infrastructure.db.models.users import USERS
 
 sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
 
+# Import Tables
+from app.infrastructure.db.metadata import METADATA
+from app.infrastructure.db.models.users import USERS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -32,12 +32,14 @@ target_metadata = METADATA
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-db_url = context.get_x_argument(as_dictionary=True).get("db_url")
+postgres_host = getenv("POSTGRES_HOST", default="localhost")
+postgres_port = getenv("POSTGRES_PORT", default=5432)
+postgres_user = getenv("POSTGRES_USER", default="postgres")
+postgres_password = getenv("POSTGRES_PASSWORD", default="postgres")
+postgres_database = getenv("POSTGRES_DATABASE", default="pelleum-dev")
 
-config.set_main_option(
-    "sqlalchemy.url",
-    db_url,
-)
+url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_database}"
+config.set_main_option("sqlalchemy.url", url)
 
 
 def run_migrations_offline():
