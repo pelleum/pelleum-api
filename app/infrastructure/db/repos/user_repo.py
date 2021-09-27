@@ -18,10 +18,7 @@ class UsersRepo(IUserRepo):
 
         hashed_password = password_context.hash(new_user.password)
 
-        user_id = str(uuid.uuid4())
-
         create_user_insert_stmt = USERS.insert().values(
-            user_id=user_id,
             email=new_user.email,
             username=new_user.username,
             hashed_password=hashed_password,
@@ -32,7 +29,7 @@ class UsersRepo(IUserRepo):
 
         await self.db.execute(create_user_insert_stmt)
 
-        return await self.retrieve_user_with_filter(user_id=user_id)
+        return await self.retrieve_user_with_filter(username=new_user.username)
 
     async def retrieve_user_with_filter(
         self,

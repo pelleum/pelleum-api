@@ -6,7 +6,7 @@ from app.usecases.schemas.users import UserBase
 class UserInDB(UserBase):
     """Database Model"""
 
-    user_id: str
+    user_id: int
     hashed_password: str
     is_active: bool
     is_superuser: bool

@@ -6,8 +6,9 @@ USERS = sa.Table(
     METADATA,
     sa.Column(
         "user_id",
-        sa.String,
+        sa.Integer,
         primary_key=True,
+        autoincrement=True
     ),
     sa.Column("email", sa.String, nullable=False, unique=True, index=True),
     sa.Column("username", sa.String, nullable=False, unique=True, index=True),

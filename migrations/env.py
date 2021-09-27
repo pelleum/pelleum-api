@@ -12,6 +12,7 @@ sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
 from app.infrastructure.db.models.users import USERS
+from app.infrastructure.db.models.theses import THESES, REACTIONS, COMMENTS, ADOPTIONS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

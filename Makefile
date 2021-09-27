@@ -31,7 +31,7 @@ push:
 	docker push $(docker_username)/$(docker_image):latest
 
 generate-migrations:
-	alembic revision --autogenerate --rev-id "0002" -m "My migration message"
+	alembic revision --autogenerate --rev-id "0001" -m "added users and theses"
 
 migrate:
 	alembic upgrade head
