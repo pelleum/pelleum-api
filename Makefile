@@ -1,15 +1,17 @@
-SHELL := bash
+SHELL := /bin/bash
 
 docker_image = pelleum_api
 docker_username = adamcuculich
 python_code := app/ migrations/
-
 
 requirements.txt:
 	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 
 black:
 	black $(python_code)
+
+lint:
+	pylint app
 
 run-dev:
 	python -m app --reload
@@ -28,3 +30,8 @@ push:
 	# check to make sure this is correct ...
 	docker push $(docker_username)/$(docker_image):latest
 
+generate-migrations:
+	alembic revision --autogenerate --rev-id "0001" -m "added users and theses"
+
+migrate:
+	alembic upgrade head

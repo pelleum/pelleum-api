@@ -1,0 +1,51 @@
+from fastapi import HTTPException, status
+
+
+login_error = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Incorrect username or password",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+invalid_credentials = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
+
+inactive_user_error = HTTPException(status_code=400, detail="Inactive user")
+
+
+class AccountAlreadyExists:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def account_exists(self):
+        return HTTPException(
+            status_code=403,
+            detail=self.detail
+            if self.detail
+            else "An account with this username or email already exists.",
+        )
+
+
+class PasswordValidationError:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def invalid_password(self):
+        return HTTPException(
+            status_code=400,
+            detail=self.detail if self.detail else "The submitted password is invalid.",
+        )
+
+
+class EmailValidationError:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def invalid_email(self):
+        return HTTPException(
+            status_code=400,
+            detail=self.detail if self.detail else "The submitted email is invalid.",
+        )

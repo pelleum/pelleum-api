@@ -1,5 +1,5 @@
 from os import path
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings
 
 DOTENV_FILE = ".env" if path.isfile(".env") else None
 
@@ -12,12 +12,12 @@ class Settings(BaseSettings):
     server_port: int = 8000
     server_prefix: str = ""
 
-    database_url: str = None
+    database_url: str
 
-    user_login_name: str
-    yodlee_base_url: str
-    yodlee_client_id: str
-    yodlee_secret: str
+    token_url: str
+    json_web_token_secret: str
+    json_web_token_algorithm: str
+    access_token_expire_minutes: float
 
     class Config:
         env_file = DOTENV_FILE
