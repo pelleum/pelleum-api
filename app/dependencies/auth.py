@@ -1,5 +1,5 @@
 from app.libraries import pelleum_errors
-from app.usecases.schemas.database import UserInDB
+from app.usecases.schemas.users import UserInDB
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends

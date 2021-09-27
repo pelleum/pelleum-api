@@ -1,9 +1,8 @@
 from app.usecases.interfaces.user_repo import IUserRepo
 from app.usecases.schemas import users
-from app.usecases.schemas.database import UserInDB
+from app.usecases.schemas.users import UserInDB
 from databases import Database
 from app.infrastructure.db.models.users import USERS
-import uuid
 from sqlalchemy import and_
 from passlib.context import CryptContext
 

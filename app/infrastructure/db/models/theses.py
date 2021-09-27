@@ -5,12 +5,7 @@ from app.infrastructure.db.metadata import METADATA
 THESES = sa.Table(
     "theses",
     METADATA,
-    sa.Column(
-        "thesis_id",
-        sa.BigInteger,
-        primary_key=True,
-        autoincrement=True
-    ),
+    sa.Column("thesis_id", sa.BigInteger, primary_key=True, autoincrement=True),
     sa.Column(
         "user_id",
         sa.Integer,
@@ -64,12 +59,7 @@ REACTIONS = sa.Table(
 COMMENTS = sa.Table(
     "comments",
     METADATA,
-    sa.Column(
-        "comment_id",
-        sa.BigInteger,
-        primary_key=True,
-        autoincrement=True
-    ),
+    sa.Column("comment_id", sa.BigInteger, primary_key=True, autoincrement=True),
     sa.Column(
         "thesis_id",
         sa.BigInteger,
@@ -120,3 +110,5 @@ ADOPTIONS = sa.Table(
         server_onupdate=sa.func.now(),
     ),
 )
+
+sa.UniqueConstraint(None, THESES.c.user_id, THESES.c.title)

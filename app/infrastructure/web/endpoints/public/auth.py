@@ -1,5 +1,5 @@
 from passlib.context import CryptContext
-from app.usecases.schemas.database import UserInDB
+from app.usecases.schemas.users import UserInDB
 from fastapi import APIRouter, Depends, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -21,7 +21,7 @@ from app.usecases.interfaces.user_repo import IUserRepo
 auth_router = APIRouter(tags=["auth"])
 
 
-@auth_router.post("/token", response_model=auth.JWTResponse)
+@auth_router.post("/login", response_model=auth.JWTResponse)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     users_repo: IUserRepo = Depends(get_users_repo),
@@ -47,7 +47,7 @@ async def login_for_access_token(
 
 
 @auth_router.post(
-    "/users/create",
+    "",
     status_code=201,
     response_model=users.UserResponse,
 )
@@ -85,25 +85,27 @@ async def create_new_user(
 
 
 @auth_router.patch(
-    "/users/update",
+    "",
     status_code=200,
     response_model=users.UserResponse,
 )
 async def update_user(
-    body: users.UserCreate = Body(...), users_repo: IUserRepo = Depends(get_users_repo)
+    body: users.UserCreate = Body(...),
+    users_repo: IUserRepo = Depends(get_users_repo),
+    authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
 
     password_context: CryptContext = await get_password_context()
     updated_user: UserInDB = await users_repo.update(
-        updated_user=body, password_context=password_context
+        updated_user=body, user_id=authorized_user.user_id, password_context=password_context
     )
     updated_user_raw = updated_user.dict()
 
     return users.UserResponse(**updated_user_raw)
 
 
-@auth_router.get("/users/me", response_model=users.UserResponse)
-async def read_users_me(
-    current_user: users.UserResponse = Depends(get_current_active_user),
+@auth_router.get("", response_model=users.UserResponse)
+async def get_current_user(
+    authorized_user: users.UserInDB = Depends(get_current_active_user),
 ):
-    return users.UserResponse(**current_user.dict())
+    return users.UserResponse(**authorized_user.dict())

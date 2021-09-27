@@ -49,3 +49,14 @@ class EmailValidationError:
             status_code=400,
             detail=self.detail if self.detail else "The submitted email is invalid.",
         )
+
+
+invalid_thesis_id = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="The supplied thesis_id is invalid.",
+)
+
+no_supplied_query_params = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="No supplied query parameters. Please supply query parameters.",
+)
