@@ -34,6 +34,6 @@ class UserUpdate(BaseModel):
 
 
 class UserResponse(UserBase):
-    user_id: str
+    user_id: int
     is_active: bool
     is_verified: bool
