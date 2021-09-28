@@ -4,7 +4,7 @@ from app.usecases.schemas import theses
 from app.usecases.schemas import users
 from app.usecases.schemas.request_pagination import RequestPagination, MetaData
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.dependencies import get_thesis_repo, get_current_active_user, paginate
+from app.dependencies import get_theses_repo, get_current_active_user, paginate
 from app.libraries import pelleum_errors
 from typing import List, Optional
 import math
@@ -19,7 +19,7 @@ theses_router = APIRouter(tags=["theses"])
 )
 async def create_new_thesis(
     body: theses.CreateThesisRequest = Body(...),
-    thesis_repo: IThesesRepo = Depends(get_thesis_repo),
+    thesis_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
@@ -44,7 +44,7 @@ async def create_new_thesis(
 async def update_thesis(
     thesis_id: str = Path(...),
     body: theses.UpdateThesisRequest = Body(...),
-    thesis_repo: IThesesRepo = Depends(get_thesis_repo),
+    thesis_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
@@ -77,7 +77,7 @@ async def update_thesis(
 )
 async def get_thesis(
     thesis_id: str = Path(...),
-    thesis_repo: IThesesRepo = Depends(get_thesis_repo),
+    thesis_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
@@ -102,7 +102,7 @@ async def get_many_theses(
     sentiment: Optional[theses.Sentiment] = Query(None),
     by_popularity: Optional[bool] = Query(None),
     request_pagination: RequestPagination = Depends(paginate),
-    thesis_repo: IThesesRepo = Depends(get_thesis_repo),
+    thesis_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ManyThesesResponse:
 

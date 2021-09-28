@@ -8,6 +8,6 @@ async def get_users_repo():
     return UsersRepo(db=database)
 
 
-async def get_thesis_repo():
+async def get_theses_repo():
     database = await get_or_create_database()
     return ThesesRepo(db=database)
