@@ -4,12 +4,7 @@ from app.infrastructure.db.metadata import METADATA
 USERS = sa.Table(
     "users",
     METADATA,
-    sa.Column(
-        "user_id",
-        sa.Integer,
-        primary_key=True,
-        autoincrement=True
-    ),
+    sa.Column("user_id", sa.Integer, primary_key=True, autoincrement=True),
     sa.Column("email", sa.String, nullable=False, unique=True, index=True),
     sa.Column("username", sa.String, nullable=False, unique=True, index=True),
     sa.Column("hashed_password", sa.String, nullable=False),

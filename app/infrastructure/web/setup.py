@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 import click
 
-from app.infrastructure.web.endpoints.public import example, auth
+from app.infrastructure.web.endpoints.public import auth, theses
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
 from app.infrastructure.db.core import get_or_create_database
@@ -17,8 +17,8 @@ def setup_app():
         title="Pelleum Backend API",
         description="Endpoints for Pelleum mobile appliaction to utilize.",
     )
-    app.include_router(example.example_public_router, prefix="/public")
-    app.include_router(auth.auth_router, prefix="/public/auth")
+    app.include_router(auth.auth_router, prefix="/public/auth/users")
+    app.include_router(theses.theses_router, prefix="/public/theses")
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
 

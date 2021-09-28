@@ -1,5 +1,6 @@
 from pydantic import BaseModel, constr, Field
 from typing import Optional
+from datetime import datetime
 
 
 class UserBase(BaseModel):
@@ -37,3 +38,15 @@ class UserResponse(UserBase):
     user_id: int
     is_active: bool
     is_verified: bool
+
+
+class UserInDB(UserBase):
+    """Database Model"""
+
+    user_id: int
+    hashed_password: str
+    is_active: bool
+    is_superuser: bool
+    is_verified: bool
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]

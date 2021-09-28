@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from app.usecases.schemas import users
-from app.usecases.schemas.database import UserInDB
+from app.usecases.schemas.users import UserInDB
 from passlib.context import CryptContext
 
 
