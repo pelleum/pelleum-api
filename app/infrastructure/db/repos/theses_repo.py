@@ -8,6 +8,7 @@ from typing import List, Tuple
 import asyncpg
 from app.libraries import pelleum_errors
 
+
 class ThesesRepo(IThesesRepo):
     def __init__(self, db: Database):
         self.db = db
