@@ -1,10 +1,12 @@
+from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from databases import Database
 from app.usecases.schemas import theses
 from app.infrastructure.db.models.theses import THESES
 from sqlalchemy import and_, desc, func, select
 from typing import List, Tuple
-
+import asyncpg
+from app.libraries import pelleum_errors
 
 class ThesesRepo(IThesesRepo):
     def __init__(self, db: Database):
@@ -22,7 +24,10 @@ class ThesesRepo(IThesesRepo):
             is_authors_current=True,
         )
 
-        await self.db.execute(create_thesis_insert_stmt)
+        try:
+            await self.db.execute(create_thesis_insert_stmt)
+        except asyncpg.exceptions.UniqueViolationError:
+            raise pelleum_errors.user_id_title_unique_contraint
 
         return await self.retrieve_thesis_with_filter(
             user_id=thesis.user_id, title=thesis.title
