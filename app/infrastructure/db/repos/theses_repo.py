@@ -2,8 +2,8 @@ from app.usecases.interfaces.theses_repo import IThesesRepo
 from databases import Database
 from app.usecases.schemas import theses
 from app.infrastructure.db.models.theses import THESES
-from sqlalchemy import and_, desc
-from typing import List
+from sqlalchemy import and_, desc, func, select
+from typing import List, Tuple
 
 
 class ThesesRepo(IThesesRepo):
@@ -90,7 +90,7 @@ class ThesesRepo(IThesesRepo):
         query_params: theses.ThesesQueryParams,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[theses.ThesisInDB]:
+    ) -> Tuple[List[theses.ThesisInDB], int]:
 
         conditions = []
 
@@ -112,9 +112,18 @@ class ThesesRepo(IThesesRepo):
                 .order_by(desc(THESES.c.created_at))
             )
 
-            results = await self.db.fetch_all(query)
+            query_count = (
+                select([func.count()]).select_from(THESES).where(and_(*conditions))
+            )
 
-            return [theses.ThesisInDB(**result) for result in results]
+            async with self.db.transaction():
+                query_results = await self.db.fetch_all(query)
+                count_results = await self.db.fetch_all(query_count)
+
+            theses_list = [theses.ThesisInDB(**result) for result in query_results]
+            theses_count = count_results[0][0]
+
+            return theses_list, theses_count
         else:
             raise Exception(
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"

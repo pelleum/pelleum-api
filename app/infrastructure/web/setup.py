@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import uvicorn
 import click
 
-from app.infrastructure.web.endpoints.public import auth, theses 
+from app.infrastructure.web.endpoints.public import auth, theses
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
 from app.infrastructure.db.core import get_or_create_database

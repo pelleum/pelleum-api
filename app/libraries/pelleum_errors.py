@@ -60,3 +60,8 @@ no_supplied_query_params = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="No supplied query parameters. Please supply query parameters.",
 )
+
+array_too_long = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="The maximum amount of supporting sources is 10.",
+)

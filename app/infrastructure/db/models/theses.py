@@ -111,4 +111,4 @@ ADOPTIONS = sa.Table(
     ),
 )
 
-sa.UniqueConstraint(None, THESES.c.user_id, THESES.c.title)
+sa.UniqueConstraint(THESES.c.user_id, THESES.c.title)

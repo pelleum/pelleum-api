@@ -97,7 +97,9 @@ async def update_user(
 
     password_context: CryptContext = await get_password_context()
     updated_user: UserInDB = await users_repo.update(
-        updated_user=body, user_id=authorized_user.user_id, password_context=password_context
+        updated_user=body,
+        user_id=authorized_user.user_id,
+        password_context=password_context,
     )
     updated_user_raw = updated_user.dict()
 

@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2021-09-26 20:19:10.888665
+Create Date: 2021-09-27 21:53:52.948151
 
 """
 from alembic import op
@@ -58,6 +58,7 @@ def upgrade():
             ["users.user_id"],
         ),
         sa.PrimaryKeyConstraint("thesis_id"),
+        sa.UniqueConstraint("user_id", "title"),
     )
     op.create_index(
         op.f("ix_theses_asset_symbol"), "theses", ["asset_symbol"], unique=False

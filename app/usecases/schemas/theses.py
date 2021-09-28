@@ -2,6 +2,7 @@ from pydantic import BaseModel, constr, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+from app.usecases.schemas.request_pagination import MetaData
 
 
 class Sentiment(str, Enum):
@@ -82,7 +83,7 @@ class UpdateThesisRepoAdapter(UpdateThesisRequest):
 
 
 class ThesesQueryParams(BaseModel):
-    user_id: Optional[str]
+    user_id: Optional[int]
     asset_symbol: Optional[str]
     sentiment: Optional[str]
     popularity: Optional[bool]
@@ -102,7 +103,16 @@ class ThesisInDB(ThesisBase):
 class ThesisResponse(ThesisInDB):
     """Response returned to user"""
 
-    pass
+
+class Theses(BaseModel):
+    theses: List[ThesisResponse]
+
 
 class ManyThesesResponse(BaseModel):
-    theses: List[ThesisResponse]
+    records: Optional[Theses]
+    meta_data: MetaData
+
+
+class ManyThesesRepoAdapter(BaseModel):
+    theses: List[ThesisInDB]
+    total_theses: int
