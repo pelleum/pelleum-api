@@ -26,7 +26,7 @@ class ThesisBase(BaseModel):
     )
     asset_symbol: constr(max_length=10) = Field(
         ...,
-        description="The asset symbol for the asset the thesis is being linked to.",
+        description="The symbol for the asset the thesis is being linked to.",
         example="TSLA",
     )
     sentiment: Sentiment = Field(
@@ -45,7 +45,7 @@ class CreateThesisRequest(ThesisBase):
 
 
 class UpdateThesisRequest(BaseModel):
-    """Request from user to update thesis"""
+    """Request from user to update a thesis"""
 
     title: Optional[constr(max_length=256)] = Field(
         None, description="The thesis title.", example="Pelleum to Change the World."
@@ -111,8 +111,3 @@ class Theses(BaseModel):
 class ManyThesesResponse(BaseModel):
     records: Optional[Theses]
     meta_data: MetaData
-
-
-class ManyThesesRepoAdapter(BaseModel):
-    theses: List[ThesisInDB]
-    total_theses: int

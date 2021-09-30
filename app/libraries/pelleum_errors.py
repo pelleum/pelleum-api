@@ -51,10 +51,18 @@ class EmailValidationError:
         )
 
 
-invalid_thesis_id = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="The supplied thesis_id is invalid.",
-)
+class InvalidResourceId:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def invalid_resource_id(self):
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=self.detail
+            if self.detail
+            else "The supplied resource ID is invalid.",
+        )
+
 
 no_supplied_query_params = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,

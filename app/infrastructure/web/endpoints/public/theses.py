@@ -56,7 +56,9 @@ async def update_thesis(
     )
 
     if not thesis or thesis.user_id != authorized_user.user_id:
-        raise pelleum_errors.invalid_thesis_id
+        raise await pelleum_errors.InvalidResourceId(
+            detail="The supplied thesis_id is invalid."
+        ).invalid_resource_id()
 
     update_thesis_request_raw = body.dict()
     update_thesis_request_raw.update({"thesis_id": thesis_id})
@@ -86,7 +88,9 @@ async def get_thesis(
     )
 
     if not thesis:
-        raise pelleum_errors.invalid_thesis_id
+        raise await pelleum_errors.InvalidResourceId(
+            detail="The supplied thesis_id is invalid."
+        ).invalid_resource_id()
 
     return thesis
 

@@ -2,8 +2,8 @@ import sqlalchemy as sa
 from app.infrastructure.db.metadata import METADATA
 
 
-FEED_POSTS = sa.Table(
-    "feed_posts",
+POSTS = sa.Table(
+    "posts",
     METADATA,
     sa.Column("post_id", sa.BigInteger, primary_key=True, autoincrement=True),
     sa.Column(
@@ -18,7 +18,7 @@ FEED_POSTS = sa.Table(
         sa.ForeignKey("theses.thesis_id"),
         index=True,
     ),
-    sa.Column("title", sa.Text, nullable=True),
+    sa.Column("title", sa.String, nullable=True),
     sa.Column("content", sa.Text, nullable=False),
     sa.Column("asset_symbol", sa.String, nullable=False, index=True),
     sa.Column("sentiment", sa.String, nullable=True),
@@ -32,13 +32,13 @@ FEED_POSTS = sa.Table(
     ),
 )
 
-FEED_POST_REACTIONS = sa.Table(
-    "feed_post_reactions",
+POST_REACTIONS = sa.Table(
+    "post_reactions",
     METADATA,
     sa.Column(
         "post_id",
         sa.BigInteger,
-        sa.ForeignKey("feed_posts.post_id"),
+        sa.ForeignKey("posts.post_id"),
         primary_key=True,
         index=True,
     ),
@@ -60,14 +60,14 @@ FEED_POST_REACTIONS = sa.Table(
     ),
 )
 
-FEED_POST_COMMENTS = sa.Table(
-    "feed_post_comments",
+POST_COMMENTS = sa.Table(
+    "post_comments",
     METADATA,
     sa.Column("comment_id", sa.BigInteger, primary_key=True, autoincrement=True),
     sa.Column(
         "post_id",
         sa.BigInteger,
-        sa.ForeignKey("feed_posts.post_id"),
+        sa.ForeignKey("posts.post_id"),
         index=True,
     ),
     sa.Column(

@@ -4,6 +4,9 @@ docker_image = pelleum_api
 docker_username = adamcuculich
 python_code := app/ migrations/
 
+
+.ONESHELL:
+
 requirements.txt:
 	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 
