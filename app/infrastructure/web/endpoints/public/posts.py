@@ -1,5 +1,10 @@
+from typing import Optional
+import math
+
 from fastapi import APIRouter, Depends, Body, Path
 from fastapi.param_functions import Query
+from pydantic import constr, conint
+
 from app.usecases.schemas import posts
 from app.usecases.schemas import users
 from app.usecases.schemas.request_pagination import RequestPagination, MetaData
@@ -11,10 +16,9 @@ from app.dependencies import (
     paginate,
 )
 from app.libraries import pelleum_errors
-from typing import List, Optional
-import math
 
-posts_router = APIRouter(tags=["posts"])
+
+posts_router = APIRouter(tags=["Posts"])
 
 
 @posts_router.post(
@@ -43,14 +47,12 @@ async def create_new_feed_post(
     response_model=posts.PostResponse,
 )
 async def get_feed_post(
-    post_id: str = Path(...),
+    post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.PostResponse:
 
-    post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(
-        post_id=int(post_id)
-    )
+    post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
     if not post:
         raise await pelleum_errors.InvalidResourceId(
@@ -67,7 +69,7 @@ async def get_feed_post(
 )
 async def get_many_posts(
     by_user_id: Optional[bool] = Query(None),
-    asset_symbol: Optional[str] = Query(None),
+    asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[posts.Sentiment] = Query(None),
     by_popularity: Optional[bool] = Query(None),
     request_pagination: RequestPagination = Depends(paginate),
@@ -115,10 +117,10 @@ async def get_many_posts(
     status_code=204,
 )
 async def delete_feed_post(
-    post_id: str = Path(...),
+    post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
-) -> posts.PostResponse:
+) -> None:
 
     post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(
         post_id=int(post_id)
@@ -129,4 +131,4 @@ async def delete_feed_post(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 
-    await posts_repo.delete(post_id=int(post_id))
+    await posts_repo.delete(post_id=post_id)

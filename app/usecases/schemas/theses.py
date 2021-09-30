@@ -11,8 +11,7 @@ class Sentiment(str, Enum):
 
 
 class TimeHorizon(str, Enum):
-    # TODO: implement this when ready
-    pass
+    """implement this when ready"""
 
 
 class ThesisBase(BaseModel):
@@ -70,18 +69,6 @@ class UpdateThesisRequest(BaseModel):
     )
 
 
-class CreateThesisRepoAdapter(CreateThesisRequest):
-    """This model is used to send to the ThesisRepo create function"""
-
-    user_id: int
-
-
-class UpdateThesisRepoAdapter(UpdateThesisRequest):
-    """This model is used to send to the ThesisRepo update function"""
-
-    thesis_id: int
-
-
 class ThesesQueryParams(BaseModel):
     user_id: Optional[int]
     asset_symbol: Optional[str]
@@ -109,5 +96,20 @@ class Theses(BaseModel):
 
 
 class ManyThesesResponse(BaseModel):
+    """Response returned to user"""
+
     records: Optional[Theses]
     meta_data: MetaData
+
+
+# Repo Adapters
+class CreateThesisRepoAdapter(CreateThesisRequest):
+    """This model is used to send to the ThesisRepo create function"""
+
+    user_id: int
+
+
+class UpdateThesisRepoAdapter(UpdateThesisRequest):
+    """This model is used to send to the ThesisRepo update function"""
+
+    thesis_id: int

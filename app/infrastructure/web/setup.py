@@ -2,7 +2,12 @@ from fastapi import FastAPI
 import uvicorn
 import click
 
-from app.infrastructure.web.endpoints.public import auth, theses, posts
+from app.infrastructure.web.endpoints.public import (
+    auth,
+    theses,
+    posts,
+    thesis_reactions,
+)
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
 from app.infrastructure.db.core import get_or_create_database
@@ -19,6 +24,9 @@ def setup_app():
     )
     app.include_router(auth.auth_router, prefix="/public/auth/users")
     app.include_router(theses.theses_router, prefix="/public/theses")
+    app.include_router(
+        thesis_reactions.thesis_reactions_router, prefix="/public/theses/reactions"
+    )
     app.include_router(posts.posts_router, prefix="/public/posts")
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")

@@ -2,7 +2,7 @@ from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from databases import Database
 from app.usecases.schemas import theses
-from app.infrastructure.db.models.theses import THESES
+from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from sqlalchemy import and_, desc, func, select
 from typing import List, Tuple
 import asyncpg
@@ -27,7 +27,9 @@ class ThesesRepo(IThesesRepo):
         try:
             await self.db.execute(create_thesis_insert_stmt)
         except asyncpg.exceptions.UniqueViolationError:
-            raise pelleum_errors.user_id_title_unique_contraint
+            raise await pelleum_errors.UniqueConstraint(
+                detail="A thesis with this title already exists on your account. Please choose a new title."
+            ).unique_constraint()
 
         return await self.retrieve_thesis_with_filter(
             user_id=thesis.user_id, title=thesis.title
@@ -131,4 +133,3 @@ class ThesesRepo(IThesesRepo):
         raise Exception(
             "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
         )
-        

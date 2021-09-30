@@ -64,6 +64,19 @@ class InvalidResourceId:
         )
 
 
+class UniqueConstraint:
+    def __init__(self, detail: str = None):
+        self.detail = detail
+
+    async def unique_constraint(self):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=self.detail
+            if self.detail
+            else "The supplied resource ID is invalid.",
+        )
+
+
 no_supplied_query_params = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="No supplied query parameters. Please supply query parameters.",
@@ -72,9 +85,4 @@ no_supplied_query_params = HTTPException(
 array_too_long = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="The maximum amount of supporting sources is 10.",
-)
-
-user_id_title_unique_contraint = HTTPException(
-    status_code=status.HTTP_409_CONFLICT,
-    detail="A thesis with this title already exists on your account. Please choose a new title.",
 )

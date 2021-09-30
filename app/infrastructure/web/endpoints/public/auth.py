@@ -18,7 +18,7 @@ from app.usecases.schemas import users
 from app.usecases.interfaces.user_repo import IUserRepo
 
 
-auth_router = APIRouter(tags=["auth"])
+auth_router = APIRouter(tags=["Auth"])
 
 
 @auth_router.post("/login", response_model=auth.JWTResponse)
