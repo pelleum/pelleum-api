@@ -2,11 +2,10 @@ from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from databases import Database
 from app.usecases.schemas import theses
-from app.infrastructure.db.models.theses import THESES
+from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from sqlalchemy import and_, desc, func, select
 from typing import List, Tuple
 import asyncpg
-from app.libraries import pelleum_errors
 
 
 class ThesesRepo(IThesesRepo):
@@ -28,7 +27,9 @@ class ThesesRepo(IThesesRepo):
         try:
             await self.db.execute(create_thesis_insert_stmt)
         except asyncpg.exceptions.UniqueViolationError:
-            raise pelleum_errors.user_id_title_unique_contraint
+            raise await pelleum_errors.UniqueConstraint(
+                detail="A thesis with this title already exists on your account. Please choose a new title."
+            ).unique_constraint()
 
         return await self.retrieve_thesis_with_filter(
             user_id=thesis.user_id, title=thesis.title
@@ -62,10 +63,9 @@ class ThesesRepo(IThesesRepo):
             result = await self.db.fetch_one(query)
             if result:
                 return theses.ThesisInDB(**result)
-        else:
-            raise Exception(
-                "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
-            )
+        raise Exception(
+            "Please pass a condition parameter to query by to the function, retrieve_thesis_with_filter()"
+        )
 
     async def update(
         self,
@@ -130,7 +130,6 @@ class ThesesRepo(IThesesRepo):
             theses_count = count_results[0][0]
 
             return theses_list, theses_count
-        else:
-            raise Exception(
-                "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
-            )
+        raise Exception(
+            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        )

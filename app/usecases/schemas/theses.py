@@ -11,8 +11,7 @@ class Sentiment(str, Enum):
 
 
 class TimeHorizon(str, Enum):
-    # TODO: implement this when ready
-    pass
+    """implement this when ready"""
 
 
 class ThesisBase(BaseModel):
@@ -26,7 +25,7 @@ class ThesisBase(BaseModel):
     )
     asset_symbol: constr(max_length=10) = Field(
         ...,
-        description="The asset symbol for the asset the thesis is being linked to.",
+        description="The symbol for the asset the thesis is being linked to.",
         example="TSLA",
     )
     sentiment: Sentiment = Field(
@@ -45,7 +44,7 @@ class CreateThesisRequest(ThesisBase):
 
 
 class UpdateThesisRequest(BaseModel):
-    """Request from user to update thesis"""
+    """Request from user to update a thesis"""
 
     title: Optional[constr(max_length=256)] = Field(
         None, description="The thesis title.", example="Pelleum to Change the World."
@@ -68,18 +67,6 @@ class UpdateThesisRequest(BaseModel):
         description="Whether or not this thesis is the author's current linked thesis for this asset.",
         example=True,
     )
-
-
-class CreateThesisRepoAdapter(CreateThesisRequest):
-    """This model is used to send to the ThesisRepo create function"""
-
-    user_id: int
-
-
-class UpdateThesisRepoAdapter(UpdateThesisRequest):
-    """This model is used to send to the ThesisRepo update function"""
-
-    thesis_id: int
 
 
 class ThesesQueryParams(BaseModel):
@@ -109,10 +96,20 @@ class Theses(BaseModel):
 
 
 class ManyThesesResponse(BaseModel):
+    """Response returned to user"""
+
     records: Optional[Theses]
     meta_data: MetaData
 
 
-class ManyThesesRepoAdapter(BaseModel):
-    theses: List[ThesisInDB]
-    total_theses: int
+# Repo Adapters
+class CreateThesisRepoAdapter(CreateThesisRequest):
+    """This model is used to send to the ThesisRepo create function"""
+
+    user_id: int
+
+
+class UpdateThesisRepoAdapter(UpdateThesisRequest):
+    """This model is used to send to the ThesisRepo update function"""
+
+    thesis_id: int

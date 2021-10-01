@@ -4,6 +4,9 @@ docker_image = pelleum_api
 docker_username = adamcuculich
 python_code := app/ migrations/
 
+
+.ONESHELL:
+
 requirements.txt:
 	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 
@@ -31,7 +34,7 @@ push:
 	docker push $(docker_username)/$(docker_image):latest
 
 generate-migrations:
-	alembic revision --autogenerate --rev-id "0001" -m "added users and theses"
+	alembic revision --autogenerate --rev-id "0001" -m "users theses and posts"
 
 migrate:
 	alembic upgrade head
