@@ -59,7 +59,7 @@ class PostQueryParams(BaseModel):
 class PostInDB(CreatePostRequest):
     """Database Model"""
 
-    post_id: str
+    post_id: int
     user_id: int
     thesis_id: int
     created_at: Optional[datetime]

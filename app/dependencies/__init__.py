@@ -4,6 +4,7 @@ from .repos import (
     get_theses_repo,
     get_posts_repo,
     get_thesis_reactions_repo,
+    get_post_reactions_repo,
 )
 from .event_loop import get_event_loop
 from .http_client import get_client_session

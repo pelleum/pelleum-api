@@ -7,6 +7,7 @@ from app.infrastructure.web.endpoints.public import (
     theses,
     posts,
     thesis_reactions,
+    post_reactions,
 )
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
@@ -20,7 +21,7 @@ from app.settings import settings
 def setup_app():
     app = FastAPI(
         title="Pelleum Backend API",
-        description="Endpoints for Pelleum mobile appliaction to utilize.",
+        description="The following are endpoints for the Pelleum mobile appliaction to utilize.",
     )
     app.include_router(auth.auth_router, prefix="/public/auth/users")
     app.include_router(theses.theses_router, prefix="/public/theses")
@@ -28,6 +29,9 @@ def setup_app():
         thesis_reactions.thesis_reactions_router, prefix="/public/theses/reactions"
     )
     app.include_router(posts.posts_router, prefix="/public/posts")
+    app.include_router(
+        post_reactions.post_reactions_router, prefix="/public/posts/reactions"
+    )
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
 
