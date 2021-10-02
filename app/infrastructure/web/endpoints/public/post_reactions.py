@@ -10,7 +10,6 @@ from app.usecases.schemas import users
 from app.usecases.schemas.request_pagination import RequestPagination, MetaData
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
-from app.usecases.interfaces.user_repo import IUserRepo
 from app.dependencies import (
     get_post_reactions_repo,
     get_posts_repo,
