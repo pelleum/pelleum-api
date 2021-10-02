@@ -1,9 +1,11 @@
-from app.usecases.interfaces.posts_repo import IPostsRepo
+from typing import List, Tuple, Union
+
 from databases import Database
+from sqlalchemy import and_, desc, func, select, delete
+
+from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 from app.infrastructure.db.models.posts import POSTS
-from sqlalchemy import and_, desc, func, select, delete
-from typing import List, Tuple
 
 
 class PostsRepo(IPostsRepo):
@@ -29,7 +31,7 @@ class PostsRepo(IPostsRepo):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> posts.PostInDB:
+    ) -> Union[posts.PostInDB, None]:
 
         conditions = []
 
@@ -49,8 +51,8 @@ class PostsRepo(IPostsRepo):
             query = POSTS.select().where(and_(*conditions))
 
             result = await self.db.fetch_one(query)
-            if result:
-                return posts.PostInDB(**result)
+            return posts.PostInDB(**result) if result else None
+
         raise Exception(
             "Please pass a condition parameter to query by to the function, retrieve_post_with_filter()"
         )
@@ -98,7 +100,7 @@ class PostsRepo(IPostsRepo):
             "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
         )
 
-    async def delete(self, post_id) -> None:
+    async def delete(self, post_id: int) -> None:
 
         delete_statement = delete(POSTS).where(POSTS.c.post_id == post_id)
 

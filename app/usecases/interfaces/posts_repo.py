@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import List, Tuple, Union
+
 from app.usecases.schemas import posts
-from typing import List, Tuple
 
 
 class IPostsRepo(ABC):
@@ -15,7 +16,7 @@ class IPostsRepo(ABC):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> posts.PostInDB:
+    ) -> Union[posts.PostInDB, None]:
         pass
 
     @abstractmethod
@@ -28,5 +29,5 @@ class IPostsRepo(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, post_id) -> None:
+    async def delete(self, post_id: int) -> None:
         pass

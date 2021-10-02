@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import List, Tuple, Union
+
 from app.usecases.schemas import theses
-from typing import List, Tuple
 
 
 class IThesesRepo(ABC):
@@ -15,7 +16,7 @@ class IThesesRepo(ABC):
         user_id: str = None,
         asset_symbol: str = None,
         title: str = None,
-    ) -> theses.ThesisInDB:
+    ) -> Union[theses.ThesisInDB, None]:
         pass
 
     @abstractmethod

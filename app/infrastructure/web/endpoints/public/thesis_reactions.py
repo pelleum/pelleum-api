@@ -15,6 +15,7 @@ from app.dependencies import (
     get_theses_repo,
     get_current_active_user,
     paginate,
+    get_thesis_reactions_query_params,
 )
 from app.libraries import pelleum_errors
 
@@ -77,28 +78,14 @@ async def update_thesis_reaction(
     status_code=200,
     response_model=thesis_reactions.ManyThesesReactionsResponse,
 )
-async def get_many_theses(
-    by_user_id: Optional[bool] = Query(None),
-    thesis_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    reaction: Optional[thesis_reactions.ReactionString] = Query(None),
+async def get_many_thesis_reactions(
+    query_params: thesis_reactions.ThesisReactionsQueryParams = Depends(
+        get_thesis_reactions_query_params
+    ),
     request_pagination: RequestPagination = Depends(paginate),
     thesis_reactions_repo: IThesisReactionRepo = Depends(get_thesis_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> thesis_reactions.ManyThesesReactionsResponse:
-
-    if not by_user_id and not thesis_id and not reaction:
-        raise pelleum_errors.no_supplied_query_params
-
-    query_params_raw = {}
-
-    if by_user_id:
-        query_params_raw.update({"user_id": authorized_user.user_id})
-    if thesis_id:
-        query_params_raw.update({"thesis_id": thesis_id})
-    if reaction:
-        query_params_raw.update({"reaction": reaction})
-
-    query_params = thesis_reactions.ThesisReactionsQueryParams(**query_params_raw)
 
     (
         theses_reactions_list,
@@ -136,7 +123,7 @@ async def delete_thesis_reaction(
 ) -> None:
 
     thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=int(thesis_id)
+        thesis_id=thesis_id
     )
 
     if not thesis or thesis.user_id != authorized_user.user_id:
@@ -145,5 +132,5 @@ async def delete_thesis_reaction(
         ).invalid_resource_id()
 
     await thesis_reactions_repo.delete(
-        thesis_id=int(thesis_id), user_id=authorized_user.user_id
+        thesis_id=thesis_id, user_id=authorized_user.user_id
     )

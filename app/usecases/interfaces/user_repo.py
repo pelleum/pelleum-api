@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
+from typing import Union
+
+from passlib.context import CryptContext
+
 from app.usecases.schemas import users
 from app.usecases.schemas.users import UserInDB
-from passlib.context import CryptContext
 
 
 class IUserRepo(ABC):
@@ -17,7 +20,7 @@ class IUserRepo(ABC):
         user_id: str = None,
         email: str = None,
         username: str = None,
-    ) -> UserInDB:
+    ) -> Union[users.UserInDB, None]:
         pass
 
     @abstractmethod
