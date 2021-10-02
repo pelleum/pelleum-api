@@ -1,11 +1,13 @@
-from app.libraries import pelleum_errors
-from app.usecases.interfaces.theses_repo import IThesesRepo
+from typing import List, Tuple, Union
+
+import asyncpg
+from sqlalchemy import and_, desc, func, select
 from databases import Database
+
+from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import theses
 from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
-from sqlalchemy import and_, desc, func, select
-from typing import List, Tuple
-import asyncpg
+from app.libraries import pelleum_errors
 
 
 class ThesesRepo(IThesesRepo):
@@ -41,7 +43,7 @@ class ThesesRepo(IThesesRepo):
         user_id: str = None,
         asset_symbol: str = None,
         title: str = None,
-    ) -> theses.ThesisInDB:
+    ) -> Union[theses.ThesisInDB, None]:
 
         conditions = []
 
@@ -61,8 +63,7 @@ class ThesesRepo(IThesesRepo):
             query = THESES.select().where(and_(*conditions))
 
             result = await self.db.fetch_one(query)
-            if result:
-                return theses.ThesisInDB(**result)
+            return theses.ThesisInDB(**result) if result else None
         raise Exception(
             "Please pass a condition parameter to query by to the function, retrieve_thesis_with_filter()"
         )

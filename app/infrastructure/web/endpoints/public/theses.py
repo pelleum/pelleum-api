@@ -9,7 +9,12 @@ from app.usecases.schemas import theses
 from app.usecases.schemas import users
 from app.usecases.schemas.request_pagination import RequestPagination, MetaData
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.dependencies import get_theses_repo, get_current_active_user, paginate
+from app.dependencies import (
+    get_theses_repo,
+    get_current_active_user,
+    paginate,
+    get_theses_query_params,
+)
 from app.libraries import pelleum_errors
 
 
@@ -88,7 +93,7 @@ async def get_thesis(
 ) -> theses.ThesisResponse:
 
     thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=int(thesis_id)
+        thesis_id=thesis_id
     )
 
     if not thesis:
@@ -105,30 +110,11 @@ async def get_thesis(
     response_model=theses.ManyThesesResponse,
 )
 async def get_many_theses(
-    by_user_id: Optional[bool] = Query(None),
-    asset_symbol: Optional[constr(max_length=10)] = Query(None),
-    sentiment: Optional[theses.Sentiment] = Query(None),
-    by_popularity: Optional[bool] = Query(None),
+    query_params: theses.ThesesQueryParams = Depends(get_theses_query_params),
     request_pagination: RequestPagination = Depends(paginate),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ManyThesesResponse:
-
-    if not by_user_id and not asset_symbol and not sentiment and not by_popularity:
-        raise pelleum_errors.no_supplied_query_params
-
-    query_params_raw = {}
-
-    if by_user_id:
-        query_params_raw.update({"user_id": authorized_user.user_id})
-    if asset_symbol:
-        query_params_raw.update({"asset_symbol": asset_symbol})
-    if sentiment:
-        query_params_raw.update({"sentiment": sentiment})
-    if by_popularity:
-        query_params_raw.update({"popularity": by_popularity})
-
-    query_params = theses.ThesesQueryParams(**query_params_raw)
 
     theses_list, total_theses_count = await theses_repo.retrieve_many_with_filter(
         query_params=query_params,

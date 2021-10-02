@@ -1,11 +1,10 @@
 from logging.config import fileConfig
 from os import getenv
-from sqlalchemy import engine_from_config, pool
-
-from alembic import context
 import pathlib
 import sys
 
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
 

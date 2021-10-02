@@ -1,7 +1,9 @@
-from pydantic import BaseModel, constr, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+
+from pydantic import BaseModel, constr, Field
+
 from app.usecases.schemas.request_pagination import MetaData
 
 

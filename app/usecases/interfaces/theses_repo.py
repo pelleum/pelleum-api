@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from app.usecases.schemas import theses
 from typing import List, Tuple
+
+from app.usecases.schemas import theses
 
 
 class IThesesRepo(ABC):

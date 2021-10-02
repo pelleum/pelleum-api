@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+
+from passlib.context import CryptContext
+
 from app.usecases.schemas import users
 from app.usecases.schemas.users import UserInDB
-from passlib.context import CryptContext
 
 
 class IUserRepo(ABC):

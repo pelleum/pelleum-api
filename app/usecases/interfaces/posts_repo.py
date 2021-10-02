@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from app.usecases.schemas import posts
 from typing import List, Tuple
+
+from app.usecases.schemas import posts
 
 
 class IPostsRepo(ABC):

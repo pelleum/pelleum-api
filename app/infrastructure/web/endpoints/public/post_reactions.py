@@ -10,11 +10,13 @@ from app.usecases.schemas import users
 from app.usecases.schemas.request_pagination import RequestPagination, MetaData
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
+from app.usecases.interfaces.user_repo import IUserRepo
 from app.dependencies import (
     get_post_reactions_repo,
     get_posts_repo,
     get_current_active_user,
     paginate,
+    get_post_reactions_query_params,
 )
 from app.libraries import pelleum_errors
 
@@ -50,28 +52,14 @@ async def create_post_reaction(
     status_code=200,
     response_model=post_reactions.ManyPostsReactionsResponse,
 )
-async def get_many_posts(
-    by_user_id: Optional[bool] = Query(None),
-    post_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    reaction: Optional[post_reactions.ReactionString] = Query(None),
+async def get_many_post_reactions(
+    query_params: post_reactions.PostsReactionsQueryParams = Depends(
+        get_post_reactions_query_params
+    ),
     request_pagination: RequestPagination = Depends(paginate),
     post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> post_reactions.ManyPostsReactionsResponse:
-
-    if not by_user_id and not post_id and not reaction:
-        raise pelleum_errors.no_supplied_query_params
-
-    query_params_raw = {}
-
-    if by_user_id:
-        query_params_raw.update({"user_id": authorized_user.user_id})
-    if post_id:
-        query_params_raw.update({"post_id": post_id})
-    if reaction:
-        query_params_raw.update({"reaction": reaction})
-
-    query_params = post_reactions.PostsReactionsQueryParams(**query_params_raw)
 
     (
         posts_reactions_list,

@@ -1,10 +1,12 @@
-from app.usecases.interfaces.user_repo import IUserRepo
-from app.usecases.schemas import users
-from app.usecases.schemas.users import UserInDB
+from typing import Union
+
 from databases import Database
-from app.infrastructure.db.models.users import USERS
 from sqlalchemy import and_
 from passlib.context import CryptContext
+
+from app.usecases.interfaces.user_repo import IUserRepo
+from app.usecases.schemas import users
+from app.infrastructure.db.models.users import USERS
 
 
 class UsersRepo(IUserRepo):
@@ -13,7 +15,7 @@ class UsersRepo(IUserRepo):
 
     async def create(
         self, new_user: users.UserCreate, password_context: CryptContext
-    ) -> UserInDB:
+    ) -> users.UserInDB:
 
         hashed_password = password_context.hash(new_user.password)
 
@@ -35,7 +37,7 @@ class UsersRepo(IUserRepo):
         user_id: str = None,
         email: str = None,
         username: str = None,
-    ) -> UserInDB:
+    ) -> Union[users.UserInDB, None]:
 
         conditions = []
 
@@ -52,8 +54,7 @@ class UsersRepo(IUserRepo):
             query = USERS.select().where(and_(*conditions))
 
             result = await self.db.fetch_one(query)
-            if result:
-                return UserInDB(**result)
+            return users.UserInDB(**result) if result else None
         else:
             raise Exception(
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
@@ -64,7 +65,7 @@ class UsersRepo(IUserRepo):
         updated_user: users.UserUpdate,
         user_id: str,
         password_context: CryptContext,
-    ) -> UserInDB:
+    ) -> users.UserInDB:
 
         if updated_user.password:
             hashed_password = password_context.hash(updated_user.password)
