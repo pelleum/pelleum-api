@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from app.usecases.schemas import posts
 
@@ -16,7 +16,7 @@ class IPostsRepo(ABC):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> posts.PostInDB:
+    ) -> Union[posts.PostInDB, None]:
         pass
 
     @abstractmethod
