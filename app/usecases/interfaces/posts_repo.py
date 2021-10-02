@@ -29,5 +29,5 @@ class IPostsRepo(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, post_id) -> None:
+    async def delete(self, post_id: int) -> None:
         pass
