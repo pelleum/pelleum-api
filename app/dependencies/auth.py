@@ -84,27 +84,27 @@ async def validate_password(password: str) -> None:
     # fmt: on
 
     if len(password) < 8:
-        raise await pelleum_errors.PasswordValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Password must be at least 8 characters long."
         ).invalid_password()
 
     if not any(char.isdigit() for char in password):
-        raise await pelleum_errors.PasswordValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Password must contain at least 1 digit."
         ).invalid_password()
 
     if not any(char.isupper() for char in password):
-        raise await pelleum_errors.PasswordValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Password must contain at least one uppercase letter."
         ).invalid_password()
 
     if not any(char.islower() for char in password):
-        raise await pelleum_errors.PasswordValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Password must contain at least one lowercase letter."
         ).invalid_password()
 
     if not any(char in special_symbols for char in password):
-        raise await pelleum_errors.PasswordValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Password must contain at least one special character."
         ).invalid_password()
 
@@ -116,6 +116,6 @@ async def validate_email(email: str) -> None:
     regex = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
 
     if not re.fullmatch(regex, email):
-        raise await pelleum_errors.EmailValidationError(
+        raise await pelleum_errors.PelleumErrors(
             detail="Email format is invalid. Please submit a valid email."
         ).invalid_email()

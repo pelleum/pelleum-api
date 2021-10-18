@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional
 
 from databases import Database
 from sqlalchemy import and_
@@ -37,7 +37,7 @@ class UsersRepo(IUserRepo):
         user_id: str = None,
         email: str = None,
         username: str = None,
-    ) -> Union[users.UserInDB, None]:
+    ) -> Optional[users.UserInDB]:
 
         conditions = []
 
@@ -50,15 +50,15 @@ class UsersRepo(IUserRepo):
         if username:
             conditions.append(USERS.c.username == username)
 
-        if len(conditions) > 0:
-            query = USERS.select().where(and_(*conditions))
-
-            result = await self.db.fetch_one(query)
-            return users.UserInDB(**result) if result else None
-        else:
+        if len(conditions) == 0:
             raise Exception(
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
             )
+
+        query = USERS.select().where(and_(*conditions))
+
+        result = await self.db.fetch_one(query)
+        return users.UserInDB(**result) if result else None
 
     async def update(
         self,

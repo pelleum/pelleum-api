@@ -51,7 +51,7 @@ async def update_post_comment(
     )
 
     if not post_comment or post_comment.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 
@@ -74,7 +74,7 @@ async def get_post_comment(
     )
 
     if not post_comment:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 
@@ -132,7 +132,7 @@ async def delete_post_comment(
     )
 
     if not post_comment or post_comment.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 

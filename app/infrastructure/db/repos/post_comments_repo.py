@@ -59,34 +59,33 @@ class PostsCommentsRepo(IPostsCommentsRepo):
         if query_params.post_id:
             conditions.append(POST_COMMENTS.c.post_id == query_params.post_id)
 
-        if len(conditions) > 0:
-            query = (
-                POST_COMMENTS.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(POST_COMMENTS.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
 
-            query_count = (
-                select([func.count()])
-                .select_from(POST_COMMENTS)
-                .where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            post_comments_list = [
-                post_comments.PostCommentInDB(**result) for result in query_results
-            ]
-            post_comments_count = count_results[0][0]
-
-            return post_comments_list, post_comments_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            POST_COMMENTS.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(POST_COMMENTS.c.created_at))
         )
+
+        query_count = (
+            select([func.count()]).select_from(POST_COMMENTS).where(and_(*conditions))
+        )
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        post_comments_list = [
+            post_comments.PostCommentInDB(**result) for result in query_results
+        ]
+        post_comments_count = count_results[0][0]
+
+        return post_comments_list, post_comments_count
 
     async def delete(self, comment_id: int) -> None:
         """Deletes a post comment by comment_id"""

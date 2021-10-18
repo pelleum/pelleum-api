@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Optional
 
 from passlib.context import CryptContext
 
@@ -19,7 +19,7 @@ class IUserRepo(ABC):
         user_id: str = None,
         email: str = None,
         username: str = None,
-    ) -> Union[users.UserInDB, None]:
+    ) -> Optional[users.UserInDB]:
         pass
 
     @abstractmethod

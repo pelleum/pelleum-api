@@ -28,7 +28,7 @@ class ThesisReactionRepo(IThesisReactionRepo):
         try:
             await self.db.execute(insert_statement)
         except asyncpg.exceptions.UniqueViolationError:
-            raise await pelleum_errors.UniqueConstraint(
+            raise await pelleum_errors.PelleumErrors(
                 detail="User has already liked this thesis."
             ).unique_constraint()
 
@@ -81,32 +81,31 @@ class ThesisReactionRepo(IThesisReactionRepo):
         if query_params.reaction:
             conditions.append(THESES_REACTIONS.c.reaction == query_params.reaction)
 
-        if len(conditions) > 0:
-            query = (
-                THESES_REACTIONS.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(THESES_REACTIONS.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
-
-            query_count = (
-                select([func.count()])
-                .select_from(THESES_REACTIONS)
-                .where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            theses_reactions_list = [
-                thesis_reactions.ThesisReactionInDB(**result)
-                for result in query_results
-            ]
-            theses_reactions_count = count_results[0][0]
-
-            return theses_reactions_list, theses_reactions_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            THESES_REACTIONS.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(THESES_REACTIONS.c.created_at))
         )
+
+        query_count = (
+            select([func.count()])
+            .select_from(THESES_REACTIONS)
+            .where(and_(*conditions))
+        )
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        theses_reactions_list = [
+            thesis_reactions.ThesisReactionInDB(**result) for result in query_results
+        ]
+        theses_reactions_count = count_results[0][0]
+
+        return theses_reactions_list, theses_reactions_count

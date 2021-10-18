@@ -63,7 +63,7 @@ async def create_new_user(
         email=body.email
     )
     if email_already_exists:
-        raise await pelleum_errors.AccountAlreadyExists(
+        raise await pelleum_errors.PelleumErrors(
             detail="An account with this email already exists. Please choose another email."
         ).account_exists()
 
@@ -71,7 +71,7 @@ async def create_new_user(
         await users_repo.retrieve_user_with_filter(username=body.username)
     )
     if username_already_exists:
-        raise await pelleum_errors.AccountAlreadyExists(
+        raise await pelleum_errors.PelleumErrors(
             detail="An account with this username already exists. Please choose another username."
         ).account_exists()
 

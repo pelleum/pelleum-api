@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Optional
 
 import asyncpg
 from sqlalchemy import and_, desc, func, select
@@ -43,7 +43,7 @@ class ThesesRepo(IThesesRepo):
         user_id: str = None,
         asset_symbol: str = None,
         title: str = None,
-    ) -> Union[theses.ThesisInDB, None]:
+    ) -> Optional[theses.ThesisInDB]:
 
         conditions = []
 
@@ -59,14 +59,14 @@ class ThesesRepo(IThesesRepo):
         if title:
             conditions.append(THESES.c.title == title)
 
-        if len(conditions) > 0:
-            query = THESES.select().where(and_(*conditions))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_thesis_with_filter()"
+            )
+        query = THESES.select().where(and_(*conditions))
 
-            result = await self.db.fetch_one(query)
-            return theses.ThesisInDB(**result) if result else None
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_thesis_with_filter()"
-        )
+        result = await self.db.fetch_one(query)
+        return theses.ThesisInDB(**result) if result else None
 
     async def update(
         self,
@@ -110,27 +110,28 @@ class ThesesRepo(IThesesRepo):
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
 
-        if len(conditions) > 0:
-            query = (
-                THESES.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(THESES.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
 
-            query_count = (
-                select([func.count()]).select_from(THESES).where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            theses_list = [theses.ThesisInDB(**result) for result in query_results]
-            theses_count = count_results[0][0]
-
-            return theses_list, theses_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            THESES.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(THESES.c.created_at))
         )
+
+        query_count = (
+            select([func.count()]).select_from(THESES).where(and_(*conditions))
+        )
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        theses_list = [theses.ThesisInDB(**result) for result in query_results]
+        theses_count = count_results[0][0]
+
+        return theses_list, theses_count

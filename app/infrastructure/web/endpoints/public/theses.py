@@ -65,7 +65,7 @@ async def update_thesis(
     )
 
     if not thesis or thesis.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 
@@ -97,7 +97,7 @@ async def get_thesis(
     )
 
     if not thesis:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 

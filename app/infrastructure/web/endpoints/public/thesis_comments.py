@@ -50,7 +50,7 @@ async def update_thesis_comment(
     )
 
     if not thesis_comment or thesis_comment.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 
@@ -73,7 +73,7 @@ async def get_thesis_comment(
     )
 
     if not thesis_comment:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 
@@ -131,7 +131,7 @@ async def delete_thesis_comment(
     )
 
     if not thesis_comment or thesis_comment.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied comment_id is invalid."
         ).invalid_resource_id()
 

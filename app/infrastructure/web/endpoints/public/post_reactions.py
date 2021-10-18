@@ -1,8 +1,6 @@
-from typing import Optional
 import math
 
 from fastapi import APIRouter, Depends, Body, Path
-from fastapi.param_functions import Query
 from pydantic import conint
 
 from app.usecases.schemas import post_reactions, posts
@@ -35,7 +33,7 @@ async def create_post_reaction(
     post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
     if not post:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 
@@ -98,7 +96,7 @@ async def delete_post_reaction(
     )
 
     if not post or post.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 

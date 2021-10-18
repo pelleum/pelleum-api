@@ -37,7 +37,7 @@ async def create_thesis_reaction(
     )
 
     if not thesis:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 
@@ -62,7 +62,7 @@ async def update_thesis_reaction(
     )
 
     if not thesis:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 
@@ -127,7 +127,7 @@ async def delete_thesis_reaction(
     )
 
     if not thesis or thesis.user_id != authorized_user.user_id:
-        raise await pelleum_errors.InvalidResourceId(
+        raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 

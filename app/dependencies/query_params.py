@@ -14,7 +14,11 @@ from app.usecases.schemas import (
 from app.usecases.interfaces.user_repo import IUserRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.dependencies import get_users_repo, get_posts_repo, get_theses_repo  # pylint: disable = cyclic-import
+from app.dependencies import (
+    get_users_repo,
+    get_posts_repo,
+    get_theses_repo,
+)  # pylint: disable = cyclic-import
 from app.libraries import pelleum_errors
 
 
@@ -34,7 +38,7 @@ async def get_post_comments_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -44,7 +48,7 @@ async def get_post_comments_query_params(
         post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
         if not post:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied post_id is invalid."
             ).invalid_resource_id()
 
@@ -70,7 +74,7 @@ async def get_post_reactions_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -80,7 +84,7 @@ async def get_post_reactions_query_params(
         post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
         if not post:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied post_id is invalid."
             ).invalid_resource_id()
 
@@ -109,7 +113,7 @@ async def get_posts_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -142,7 +146,7 @@ async def get_theses_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -160,7 +164,7 @@ async def get_theses_query_params(
 async def get_thesis_comments_query_params(
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     thesis_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    by_popularity: Optional[bool] = Query(None),      # pylint: disable = unused-argument
+    by_popularity: Optional[bool] = Query(None),  # pylint: disable = unused-argument
     users_repo: IUserRepo = Depends(get_users_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
 ) -> thesis_comments.ThesisCommentsQueryParams:
@@ -174,7 +178,7 @@ async def get_thesis_comments_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -185,7 +189,7 @@ async def get_thesis_comments_query_params(
         )
 
         if not thesis:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied thesis_id is invalid."
             ).invalid_resource_id()
 
@@ -211,7 +215,7 @@ async def get_thesis_reactions_query_params(
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
         if not user:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied user_id is invalid."
             ).invalid_resource_id()
 
@@ -222,7 +226,7 @@ async def get_thesis_reactions_query_params(
         )
 
         if not thesis:
-            raise await pelleum_errors.InvalidResourceId(
+            raise await pelleum_errors.PelleumErrors(
                 detail="The supplied thesis_id is invalid."
             ).invalid_resource_id()
 

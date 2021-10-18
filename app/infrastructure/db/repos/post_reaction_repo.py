@@ -28,7 +28,7 @@ class PostReactionRepo(IPostReactionRepo):
         try:
             await self.db.execute(insert_statement)
         except asyncpg.exceptions.UniqueViolationError:
-            raise await pelleum_errors.UniqueConstraint(
+            raise await pelleum_errors.PelleumErrors(
                 detail="User has already liked this post."
             ).unique_constraint()
 
@@ -63,31 +63,33 @@ class PostReactionRepo(IPostReactionRepo):
         if query_params.reaction:
             conditions.append(POST_REACTIONS.c.reaction == query_params.reaction)
 
-        if len(conditions) > 0:
-            query = (
-                POST_REACTIONS.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(POST_REACTIONS.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
 
-            query_count = (
-                select([func.count()])
-                .select_from(POST_REACTIONS)
-                .where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            posts_reactions_list = [
-                post_reactions.PostReactionInDB(**result) for result in query_results
-            ]
-            posts_reactions_count = count_results[0][0]
-
-            return posts_reactions_list, posts_reactions_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            POST_REACTIONS.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(POST_REACTIONS.c.created_at))
         )
+
+        query_count = (
+            select([func.count()])
+            .select_from(POST_REACTIONS)
+            .where(and_(*conditions))
+        )
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        posts_reactions_list = [
+            post_reactions.PostReactionInDB(**result) for result in query_results
+        ]
+        posts_reactions_count = count_results[0][0]
+
+        return posts_reactions_list, posts_reactions_count
+        

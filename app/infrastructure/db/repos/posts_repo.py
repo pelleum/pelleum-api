@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Optional
 
 from databases import Database
 from sqlalchemy import and_, desc, func, select, delete
@@ -31,7 +31,7 @@ class PostsRepo(IPostsRepo):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> Union[posts.PostInDB, None]:
+    ) -> Optional[posts.PostInDB]:
 
         conditions = []
 
@@ -47,15 +47,15 @@ class PostsRepo(IPostsRepo):
         if asset_symbol:
             conditions.append(POSTS.c.asset_symbol == asset_symbol)
 
-        if len(conditions) > 0:
-            query = POSTS.select().where(and_(*conditions))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_post_with_filter()"
+            )
 
-            result = await self.db.fetch_one(query)
-            return posts.PostInDB(**result) if result else None
+        query = POSTS.select().where(and_(*conditions))
 
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_post_with_filter()"
-        )
+        result = await self.db.fetch_one(query)
+        return posts.PostInDB(**result) if result else None
 
     async def retrieve_many_with_filter(
         self,
@@ -75,30 +75,29 @@ class PostsRepo(IPostsRepo):
         if query_params.sentiment:
             conditions.append(POSTS.c.sentiment == query_params.sentiment)
 
-        if len(conditions) > 0:
-            query = (
-                POSTS.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(POSTS.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
 
-            query_count = (
-                select([func.count()]).select_from(POSTS).where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            theses_list = [posts.PostInDB(**result) for result in query_results]
-            theses_count = count_results[0][0]
-
-            return theses_list, theses_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            POSTS.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(POSTS.c.created_at))
         )
+
+        query_count = select([func.count()]).select_from(POSTS).where(and_(*conditions))
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        theses_list = [posts.PostInDB(**result) for result in query_results]
+        theses_count = count_results[0][0]
+
+        return theses_list, theses_count
 
     async def delete(self, post_id: int) -> None:
 

@@ -61,34 +61,32 @@ class ThesesCommentsRepo(IThesesCommentsRepo):
         if query_params.thesis_id:
             conditions.append(THESES_COMMENTS.c.thesis_id == query_params.thesis_id)
 
-        if len(conditions) > 0:
-            query = (
-                THESES_COMMENTS.select()
-                .where(and_(*conditions))
-                .limit(page_size)
-                .offset((page_number - 1) * page_size)
-                .order_by(desc(THESES_COMMENTS.c.created_at))
+        if len(conditions) == 0:
+            raise Exception(
+                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
-
-            query_count = (
-                select([func.count()])
-                .select_from(THESES_COMMENTS)
-                .where(and_(*conditions))
-            )
-
-            async with self.db.transaction():
-                query_results = await self.db.fetch_all(query)
-                count_results = await self.db.fetch_all(query_count)
-
-            thesis_comments_list = [
-                thesis_comments.ThesisCommentInDB(**result) for result in query_results
-            ]
-            thesis_comments_count = count_results[0][0]
-
-            return thesis_comments_list, thesis_comments_count
-        raise Exception(
-            "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
+        query = (
+            THESES_COMMENTS.select()
+            .where(and_(*conditions))
+            .limit(page_size)
+            .offset((page_number - 1) * page_size)
+            .order_by(desc(THESES_COMMENTS.c.created_at))
         )
+
+        query_count = (
+            select([func.count()]).select_from(THESES_COMMENTS).where(and_(*conditions))
+        )
+
+        async with self.db.transaction():
+            query_results = await self.db.fetch_all(query)
+            count_results = await self.db.fetch_all(query_count)
+
+        thesis_comments_list = [
+            thesis_comments.ThesisCommentInDB(**result) for result in query_results
+        ]
+        thesis_comments_count = count_results[0][0]
+
+        return thesis_comments_list, thesis_comments_count
 
     async def delete(self, comment_id: int) -> None:
         """Deletes a thesis comment by comment_id"""
