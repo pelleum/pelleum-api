@@ -1,8 +1,8 @@
-"""users theses and posts
+"""initial schema
 
 Revision ID: 0001
 Revises: 
-Create Date: 2021-09-28 22:49:06.646495
+Create Date: 2021-10-17 23:22:36.785680
 
 """
 from alembic import op
@@ -38,6 +38,26 @@ def upgrade():
     op.create_index(op.f("ix_users_email"), "users", ["email"], unique=True)
     op.create_index(op.f("ix_users_username"), "users", ["username"], unique=True)
     op.create_table(
+        "portfolio",
+        sa.Column("portfolio_id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=True),
+        sa.Column("aggregated_value", sa.Float(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.user_id"],
+        ),
+        sa.PrimaryKeyConstraint("portfolio_id"),
+    )
+    op.create_index(
+        op.f("ix_portfolio_user_id"), "portfolio", ["user_id"], unique=False
+    )
+    op.create_table(
         "theses",
         sa.Column("thesis_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
@@ -65,13 +85,42 @@ def upgrade():
     )
     op.create_index(op.f("ix_theses_user_id"), "theses", ["user_id"], unique=False)
     op.create_table(
+        "assets",
+        sa.Column("asset_id", sa.BigInteger(), autoincrement=True, nullable=False),
+        sa.Column("portfolio_id", sa.BigInteger(), nullable=True),
+        sa.Column("thesis_id", sa.BigInteger(), nullable=True),
+        sa.Column("asset_symbol", sa.String(), nullable=False),
+        sa.Column("position_value", sa.Float(), nullable=False),
+        sa.Column("skin_rating", sa.Float(), nullable=True),
+        sa.Column("average_buy_price", sa.Float(), nullable=True),
+        sa.Column("total_contribution", sa.Float(), nullable=True),
+        sa.Column(
+            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.ForeignKeyConstraint(
+            ["portfolio_id"],
+            ["portfolio.portfolio_id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["thesis_id"],
+            ["theses.thesis_id"],
+        ),
+        sa.PrimaryKeyConstraint("asset_id"),
+    )
+    op.create_index(
+        op.f("ix_assets_portfolio_id"), "assets", ["portfolio_id"], unique=False
+    )
+    op.create_table(
         "posts",
         sa.Column("post_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
         sa.Column("thesis_id", sa.BigInteger(), nullable=True),
         sa.Column("title", sa.String(), nullable=True),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("asset_symbol", sa.String(), nullable=False),
+        sa.Column("asset_symbol", sa.String(), nullable=True),
         sa.Column("sentiment", sa.String(), nullable=True),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
@@ -270,9 +319,13 @@ def downgrade():
     op.drop_index(op.f("ix_posts_thesis_id"), table_name="posts")
     op.drop_index(op.f("ix_posts_asset_symbol"), table_name="posts")
     op.drop_table("posts")
+    op.drop_index(op.f("ix_assets_portfolio_id"), table_name="assets")
+    op.drop_table("assets")
     op.drop_index(op.f("ix_theses_user_id"), table_name="theses")
     op.drop_index(op.f("ix_theses_asset_symbol"), table_name="theses")
     op.drop_table("theses")
+    op.drop_index(op.f("ix_portfolio_user_id"), table_name="portfolio")
+    op.drop_table("portfolio")
     op.drop_index(op.f("ix_users_username"), table_name="users")
     op.drop_index(op.f("ix_users_email"), table_name="users")
     op.drop_table("users")

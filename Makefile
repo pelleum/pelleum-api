@@ -3,7 +3,8 @@ SHELL := /bin/bash
 docker_image = pelleum_api
 docker_username = adamcuculich
 python_code := app/ migrations/
-
+rev_id = ""
+migration_message = ""
 
 .ONESHELL:
 
@@ -33,8 +34,13 @@ push:
 	# check to make sure this is correct ...
 	docker push $(docker_username)/$(docker_image):latest
 
-generate-migrations:
-	alembic revision --autogenerate --rev-id "0001" -m "users theses and posts"
+migration:
+	if [ -z $(rev_id)] || [ -z $(migration_message)]; \
+	then \
+		echo -e "\n\nmake migration requires both a rev_id and a migration_message.\nExample usage: make migration rev_id=0001 migration_message=\"my message\"\n\n"; \
+	else \
+		alembic revision --autogenerate --rev-id "$(rev_id)" -m "$(migration_message)"; \
+	fi
 
 migrate:
 	alembic upgrade head

@@ -77,9 +77,7 @@ class PostReactionRepo(IPostReactionRepo):
         )
 
         query_count = (
-            select([func.count()])
-            .select_from(POST_REACTIONS)
-            .where(and_(*conditions))
+            select([func.count()]).select_from(POST_REACTIONS).where(and_(*conditions))
         )
 
         async with self.db.transaction():
@@ -92,4 +90,3 @@ class PostReactionRepo(IPostReactionRepo):
         posts_reactions_count = count_results[0][0]
 
         return posts_reactions_list, posts_reactions_count
-        
