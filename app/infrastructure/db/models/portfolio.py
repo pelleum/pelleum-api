@@ -2,8 +2,8 @@ import sqlalchemy as sa
 from app.infrastructure.db.metadata import METADATA
 
 
-PORTFOLIO = sa.Table(
-    "portfolio",
+PORTFOLIOS = sa.Table(
+    "portfolios",
     METADATA,
     sa.Column("portfolio_id", sa.BigInteger, primary_key=True, autoincrement=True),
     sa.Column(
@@ -31,7 +31,7 @@ ASSETS = sa.Table(
     sa.Column(
         "portfolio_id",
         sa.BigInteger,
-        sa.ForeignKey("portfolio.portfolio_id"),
+        sa.ForeignKey("portfolios.portfolio_id"),
         index=True,
     ),
     sa.Column(
@@ -39,6 +39,7 @@ ASSETS = sa.Table(
         sa.BigInteger,
         sa.ForeignKey("theses.thesis_id"),
         nullable=True,
+        index=True,
     ),
     sa.Column("asset_symbol", sa.String, nullable=False),
     sa.Column("position_value", sa.Float, nullable=False),
@@ -54,3 +55,5 @@ ASSETS = sa.Table(
         server_onupdate=sa.func.now(),
     ),
 )
+
+sa.UniqueConstraint(ASSETS.c.portfolio_id, ASSETS.c.asset_symbol)

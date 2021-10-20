@@ -22,7 +22,7 @@ from app.infrastructure.db.models.posts import (
     POST_REACTIONS,
     POST_COMMENTS,
 )
-from app.infrastructure.db.models.portfolio import PORTFOLIO, ASSETS
+from app.infrastructure.db.models.portfolio import PORTFOLIOS, ASSETS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
