@@ -29,7 +29,7 @@ class ThesesRepo(IThesesRepo):
         try:
             await self.db.execute(create_thesis_insert_stmt)
         except asyncpg.exceptions.UniqueViolationError:
-            raise await pelleum_errors.UniqueConstraint(
+            raise await pelleum_errors.PelleumErrors(
                 detail="A thesis with this title already exists on your account. Please choose a new title."
             ).unique_constraint()
 
@@ -67,6 +67,7 @@ class ThesesRepo(IThesesRepo):
 
         result = await self.db.fetch_one(query)
         return theses.ThesisInDB(**result) if result else None
+        
 
     async def update(
         self,
@@ -135,3 +136,4 @@ class ThesesRepo(IThesesRepo):
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
+        
