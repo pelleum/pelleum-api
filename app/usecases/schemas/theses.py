@@ -8,8 +8,8 @@ from app.usecases.schemas.request_pagination import MetaData
 
 
 class Sentiment(str, Enum):
-    BULL = "bull"
-    BEAR = "bear"
+    Bull = "Bull"
+    BEAR = "Bear"
 
 
 class TimeHorizon(str, Enum):
@@ -31,7 +31,7 @@ class ThesisBase(BaseModel):
         example="TSLA",
     )
     sentiment: Sentiment = Field(
-        ..., description="The thesis sentiment.", example="bull"
+        ..., description="The thesis sentiment.", example="Bull"
     )
 
 
@@ -62,7 +62,7 @@ class UpdateThesisRequest(BaseModel):
         example=["https://www.pelleum.com", "https://www.youtube.com"],
     )
     sentiment: Optional[Sentiment] = Field(
-        None, description="The thesis sentiment.", example="bull"
+        None, description="The thesis sentiment.", example="Bull"
     )
     is_authors_current: Optional[bool] = Field(
         None,

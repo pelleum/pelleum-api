@@ -45,7 +45,7 @@ async def create_post_reaction(
 
 
 @post_reactions_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=post_reactions.ManyPostsReactionsResponse,
 )

@@ -24,7 +24,7 @@ THESES = sa.Table(
         sa.DateTime,
         nullable=False,
         server_default=sa.func.now(),
-        server_onupdate=sa.func.now(),
+        onupdate=sa.func.now(),
     ),
 )
 
@@ -52,7 +52,7 @@ THESES_REACTIONS = sa.Table(
         sa.DateTime,
         nullable=False,
         server_default=sa.func.now(),
-        server_onupdate=sa.func.now(),
+        onupdate=sa.func.now(),
     ),
 )
 
@@ -79,7 +79,7 @@ THESES_COMMENTS = sa.Table(
         sa.DateTime,
         nullable=False,
         server_default=sa.func.now(),
-        server_onupdate=sa.func.now(),
+        onupdate=sa.func.now(),
     ),
 )
 
@@ -107,7 +107,7 @@ THESES_ADOPTIONS = sa.Table(
         sa.DateTime,
         nullable=False,
         server_default=sa.func.now(),
-        server_onupdate=sa.func.now(),
+        onupdate=sa.func.now(),
     ),
 )
 

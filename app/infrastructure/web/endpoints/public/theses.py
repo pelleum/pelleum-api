@@ -105,7 +105,7 @@ async def get_thesis(
 
 
 @theses_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=theses.ManyThesesResponse,
 )

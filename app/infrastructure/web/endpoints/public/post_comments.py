@@ -82,7 +82,7 @@ async def get_post_comment(
 
 
 @post_comments_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=post_comments.ManyPostCommentsResponse,
 )

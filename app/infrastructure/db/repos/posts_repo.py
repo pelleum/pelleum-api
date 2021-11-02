@@ -75,11 +75,6 @@ class PostsRepo(IPostsRepo):
         if query_params.sentiment:
             conditions.append(POSTS.c.sentiment == query_params.sentiment)
 
-        if len(conditions) == 0:
-            raise Exception(
-                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
-            )
-
         query = (
             POSTS.select()
             .where(and_(*conditions))

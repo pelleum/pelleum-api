@@ -5,8 +5,10 @@ import sys
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from dotenv import load_dotenv
 
 sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
+load_dotenv()
 
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
@@ -77,6 +79,13 @@ def run_migrations_offline():
         context.run_migrations()
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    # If the table has a specified schema, don't include it
+    if type_ == "table" and object.schema:
+        return False
+    return True
+
+
 def run_migrations_online():
     """Run migrations in 'online' mode.
 
@@ -91,7 +100,12 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            include_schemas=True,
+            include_object=include_object,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

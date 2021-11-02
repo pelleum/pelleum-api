@@ -104,9 +104,6 @@ async def get_posts_query_params(
     users_repo: IUserRepo = Depends(get_users_repo),
 ) -> posts.PostQueryParams:
 
-    if not user_id and not asset_symbol and not sentiment and not by_popularity:
-        raise pelleum_errors.no_supplied_query_params
-
     query_params_raw = {}
 
     if user_id:

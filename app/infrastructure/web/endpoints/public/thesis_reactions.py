@@ -74,7 +74,7 @@ async def update_thesis_reaction(
 
 
 @thesis_reactions_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=thesis_reactions.ManyThesesReactionsResponse,
 )

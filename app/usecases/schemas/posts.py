@@ -8,8 +8,8 @@ from app.usecases.schemas.request_pagination import MetaData
 
 
 class Sentiment(str, Enum):
-    BULL = "bull"
-    BEAR = "bear"
+    Bull = "Bull"
+    BEAR = "Bear"
 
 
 class CreatePostRequest(BaseModel):
@@ -33,12 +33,12 @@ class CreatePostRequest(BaseModel):
         example="TSLA",
     )
     sentiment: Optional[Sentiment] = Field(
-        None, description="The post sentiment.", example="bull"
+        None, description="The post sentiment.", example="Bull"
     )
     thesis_id: Optional[int] = Field(
         None,
         description="A thesis linked to the post. If left blank, will auto populate with user's thesis for this asset.",
-        example="bull",
+        example="Bull",
     )
 
 
@@ -46,7 +46,7 @@ class CreatePostRepoAdapter(CreatePostRequest):
     """This model is used to send to the PostsRepo create function"""
 
     user_id: int
-    thesis_id: int
+    thesis_id: Optional[int] = None
 
 
 class PostQueryParams(BaseModel):
@@ -63,7 +63,7 @@ class PostInDB(CreatePostRequest):
 
     post_id: int
     user_id: int
-    thesis_id: int
+    thesis_id: Optional[int]
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
 

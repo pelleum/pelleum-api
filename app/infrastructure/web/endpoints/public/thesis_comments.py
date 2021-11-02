@@ -81,7 +81,7 @@ async def get_thesis_comment(
 
 
 @thesis_comments_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=thesis_comments.ManyThesisCommentsResponse,
 )

@@ -67,7 +67,6 @@ class ThesesRepo(IThesesRepo):
 
         result = await self.db.fetch_one(query)
         return theses.ThesisInDB(**result) if result else None
-        
 
     async def update(
         self,
@@ -136,4 +135,3 @@ class ThesesRepo(IThesesRepo):
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
-        

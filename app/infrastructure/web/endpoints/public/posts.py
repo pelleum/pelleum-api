@@ -32,8 +32,6 @@ async def create_new_feed_post(
 
     create_feed_post_request_raw = body.dict()
     create_feed_post_request_raw.update({"user_id": authorized_user.user_id})
-    # TODO: grab author's current thesis for the linked asset, for now hard code it to 1
-    create_feed_post_request_raw.update({"thesis_id": 4})
 
     new_feed_post = posts.CreatePostRepoAdapter(**create_feed_post_request_raw)
 
@@ -62,7 +60,7 @@ async def get_feed_post(
 
 
 @posts_router.get(
-    "/retrieve/many",
+    "",
     status_code=200,
     response_model=posts.ManyPostsResponse,
 )
