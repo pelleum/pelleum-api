@@ -16,6 +16,15 @@ class PostCommentRequest(BaseModel):
     )
 
 
+class CreatePostCommentRepoAdapter(BaseModel):
+    """Utilized by repo to create new post comment"""
+
+    post_id: int
+    user_id: int
+    username: str
+    content: str
+
+
 class UpdatePostCommentRequest(PostCommentRequest):
     """Request for user to update post comment"""
 
@@ -26,6 +35,7 @@ class PostCommentInDB(BaseModel):
     comment_id: int
     post_id: int
     user_id: int
+    username: str
     content: str
     created_at: datetime
     updated_at: datetime

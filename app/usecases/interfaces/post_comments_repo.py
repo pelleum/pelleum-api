@@ -6,7 +6,9 @@ from app.usecases.schemas import post_comments
 
 class IPostsCommentsRepo(ABC):
     @abstractmethod
-    async def create(self, post_id: int, user_id: int, content: str) -> None:
+    async def create(
+        self, comment_info: post_comments.CreatePostCommentRepoAdapter
+    ) -> None:
         """Saves a new post comment"""
 
     @abstractmethod

@@ -83,6 +83,7 @@ class ThesisInDB(ThesisBase):
 
     thesis_id: int
     user_id: int
+    username: str
     sources: Optional[List[str]]
     is_authors_current: bool
     created_at: Optional[datetime]
@@ -109,6 +110,7 @@ class CreateThesisRepoAdapter(CreateThesisRequest):
     """This model is used to send to the ThesisRepo create function"""
 
     user_id: int
+    username: str
 
 
 class UpdateThesisRepoAdapter(UpdateThesisRequest):

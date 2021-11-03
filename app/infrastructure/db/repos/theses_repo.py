@@ -18,6 +18,7 @@ class ThesesRepo(IThesesRepo):
 
         create_thesis_insert_stmt = THESES.insert().values(
             user_id=thesis.user_id,
+            username=thesis.username,
             title=thesis.title,
             content=thesis.content,
             sources=thesis.sources,
@@ -109,11 +110,6 @@ class ThesesRepo(IThesesRepo):
 
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
-
-        if len(conditions) == 0:
-            raise Exception(
-                "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
-            )
 
         query = (
             THESES.select()

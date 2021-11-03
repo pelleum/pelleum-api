@@ -36,7 +36,9 @@ async def create_new_thesis(
         raise pelleum_errors.array_too_long
 
     create_thesis_request_raw = body.dict()
-    create_thesis_request_raw.update({"user_id": authorized_user.user_id})
+    create_thesis_request_raw.update(
+        {"user_id": authorized_user.user_id, "username": authorized_user.username}
+    )
 
     thesis = theses.CreateThesisRepoAdapter(**create_thesis_request_raw)
 
@@ -105,7 +107,7 @@ async def get_thesis(
 
 
 @theses_router.get(
-    "",
+    "/retrieve/many",
     status_code=200,
     response_model=theses.ManyThesesResponse,
 )

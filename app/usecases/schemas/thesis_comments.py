@@ -20,12 +20,22 @@ class UpdateThesisCommentRequest(ThesisCommentRequest):
     """Request for user to update thesis comment"""
 
 
+class CreateThesisCommentRepoAdapter(BaseModel):
+    """Utilized by repo to create new post comment"""
+
+    thesis_id: int
+    user_id: int
+    username: str
+    content: str
+
+
 class ThesisCommentInDB(BaseModel):
     """Database Model"""
 
     comment_id: int
     thesis_id: int
     user_id: int
+    username: str
     content: str
     created_at: datetime
     updated_at: datetime

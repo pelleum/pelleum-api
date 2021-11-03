@@ -12,11 +12,16 @@ class ThesesCommentsRepo(IThesesCommentsRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, thesis_id: int, user_id: int, content: str) -> None:
+    async def create(
+        self, comment_info: thesis_comments.CreateThesisCommentRepoAdapter
+    ) -> None:
         """Saves a new thesis comment"""
 
         thesis_comment_insert_statement = THESES_COMMENTS.insert().values(
-            thesis_id=thesis_id, user_id=user_id, content=content
+            thesis_id=comment_info.thesis_id,
+            user_id=comment_info.user_id,
+            username=comment_info.username,
+            content=comment_info.content,
         )
 
         await self.db.execute(thesis_comment_insert_statement)

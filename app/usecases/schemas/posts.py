@@ -46,6 +46,7 @@ class CreatePostRepoAdapter(CreatePostRequest):
     """This model is used to send to the PostsRepo create function"""
 
     user_id: int
+    username: str
     thesis_id: Optional[int] = None
 
 
@@ -63,6 +64,7 @@ class PostInDB(CreatePostRequest):
 
     post_id: int
     user_id: int
+    username: str
     thesis_id: Optional[int]
     created_at: Optional[datetime]
     updated_at: Optional[datetime]

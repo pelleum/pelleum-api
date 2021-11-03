@@ -16,6 +16,7 @@ class PostsRepo(IPostsRepo):
 
         create_post_insert_stmt = POSTS.insert().values(
             user_id=new_feed_post.user_id,
+            username=new_feed_post.username,
             thesis_id=new_feed_post.thesis_id,
             title=new_feed_post.title,
             content=new_feed_post.content,

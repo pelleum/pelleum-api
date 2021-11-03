@@ -12,6 +12,7 @@ POSTS = sa.Table(
         sa.ForeignKey("users.user_id"),
         index=True,
     ),
+    sa.Column("username", sa.String, nullable=False, index=True),
     sa.Column(
         "thesis_id",
         sa.BigInteger,
@@ -77,6 +78,7 @@ POST_COMMENTS = sa.Table(
         sa.ForeignKey("users.user_id"),
         index=True,
     ),
+    sa.Column("username", sa.String, nullable=False, index=True),
     sa.Column("content", sa.Text, nullable=False),
     sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     sa.Column(

@@ -12,11 +12,16 @@ class PostsCommentsRepo(IPostsCommentsRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, post_id: int, user_id: int, content: str) -> None:
+    async def create(
+        self, comment_info: post_comments.CreatePostCommentRepoAdapter
+    ) -> None:
         """Saves a new post comment"""
 
         post_comment_insert_statement = POST_COMMENTS.insert().values(
-            post_id=post_id, user_id=user_id, content=content
+            post_id=comment_info.post_id,
+            user_id=comment_info.user_id,
+            username=comment_info.username,
+            content=comment_info.content,
         )
 
         await self.db.execute(post_comment_insert_statement)

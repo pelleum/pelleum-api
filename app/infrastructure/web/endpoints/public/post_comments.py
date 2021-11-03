@@ -1,8 +1,6 @@
-from typing import Optional
 import math
 
 from fastapi import APIRouter, Depends, Body, Path
-from fastapi.param_functions import Query
 from pydantic import conint
 
 from app.usecases.schemas import post_comments
@@ -31,7 +29,12 @@ async def create_new_post_comment(
 ) -> None:
 
     await post_comments_repo.create(
-        post_id=post_id, user_id=authorized_user.user_id, content=body.content
+        comment_info=post_comments.CreatePostCommentRepoAdapter(
+            post_id=post_id,
+            user_id=authorized_user.user_id,
+            username=authorized_user.username,
+            content=body.content,
+        )
     )
 
 
@@ -82,7 +85,7 @@ async def get_post_comment(
 
 
 @post_comments_router.get(
-    "",
+    "/retrieve/many",
     status_code=200,
     response_model=post_comments.ManyPostCommentsResponse,
 )

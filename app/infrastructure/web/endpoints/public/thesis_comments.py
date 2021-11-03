@@ -1,8 +1,6 @@
-from typing import Optional
 import math
 
 from fastapi import APIRouter, Depends, Body, Path
-from fastapi.param_functions import Query
 from pydantic import conint
 
 from app.usecases.schemas import thesis_comments
@@ -30,7 +28,12 @@ async def create_new_thesis_comment(
 ) -> None:
 
     await thesis_comments_repo.create(
-        thesis_id=thesis_id, user_id=authorized_user.user_id, content=body.content
+        comment_info=thesis_comments.CreateThesisCommentRepoAdapter(
+            thesis_id=thesis_id,
+            user_id=authorized_user.user_id,
+            username=authorized_user.username,
+            content=body.content,
+        )
     )
 
 
@@ -81,7 +84,7 @@ async def get_thesis_comment(
 
 
 @thesis_comments_router.get(
-    "",
+    "/retrieve/many",
     status_code=200,
     response_model=thesis_comments.ManyThesisCommentsResponse,
 )

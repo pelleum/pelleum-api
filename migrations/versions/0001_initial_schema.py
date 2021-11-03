@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2021-10-24 22:24:48.859528
+Create Date: 2021-11-02 18:45:34.836500
 
 """
 from alembic import op
@@ -61,6 +61,7 @@ def upgrade():
         "theses",
         sa.Column("thesis_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
+        sa.Column("username", sa.String(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("sources", sa.ARRAY(sa.String()), nullable=True),
@@ -84,6 +85,7 @@ def upgrade():
         op.f("ix_theses_asset_symbol"), "theses", ["asset_symbol"], unique=False
     )
     op.create_index(op.f("ix_theses_user_id"), "theses", ["user_id"], unique=False)
+    op.create_index(op.f("ix_theses_username"), "theses", ["username"], unique=False)
     op.create_table(
         "assets",
         sa.Column("asset_id", sa.BigInteger(), autoincrement=True, nullable=False),
@@ -91,9 +93,9 @@ def upgrade():
         sa.Column("institution_id", sa.String(), nullable=True),
         sa.Column("thesis_id", sa.BigInteger(), nullable=True),
         sa.Column("asset_symbol", sa.String(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("name", sa.String(), nullable=True),
         sa.Column("quantity", sa.Float(), nullable=False),
-        sa.Column("position_value", sa.Float(), nullable=False),
+        sa.Column("position_value", sa.Float(), nullable=True),
         sa.Column("skin_rating", sa.Float(), nullable=True),
         sa.Column("average_buy_price", sa.Float(), nullable=True),
         sa.Column("total_contribution", sa.Float(), nullable=True),
@@ -133,6 +135,7 @@ def upgrade():
         "posts",
         sa.Column("post_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=True),
+        sa.Column("username", sa.String(), nullable=False),
         sa.Column("thesis_id", sa.BigInteger(), nullable=True),
         sa.Column("title", sa.String(), nullable=True),
         sa.Column("content", sa.Text(), nullable=False),
@@ -159,6 +162,7 @@ def upgrade():
     )
     op.create_index(op.f("ix_posts_thesis_id"), "posts", ["thesis_id"], unique=False)
     op.create_index(op.f("ix_posts_user_id"), "posts", ["user_id"], unique=False)
+    op.create_index(op.f("ix_posts_username"), "posts", ["username"], unique=False)
     op.create_table(
         "theses_adoptions",
         sa.Column("thesis_id", sa.BigInteger(), nullable=False),
@@ -197,6 +201,7 @@ def upgrade():
         sa.Column("comment_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("thesis_id", sa.BigInteger(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),
+        sa.Column("username", sa.String(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
@@ -222,6 +227,12 @@ def upgrade():
     )
     op.create_index(
         op.f("ix_theses_comments_user_id"), "theses_comments", ["user_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_theses_comments_username"),
+        "theses_comments",
+        ["username"],
+        unique=False,
     )
     op.create_table(
         "theses_reactions",
@@ -261,6 +272,7 @@ def upgrade():
         sa.Column("comment_id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("post_id", sa.BigInteger(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),
+        sa.Column("username", sa.String(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column(
             "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
@@ -283,6 +295,9 @@ def upgrade():
     )
     op.create_index(
         op.f("ix_post_comments_user_id"), "post_comments", ["user_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_post_comments_username"), "post_comments", ["username"], unique=False
     )
     op.create_table(
         "post_reactions",
@@ -319,18 +334,21 @@ def downgrade():
     op.drop_index(op.f("ix_post_reactions_user_id"), table_name="post_reactions")
     op.drop_index(op.f("ix_post_reactions_post_id"), table_name="post_reactions")
     op.drop_table("post_reactions")
+    op.drop_index(op.f("ix_post_comments_username"), table_name="post_comments")
     op.drop_index(op.f("ix_post_comments_user_id"), table_name="post_comments")
     op.drop_index(op.f("ix_post_comments_post_id"), table_name="post_comments")
     op.drop_table("post_comments")
     op.drop_index(op.f("ix_theses_reactions_user_id"), table_name="theses_reactions")
     op.drop_index(op.f("ix_theses_reactions_thesis_id"), table_name="theses_reactions")
     op.drop_table("theses_reactions")
+    op.drop_index(op.f("ix_theses_comments_username"), table_name="theses_comments")
     op.drop_index(op.f("ix_theses_comments_user_id"), table_name="theses_comments")
     op.drop_index(op.f("ix_theses_comments_thesis_id"), table_name="theses_comments")
     op.drop_table("theses_comments")
     op.drop_index(op.f("ix_theses_adoptions_user_id"), table_name="theses_adoptions")
     op.drop_index(op.f("ix_theses_adoptions_thesis_id"), table_name="theses_adoptions")
     op.drop_table("theses_adoptions")
+    op.drop_index(op.f("ix_posts_username"), table_name="posts")
     op.drop_index(op.f("ix_posts_user_id"), table_name="posts")
     op.drop_index(op.f("ix_posts_thesis_id"), table_name="posts")
     op.drop_index(op.f("ix_posts_asset_symbol"), table_name="posts")
@@ -339,6 +357,7 @@ def downgrade():
     op.drop_index(op.f("ix_assets_thesis_id"), table_name="assets")
     op.drop_index(op.f("ix_assets_portfolio_id"), table_name="assets")
     op.drop_table("assets")
+    op.drop_index(op.f("ix_theses_username"), table_name="theses")
     op.drop_index(op.f("ix_theses_user_id"), table_name="theses")
     op.drop_index(op.f("ix_theses_asset_symbol"), table_name="theses")
     op.drop_table("theses")

@@ -6,7 +6,9 @@ from app.usecases.schemas import thesis_comments
 
 class IThesesCommentsRepo(ABC):
     @abstractmethod
-    async def create(self, thesis_id: int, user_id: int, content: str) -> None:
+    async def create(
+        self, comment_info: thesis_comments.CreateThesisCommentRepoAdapter
+    ) -> None:
         """Saves a new thesis comment"""
 
     @abstractmethod
