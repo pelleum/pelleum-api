@@ -49,8 +49,8 @@ async def update_post_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    post_comment: post_comments.PostCommentInDB = (
-        await post_comments_repo.retrieve_post_comment_by_id(comment_id=comment_id)
+    post_comment = await post_comments_repo.retrieve_post_comment_by_id(
+        comment_id=comment_id
     )
 
     if not post_comment or post_comment.user_id != authorized_user.user_id:
@@ -72,8 +72,8 @@ async def get_post_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> post_comments.PostCommentResponse:
 
-    post_comment: post_comments.PostCommentInDB = (
-        await post_comments_repo.retrieve_post_comment_by_id(comment_id=comment_id)
+    post_comment = await post_comments_repo.retrieve_post_comment_by_id(
+        comment_id=comment_id
     )
 
     if not post_comment:
@@ -130,8 +130,8 @@ async def delete_post_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    post_comment: post_comments.PostCommentInDB = (
-        await post_comments_repo.retrieve_post_comment_by_id(comment_id=comment_id)
+    post_comment = await post_comments_repo.retrieve_post_comment_by_id(
+        comment_id=comment_id
     )
 
     if not post_comment or post_comment.user_id != authorized_user.user_id:

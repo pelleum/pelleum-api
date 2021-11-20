@@ -48,8 +48,8 @@ async def update_thesis_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    thesis_comment: thesis_comments.ThesisCommentInDB = (
-        await thesis_comments_repo.retrieve_thesis_comment_by_id(comment_id=comment_id)
+    thesis_comment = await thesis_comments_repo.retrieve_thesis_comment_by_id(
+        comment_id=comment_id
     )
 
     if not thesis_comment or thesis_comment.user_id != authorized_user.user_id:
@@ -71,8 +71,8 @@ async def get_thesis_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> thesis_comments.ThesisCommentResponse:
 
-    thesis_comment: thesis_comments.ThesisCommentInDB = (
-        await thesis_comments_repo.retrieve_thesis_comment_by_id(comment_id=comment_id)
+    thesis_comment = await thesis_comments_repo.retrieve_thesis_comment_by_id(
+        comment_id=comment_id
     )
 
     if not thesis_comment:
@@ -129,8 +129,8 @@ async def delete_thesis_comment(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    thesis_comment: thesis_comments.ThesisCommentInDB = (
-        await thesis_comments_repo.retrieve_thesis_comment_by_id(comment_id=comment_id)
+    thesis_comment = await thesis_comments_repo.retrieve_thesis_comment_by_id(
+        comment_id=comment_id
     )
 
     if not thesis_comment or thesis_comment.user_id != authorized_user.user_id:

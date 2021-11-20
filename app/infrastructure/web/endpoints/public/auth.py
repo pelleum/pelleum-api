@@ -26,9 +26,7 @@ async def login_for_access_token(
     users_repo: IUserRepo = Depends(get_users_repo),
 ) -> auth.JWTResponse:
 
-    user: users.UserInDB = await users_repo.retrieve_user_with_filter(
-        username=form_data.username
-    )
+    user = await users_repo.retrieve_user_with_filter(username=form_data.username)
 
     if not user:
         raise pelleum_errors.login_error
@@ -59,9 +57,7 @@ async def create_new_user(
 
     password_context: CryptContext = await get_password_context()
 
-    email_already_exists: users.UserInDB = await users_repo.retrieve_user_with_filter(
-        email=body.email
-    )
+    email_already_exists = await users_repo.retrieve_user_with_filter(email=body.email)
     if email_already_exists:
         raise await pelleum_errors.PelleumErrors(
             detail="An account with this email already exists. Please choose another email."
@@ -75,9 +71,7 @@ async def create_new_user(
             detail="An account with this username already exists. Please choose another username."
         ).account_exists()
 
-    new_user: users.UserInDB = await users_repo.create(
-        new_user=body, password_context=password_context
-    )
+    new_user = await users_repo.create(new_user=body, password_context=password_context)
     new_user_raw = new_user.dict()
 
     return users.UserResponse(**new_user_raw)
@@ -94,8 +88,8 @@ async def update_user(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
 
-    password_context: CryptContext = await get_password_context()
-    updated_user: users.UserInDB = await users_repo.update(
+    password_context = await get_password_context()
+    updated_user = await users_repo.update(
         updated_user=body,
         user_id=authorized_user.user_id,
         password_context=password_context,

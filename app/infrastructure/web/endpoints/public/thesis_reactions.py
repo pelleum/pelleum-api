@@ -1,4 +1,3 @@
-from typing import Optional
 import math
 
 from fastapi import APIRouter, Depends, Body, Path
@@ -32,9 +31,7 @@ async def create_thesis_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=thesis_id
-    )
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
@@ -57,9 +54,7 @@ async def update_thesis_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=thesis_id
-    )
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
@@ -122,9 +117,7 @@ async def delete_thesis_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=thesis_id
-    )
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis or thesis.user_id != authorized_user.user_id:
         raise await pelleum_errors.PelleumErrors(

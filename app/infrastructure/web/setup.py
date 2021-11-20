@@ -10,6 +10,7 @@ from app.infrastructure.web.endpoints.public import (
     posts,
     post_reactions,
     post_comments,
+    portfolio,
 )
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints import health
@@ -42,6 +43,7 @@ def setup_app():
     app.include_router(
         post_comments.post_comments_router, prefix="/public/posts/comments"
     )
+    app.include_router(portfolio.portfolio_router, prefix="/public/portfolio")
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
 

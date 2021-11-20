@@ -30,7 +30,7 @@ async def create_post_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(post_id=post_id)
+    post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
     if not post:
         raise await pelleum_errors.PelleumErrors(
@@ -91,9 +91,7 @@ async def delete_post_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    post: posts.PostInDB = await posts_repo.retrieve_post_with_filter(
-        post_id=int(post_id)
-    )
+    post = await posts_repo.retrieve_post_with_filter(post_id=int(post_id))
 
     if not post or post.user_id != authorized_user.user_id:
         raise await pelleum_errors.PelleumErrors(

@@ -42,7 +42,7 @@ async def create_new_thesis(
 
     thesis = theses.CreateThesisRepoAdapter(**create_thesis_request_raw)
 
-    newly_created_thesis: theses.ThesisInDB = await theses_repo.create(thesis=thesis)
+    newly_created_thesis = await theses_repo.create(thesis=thesis)
 
     return newly_created_thesis
 
@@ -76,9 +76,7 @@ async def update_thesis(
 
     updated_thesis = theses.UpdateThesisRepoAdapter(**update_thesis_request_raw)
 
-    updated_thesis: theses.ThesisInDB = await theses_repo.update(
-        updated_thesis=updated_thesis
-    )
+    updated_thesis = await theses_repo.update(updated_thesis=updated_thesis)
 
     return updated_thesis
 
@@ -94,9 +92,7 @@ async def get_thesis(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
-    thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=thesis_id
-    )
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
