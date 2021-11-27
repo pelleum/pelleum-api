@@ -27,8 +27,8 @@ class CreatePostRequest(BaseModel):
         description="The post content.",
         example="Pelleum is the future of investing; the retail investing world needs more transparency.",
     )
-    asset_symbol: constr(max_length=10) = Field(
-        ...,
+    asset_symbol: Optional[constr(max_length=10)] = Field(
+        None,
         description="The symbol for the asset the post (and thesis) is linked to.",
         example="TSLA",
     )
