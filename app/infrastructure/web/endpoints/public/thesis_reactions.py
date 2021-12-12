@@ -1,23 +1,20 @@
 import math
 
-from fastapi import APIRouter, Depends, Body, Path
-from fastapi.param_functions import Query
+from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
-from app.usecases.schemas import thesis_reactions, theses
-from app.usecases.schemas import users
-from app.usecases.schemas.request_pagination import RequestPagination, MetaData
-from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
-from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.dependencies import (
-    get_thesis_reactions_repo,
-    get_theses_repo,
     get_current_active_user,
-    paginate,
+    get_theses_repo,
     get_thesis_reactions_query_params,
+    get_thesis_reactions_repo,
+    paginate,
 )
 from app.libraries import pelleum_errors
-
+from app.usecases.interfaces.theses_repo import IThesesRepo
+from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
+from app.usecases.schemas import theses, thesis_reactions, users
+from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 thesis_reactions_router = APIRouter(tags=["Thesis Reactions"])
 

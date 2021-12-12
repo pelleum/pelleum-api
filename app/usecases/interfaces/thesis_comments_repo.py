@@ -1,5 +1,5 @@
-from typing import Tuple, List
 from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 from app.usecases.schemas import thesis_comments
 

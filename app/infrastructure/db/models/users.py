@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+
 from app.infrastructure.db.metadata import METADATA
 
 USERS = sa.Table(

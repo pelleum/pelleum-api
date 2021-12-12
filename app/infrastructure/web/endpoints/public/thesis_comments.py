@@ -1,20 +1,18 @@
 import math
 
-from fastapi import APIRouter, Depends, Body, Path
+from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
-from app.usecases.schemas import thesis_comments
-from app.usecases.schemas import users
-from app.usecases.schemas.request_pagination import RequestPagination, MetaData
-from app.usecases.interfaces.thesis_comments_repo import IThesesCommentsRepo
 from app.dependencies import (
-    get_thesis_comments_repo,
     get_current_active_user,
-    paginate,
     get_thesis_comments_query_params,
+    get_thesis_comments_repo,
+    paginate,
 )
 from app.libraries import pelleum_errors
-
+from app.usecases.interfaces.thesis_comments_repo import IThesesCommentsRepo
+from app.usecases.schemas import thesis_comments, users
+from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 thesis_comments_router = APIRouter(tags=["Theses Comments"])
 

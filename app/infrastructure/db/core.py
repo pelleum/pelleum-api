@@ -1,7 +1,7 @@
-from app.dependencies import logger
 import databases
-from app.settings import settings
 
+from app.dependencies import logger
+from app.settings import settings
 
 DATABASE = None
 

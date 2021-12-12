@@ -1,11 +1,11 @@
 from typing import List, Optional
-from sqlalchemy import desc, and_, delete
 
 from databases import Database
+from sqlalchemy import and_, delete, desc
 
-from app.infrastructure.db.models.portfolio import PORTFOLIOS, ASSETS
-from app.usecases.schemas import portfolios
+from app.infrastructure.db.models.portfolio import ASSETS, PORTFOLIOS
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
+from app.usecases.schemas import portfolios
 
 
 class PortfolioRepo(IPortfolioRepo):

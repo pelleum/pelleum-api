@@ -1,22 +1,19 @@
-from typing import Optional
 import math
 
-from fastapi import APIRouter, Depends, Body, Path
+from fastapi import APIRouter, Body, Depends, Path
 from fastapi.param_functions import Query
-from pydantic import constr, conint
+from pydantic import conint
 
-from app.usecases.schemas import theses
-from app.usecases.schemas import users
-from app.usecases.schemas.request_pagination import RequestPagination, MetaData
-from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.dependencies import (
-    get_theses_repo,
     get_current_active_user,
-    paginate,
     get_theses_query_params,
+    get_theses_repo,
+    paginate,
 )
 from app.libraries import pelleum_errors
-
+from app.usecases.interfaces.theses_repo import IThesesRepo
+from app.usecases.schemas import theses, users
+from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 theses_router = APIRouter(tags=["Theses"])
 

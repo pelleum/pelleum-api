@@ -1,7 +1,7 @@
 import sqlalchemy as sa
+
 from app.infrastructure.db.metadata import METADATA
 from app.infrastructure.db.models.institutions import INSTITUTIONS
-
 
 PORTFOLIOS = sa.Table(
     "portfolios",

@@ -1,11 +1,11 @@
 from typing import List, Tuple
 
 from databases import Database
-from sqlalchemy import and_, desc, func, select, delete
+from sqlalchemy import and_, delete, desc, func, select
 
+from app.infrastructure.db.models.theses import THESES_COMMENTS
 from app.usecases.interfaces.thesis_comments_repo import IThesesCommentsRepo
 from app.usecases.schemas import thesis_comments
-from app.infrastructure.db.models.theses import THESES_COMMENTS
 
 
 class ThesesCommentsRepo(IThesesCommentsRepo):

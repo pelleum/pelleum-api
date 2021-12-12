@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-
 from app.usecases.schemas import portfolios
 
 

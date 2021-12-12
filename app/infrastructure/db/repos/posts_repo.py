@@ -1,11 +1,11 @@
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 from databases import Database
-from sqlalchemy import and_, desc, func, select, delete
+from sqlalchemy import and_, delete, desc, func, select
 
+from app.infrastructure.db.models.posts import POSTS
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
-from app.infrastructure.db.models.posts import POSTS
 
 
 class PostsRepo(IPostsRepo):

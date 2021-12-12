@@ -11,7 +11,8 @@ migration_message = ""
 requirements.txt:
 	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 
-black:
+format:
+	isort --profile black $(python_code)
 	black $(python_code)
 
 lint:

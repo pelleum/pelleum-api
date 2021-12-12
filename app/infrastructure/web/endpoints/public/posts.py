@@ -1,21 +1,18 @@
 import math
 
-from fastapi import APIRouter, Depends, Body, Path
+from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
-from app.usecases.schemas import posts
-from app.usecases.schemas import users
-from app.usecases.schemas.request_pagination import RequestPagination, MetaData
-from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.dependencies import (
-    get_posts_repo,
-    get_posts_repo,
     get_current_active_user,
-    paginate,
     get_posts_query_params,
+    get_posts_repo,
+    paginate,
 )
 from app.libraries import pelleum_errors
-
+from app.usecases.interfaces.posts_repo import IPostsRepo
+from app.usecases.schemas import posts, users
+from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 posts_router = APIRouter(tags=["Posts"])
 

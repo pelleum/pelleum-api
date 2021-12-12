@@ -1,13 +1,13 @@
 from typing import List
 
-from sqlalchemy import and_, delete, select, func, desc
-from databases import Database
 import asyncpg
+from databases import Database
+from sqlalchemy import and_, delete, desc, func, select
 
-from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
-from app.usecases.schemas import thesis_reactions
 from app.infrastructure.db.models.theses import THESES_REACTIONS
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
+from app.usecases.schemas import thesis_reactions
 
 
 class ThesisReactionRepo(IThesisReactionRepo):

@@ -1,8 +1,8 @@
-from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
-from pydantic import BaseModel, constr, Field
+from pydantic import BaseModel, Field, constr
 
 from app.usecases.schemas.request_pagination import MetaData
 
@@ -39,7 +39,7 @@ class CreateThesisRequest(ThesisBase):
     """Request from user to create a new thesis"""
 
     sources: Optional[List[constr(max_length=256)]] = Field(
-        ...,
+        None,
         description="The supporting, cited sources an author can optionally include.",
         example=["https://www.pelleum.com", "https://www.youtube.com"],
     )

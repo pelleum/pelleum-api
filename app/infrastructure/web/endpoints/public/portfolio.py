@@ -1,13 +1,10 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, Path
 from pydantic import conint
 
-from app.usecases.schemas import portfolios
-from app.usecases.schemas import users
-from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
-from app.dependencies import get_portfolio_repo, get_current_active_user
+from app.dependencies import get_current_active_user, get_portfolio_repo
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
+from app.usecases.schemas import portfolios, users
 
 portfolio_router = APIRouter(tags=["User Portfolio"])
 

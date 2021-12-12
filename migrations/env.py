@@ -1,30 +1,26 @@
-from logging.config import fileConfig
-from os import getenv
 import pathlib
 import sys
+from logging.config import fileConfig
+from os import getenv
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 from dotenv import load_dotenv
+from sqlalchemy import engine_from_config, pool
 
 sys.path[0] = str(pathlib.Path(__file__).parents[1].resolve())
 load_dotenv()
 
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
-from app.infrastructure.db.models.users import USERS
+from app.infrastructure.db.models.portfolio import ASSETS, PORTFOLIOS
+from app.infrastructure.db.models.posts import POST_COMMENTS, POST_REACTIONS, POSTS
 from app.infrastructure.db.models.theses import (
     THESES,
-    THESES_REACTIONS,
-    THESES_COMMENTS,
     THESES_ADOPTIONS,
+    THESES_COMMENTS,
+    THESES_REACTIONS,
 )
-from app.infrastructure.db.models.posts import (
-    POSTS,
-    POST_REACTIONS,
-    POST_COMMENTS,
-)
-from app.infrastructure.db.models.portfolio import PORTFOLIOS, ASSETS
+from app.infrastructure.db.models.users import USERS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

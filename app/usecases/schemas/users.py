@@ -1,6 +1,7 @@
-from pydantic import BaseModel, constr, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field, constr
 
 
 class UserBase(BaseModel):
@@ -38,6 +39,11 @@ class UserResponse(UserBase):
     user_id: int
     is_active: bool
     is_verified: bool
+
+
+class UserWithAuthTokenResponse(UserResponse):
+    access_token: str
+    token_type: str
 
 
 class UserInDB(UserBase):

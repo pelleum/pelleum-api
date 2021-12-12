@@ -1,21 +1,18 @@
-from passlib.context import CryptContext
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.dependencies import (
-    get_users_repo,
-    get_password_context,
-    verify_password,
     create_access_token,
     get_current_active_user,
-    validate_password,
+    get_password_context,
+    get_users_repo,
     validate_email,
+    validate_password,
+    verify_password,
 )
 from app.libraries import pelleum_errors
-from app.usecases.schemas import auth
-from app.usecases.schemas import users
 from app.usecases.interfaces.user_repo import IUserRepo
-
+from app.usecases.schemas import auth, users
 
 auth_router = APIRouter(tags=["Users"])
 
@@ -36,7 +33,7 @@ async def login_for_access_token(
     if not password_matches:
         raise pelleum_errors.login_error
 
-    access_token: str = await create_access_token(
+    access_token = await create_access_token(
         data=auth.AuthDataToCreateToken(sub=user.username)
     )
 
@@ -46,16 +43,16 @@ async def login_for_access_token(
 @auth_router.post(
     "",
     status_code=201,
-    response_model=users.UserResponse,
+    response_model=users.UserWithAuthTokenResponse,
 )
 async def create_new_user(
     body: users.UserCreate = Body(...), users_repo: IUserRepo = Depends(get_users_repo)
-) -> users.UserResponse:
+) -> users.UserWithAuthTokenResponse:
 
     await validate_password(password=body.password)
     await validate_email(email=body.email)
 
-    password_context: CryptContext = await get_password_context()
+    password_context = await get_password_context()
 
     email_already_exists = await users_repo.retrieve_user_with_filter(email=body.email)
     if email_already_exists:
@@ -63,8 +60,8 @@ async def create_new_user(
             detail="An account with this email already exists. Please choose another email."
         ).account_exists()
 
-    username_already_exists: users.UserInDB = (
-        await users_repo.retrieve_user_with_filter(username=body.username)
+    username_already_exists = await users_repo.retrieve_user_with_filter(
+        username=body.username
     )
     if username_already_exists:
         raise await pelleum_errors.PelleumErrors(
@@ -74,7 +71,13 @@ async def create_new_user(
     new_user = await users_repo.create(new_user=body, password_context=password_context)
     new_user_raw = new_user.dict()
 
-    return users.UserResponse(**new_user_raw)
+    access_token = await create_access_token(
+        data=auth.AuthDataToCreateToken(sub=body.username)
+    )
+
+    return users.UserWithAuthTokenResponse(
+        **new_user_raw, access_token=access_token, token_type="bearer"
+    )
 
 
 @auth_router.patch(

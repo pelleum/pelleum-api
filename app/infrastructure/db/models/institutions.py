@@ -3,7 +3,6 @@ import sqlalchemy as sa
 
 from app.infrastructure.db.metadata import METADATA
 
-
 INSTITUTIONS = sa.Table(
     "institutions",
     METADATA,

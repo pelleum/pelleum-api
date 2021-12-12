@@ -1,21 +1,18 @@
 import math
 
-from fastapi import APIRouter, Depends, Body, Path
+from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
-from app.usecases.schemas import post_comments
-from app.usecases.schemas import users
-from app.usecases.schemas.request_pagination import RequestPagination, MetaData
-from app.usecases.interfaces.post_comments_repo import IPostsCommentsRepo
-
 from app.dependencies import (
-    get_post_comments_repo,
     get_current_active_user,
-    paginate,
     get_post_comments_query_params,
+    get_post_comments_repo,
+    paginate,
 )
 from app.libraries import pelleum_errors
-
+from app.usecases.interfaces.post_comments_repo import IPostsCommentsRepo
+from app.usecases.schemas import post_comments, users
+from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 post_comments_router = APIRouter(tags=["Posts Comments"])
 

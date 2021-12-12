@@ -1,23 +1,21 @@
-from fastapi import FastAPI
-import uvicorn
 import click
+import uvicorn
+from fastapi import FastAPI
 
+from app.dependencies import get_client_session, get_event_loop
+from app.infrastructure.db.core import get_or_create_database
+from app.infrastructure.web.endpoints import health
+from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints.public import (
     auth,
-    theses,
-    thesis_reactions,
-    thesis_comments,
-    posts,
-    post_reactions,
-    post_comments,
     portfolio,
+    post_comments,
+    post_reactions,
+    posts,
+    theses,
+    thesis_comments,
+    thesis_reactions,
 )
-from app.infrastructure.web.endpoints.private import example as example_private
-from app.infrastructure.web.endpoints import health
-from app.infrastructure.db.core import get_or_create_database
-from app.dependencies import get_event_loop, get_client_session
-
-
 from app.settings import settings
 
 

@@ -1,8 +1,17 @@
 from typing import Optional
 
-from fastapi import Query, Depends
+from fastapi import Depends, Query
 from pydantic import conint, constr
 
+from app.dependencies import (  # pylint: disable = cyclic-import
+    get_posts_repo,
+    get_theses_repo,
+    get_users_repo,
+)
+from app.libraries import pelleum_errors
+from app.usecases.interfaces.posts_repo import IPostsRepo
+from app.usecases.interfaces.theses_repo import IThesesRepo
+from app.usecases.interfaces.user_repo import IUserRepo
 from app.usecases.schemas import (
     post_comments,
     post_reactions,
@@ -11,15 +20,6 @@ from app.usecases.schemas import (
     thesis_comments,
     thesis_reactions,
 )
-from app.usecases.interfaces.user_repo import IUserRepo
-from app.usecases.interfaces.posts_repo import IPostsRepo
-from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.dependencies import (
-    get_users_repo,
-    get_posts_repo,
-    get_theses_repo,
-)  # pylint: disable = cyclic-import
-from app.libraries import pelleum_errors
 
 
 async def get_post_comments_query_params(
