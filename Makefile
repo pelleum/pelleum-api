@@ -12,13 +12,13 @@ requirements.txt:
 	pip-compile --generate-hashes --output-file=requirements.txt requirements.in
 
 format:
-	isort --profile black $(python_code)
+	isort $(python_code)
 	black $(python_code)
 
 lint:
 	pylint app
 
-run-dev:
+run:
 	python -m app --reload
 
 check:
