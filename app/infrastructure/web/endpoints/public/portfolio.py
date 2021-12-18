@@ -21,12 +21,8 @@ async def get_portfolio_assets(
 ) -> portfolios.UserAssetsResponse:
     """Retrieves assets owned by a Pelleum user."""
 
+    # This should never be null, because we create these objects on signup
     portfolio = await portfolio_repo.retrieve_portfolio(user_id=user_id)
-
-    if not portfolio:
-        raise await pelleum_errors.PelleumErrors(
-            detail="Invalid user_id."
-        ).invalid_resource_id()
 
     user_assets = await portfolio_repo.retrieve_assets_with_filter(
         portfolio_id=portfolio.portfolio_id
