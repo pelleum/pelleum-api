@@ -12,12 +12,10 @@ class PortfolioRepo(IPortfolioRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create_portfolio(self, user_id: int, aggregated_value: float) -> None:
+    async def create_portfolio(self, user_id: int) -> None:
         """Creates new portfolio"""
 
-        portfolio_insert_statement = PORTFOLIOS.insert().values(
-            user_id=user_id, aggregated_value=aggregated_value
-        )
+        portfolio_insert_statement = PORTFOLIOS.insert().values(user_id=user_id)
 
         await self.db.execute(portfolio_insert_statement)
 

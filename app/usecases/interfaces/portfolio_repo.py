@@ -6,7 +6,7 @@ from app.usecases.schemas import portfolios
 
 class IPortfolioRepo(ABC):
     @abstractmethod
-    async def create_portfolio(self, user_id: int, aggregated_value: float) -> None:
+    async def create_portfolio(self, user_id: int) -> None:
         """Creates new portfolio"""
 
     @abstractmethod

@@ -13,7 +13,7 @@ PORTFOLIOS = sa.Table(
         sa.ForeignKey("users.user_id"),
         index=True,
     ),
-    sa.Column("aggregated_value", sa.Float, nullable=False),
+    sa.Column("aggregated_value", sa.Float, nullable=True),
     sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     sa.Column(
         "updated_at",

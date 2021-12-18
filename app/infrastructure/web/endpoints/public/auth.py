@@ -5,12 +5,14 @@ from app.dependencies import (
     create_access_token,
     get_current_active_user,
     get_password_context,
+    get_portfolio_repo,
     get_users_repo,
     validate_email,
     validate_password,
     verify_password,
 )
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.interfaces.user_repo import IUserRepo
 from app.usecases.schemas import auth, users
 
@@ -46,9 +48,13 @@ async def login_for_access_token(
     response_model=users.UserWithAuthTokenResponse,
 )
 async def create_new_user(
-    body: users.UserCreate = Body(...), users_repo: IUserRepo = Depends(get_users_repo)
+    body: users.UserCreate = Body(...),
+    users_repo: IUserRepo = Depends(get_users_repo),
+    portfolio_repo: IPortfolioRepo = Depends(get_portfolio_repo),
 ) -> users.UserWithAuthTokenResponse:
+    """Upon signup, validates inputs, creates new user object, and creates new portfolio object."""
 
+    # 1. Validate inputs
     await validate_password(password=body.password)
     await validate_email(email=body.email)
 
@@ -68,8 +74,12 @@ async def create_new_user(
             detail="An account with this username already exists. Please choose another username."
         ).account_exists()
 
+    # 2. Create new user object
     new_user = await users_repo.create(new_user=body, password_context=password_context)
     new_user_raw = new_user.dict()
+
+    # 3. Create new portfolio object
+    await portfolio_repo.create_portfolio(user_id=new_user.user_id)
 
     access_token = await create_access_token(
         data=auth.AuthDataToCreateToken(sub=body.username)
