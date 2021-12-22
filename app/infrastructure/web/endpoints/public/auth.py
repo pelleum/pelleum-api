@@ -19,11 +19,11 @@ from app.usecases.schemas import auth, users
 auth_router = APIRouter(tags=["Users"])
 
 
-@auth_router.post("/login", response_model=auth.JWTResponse)
+@auth_router.post("/login", response_model=users.UserWithAuthTokenResponse)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     users_repo: IUserRepo = Depends(get_users_repo),
-) -> auth.JWTResponse:
+) -> users.UserWithAuthTokenResponse:
 
     user = await users_repo.retrieve_user_with_filter(username=form_data.username)
 
@@ -39,7 +39,9 @@ async def login_for_access_token(
         data=auth.AuthDataToCreateToken(sub=user.username)
     )
 
-    return auth.JWTResponse(access_token=access_token, token_type="bearer")
+    return users.UserWithAuthTokenResponse(
+        **user.dict(), access_token=access_token, token_type="bearer"
+    )
 
 
 @auth_router.post(
