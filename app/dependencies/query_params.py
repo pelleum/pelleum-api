@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from fastapi import Depends, Query
@@ -30,7 +31,9 @@ async def get_post_comments_query_params(
 ) -> post_comments.PostsCommentsQueryParams:
 
     if not user_id and not post_id:
-        raise pelleum_errors.no_supplied_query_params
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
 
     query_params_raw = {}
 
@@ -61,12 +64,21 @@ async def get_post_reactions_query_params(
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     post_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     reaction: Optional[post_reactions.ReactionString] = Query(None),
+    start_time: Optional[datetime] = Query(None),
+    end_time: Optional[datetime] = Query(None),
     users_repo: IUserRepo = Depends(get_users_repo),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
 ) -> post_reactions.PostsReactionsQueryParams:
 
-    if not user_id and not post_id and not reaction:
-        raise pelleum_errors.no_supplied_query_params
+    if not user_id and not post_id and not reaction and not start_time and not end_time:
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
+
+    if (start_time and not end_time) or (end_time and not start_time):
+        raise await pelleum_errors.PelleumErrors(
+            detail="If querying by a date range is desired, please send a valid start_time and end_time."
+        ).invalid_query_params()
 
     query_params_raw = {}
 
@@ -92,6 +104,15 @@ async def get_post_reactions_query_params(
 
     if reaction:
         query_params_raw.update({"reaction": reaction})
+
+    if start_time:
+        if end_time <= start_time:
+            raise await pelleum_errors.PelleumErrors(
+                detail="If querying by a date range is desired, please send a valid start_time and end_time (end_time must be greater than start_time)."
+            ).invalid_query_params()
+        query_params_raw.update(
+            {"time_range": {"start_time": start_time, "end_time": end_time}}
+        )
 
     return post_reactions.PostsReactionsQueryParams(**query_params_raw)
 
@@ -164,7 +185,9 @@ async def get_thesis_comments_query_params(
 ) -> thesis_comments.ThesisCommentsQueryParams:
 
     if not user_id and not thesis_id:
-        raise pelleum_errors.no_supplied_query_params
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
 
     query_params_raw = {}
 
@@ -201,7 +224,9 @@ async def get_thesis_reactions_query_params(
 ) -> thesis_reactions.ThesisReactionsQueryParams:
 
     if not user_id and not thesis_id and not reaction:
-        raise pelleum_errors.no_supplied_query_params
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
 
     query_params_raw = {}
 

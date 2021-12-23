@@ -41,7 +41,7 @@ class PelleumErrors:
 
     async def invalid_resource_id(self):
         return HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=self.detail
             if self.detail
             else "The supplied resource ID is invalid.",
@@ -75,11 +75,14 @@ class PelleumErrors:
             else "There was an external account connection error.",
         )
 
+    async def invalid_query_params(self):
+        return HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=self.detail
+            if self.detail
+            else "Invalid query parameters sent to the endpiont.",
+        )
 
-no_supplied_query_params = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
-    detail="No supplied query parameters. Please supply query parameters.",
-)
 
 array_too_long = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,

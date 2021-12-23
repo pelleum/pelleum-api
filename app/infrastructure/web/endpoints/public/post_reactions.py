@@ -55,6 +55,8 @@ async def get_many_post_reactions(
     post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> post_reactions.ManyPostsReactionsResponse:
+    """This is a 'Swiss army knife' endpoint in the sense that it returns
+    a list of post reactions based on the query parameters supplied to it."""
 
     (
         posts_reactions_list,
@@ -91,7 +93,7 @@ async def delete_post_reaction(
 
     post = await posts_repo.retrieve_post_with_filter(post_id=int(post_id))
 
-    if not post or post.user_id != authorized_user.user_id:
+    if not post:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()

@@ -2,9 +2,9 @@ from typing import List
 
 import asyncpg
 from databases import Database
-from sqlalchemy import and_, delete, desc, func, select
+from sqlalchemy import and_, between, delete, desc, func, select
 
-from app.infrastructure.db.models.posts import POST_REACTIONS
+from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.schemas import post_reactions
@@ -63,22 +63,32 @@ class PostReactionRepo(IPostReactionRepo):
         if query_params.reaction:
             conditions.append(POST_REACTIONS.c.reaction == query_params.reaction)
 
+        if query_params.time_range:
+            conditions.append(
+                between(
+                    POSTS.c.created_at,
+                    query_params.time_range.start_time,
+                    query_params.time_range.end_time,
+                )
+            )
+
         if len(conditions) == 0:
             raise Exception(
                 "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
 
+        j = POST_REACTIONS.join(POSTS, POST_REACTIONS.c.post_id == POSTS.c.post_id)
+
         query = (
-            POST_REACTIONS.select()
+            select([POST_REACTIONS])
+            .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(POST_REACTIONS.c.created_at))
         )
 
-        query_count = (
-            select([func.count()]).select_from(POST_REACTIONS).where(and_(*conditions))
-        )
+        query_count = select([func.count()]).select_from(j).where(and_(*conditions))
 
         async with self.db.transaction():
             query_results = await self.db.fetch_all(query)
