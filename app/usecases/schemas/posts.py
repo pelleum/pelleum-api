@@ -15,8 +15,7 @@ class Sentiment(str, Enum):
 class CreatePostRequest(BaseModel):
     """Request from user to create a new post"""
 
-    # NOTE: Would be cool to directly link skin...
-
+    # leaving title in in favor of optionality
     title: Optional[constr(max_length=256)] = Field(
         None,
         description="The post title.",
@@ -38,7 +37,17 @@ class CreatePostRequest(BaseModel):
     thesis_id: Optional[int] = Field(
         None,
         description="A thesis linked to the post. If left blank, will auto populate with user's thesis for this asset.",
-        example="Bull",
+        example=24,
+    )
+    is_post_comment_on: Optional[int] = Field(
+        None,
+        description="An optional parameter to be supplied only if the post is a comment on another post.",
+        example=2,
+    )
+    is_thesis_comment_on: Optional[int] = Field(
+        None,
+        description="An optional parameter to be supplied only if the post is a comment on another post.",
+        example=5,
     )
 
 
@@ -57,6 +66,8 @@ class PostQueryParams(BaseModel):
     asset_symbol: Optional[str]
     sentiment: Optional[str]
     popularity: Optional[bool]
+    is_post_comment_on: Optional[int]
+    is_thesis_comment_on: Optional[int]
 
 
 class PostInDB(CreatePostRequest):

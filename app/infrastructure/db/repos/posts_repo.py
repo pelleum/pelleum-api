@@ -22,6 +22,8 @@ class PostsRepo(IPostsRepo):
             content=new_feed_post.content,
             asset_symbol=new_feed_post.asset_symbol,
             sentiment=new_feed_post.sentiment,
+            is_post_comment_on=new_feed_post.is_post_comment_on,
+            is_thesis_comment_on=new_feed_post.is_thesis_comment_on,
         )
 
         await self.db.execute(create_post_insert_stmt)
@@ -75,6 +77,16 @@ class PostsRepo(IPostsRepo):
 
         if query_params.sentiment:
             conditions.append(POSTS.c.sentiment == query_params.sentiment)
+
+        if query_params.is_post_comment_on:
+            conditions.append(
+                POSTS.c.is_post_comment_on == query_params.is_post_comment_on
+            )
+
+        if query_params.is_thesis_comment_on:
+            conditions.append(
+                POSTS.c.is_thesis_comment_on == query_params.is_thesis_comment_on
+            )
 
         query = (
             POSTS.select()

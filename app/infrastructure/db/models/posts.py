@@ -24,6 +24,8 @@ POSTS = sa.Table(
     sa.Column("content", sa.Text, nullable=False),
     sa.Column("asset_symbol", sa.String, nullable=True, index=True),
     sa.Column("sentiment", sa.String, nullable=True),
+    sa.Column("is_post_comment_on", sa.BigInteger, nullable=True, index=True),
+    sa.Column("is_thesis_comment_on", sa.BigInteger, nullable=True, index=True),
     sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     sa.Column(
         "updated_at",
@@ -52,34 +54,6 @@ POST_REACTIONS = sa.Table(
         index=True,
     ),
     sa.Column("reaction", sa.SmallInteger, nullable=False),
-    sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
-    sa.Column(
-        "updated_at",
-        sa.DateTime,
-        nullable=False,
-        server_default=sa.func.now(),
-        onupdate=sa.func.now(),
-    ),
-)
-
-POST_COMMENTS = sa.Table(
-    "post_comments",
-    METADATA,
-    sa.Column("comment_id", sa.BigInteger, primary_key=True, autoincrement=True),
-    sa.Column(
-        "post_id",
-        sa.BigInteger,
-        sa.ForeignKey("posts.post_id"),
-        index=True,
-    ),
-    sa.Column(
-        "user_id",
-        sa.Integer,
-        sa.ForeignKey("users.user_id"),
-        index=True,
-    ),
-    sa.Column("username", sa.String, nullable=False, index=True),
-    sa.Column("content", sa.Text, nullable=False),
     sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     sa.Column(
         "updated_at",

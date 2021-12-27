@@ -13,51 +13,7 @@ from app.libraries import pelleum_errors
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.user_repo import IUserRepo
-from app.usecases.schemas import (
-    post_comments,
-    post_reactions,
-    posts,
-    theses,
-    thesis_comments,
-    thesis_reactions,
-)
-
-
-async def get_post_comments_query_params(
-    user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    post_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
-    posts_repo: IPostsRepo = Depends(get_posts_repo),
-) -> post_comments.PostsCommentsQueryParams:
-
-    if not user_id and not post_id:
-        raise await pelleum_errors.PelleumErrors(
-            detail="No query parameters were sent. Please send valid query parameters."
-        ).invalid_query_params()
-
-    query_params_raw = {}
-
-    if user_id:
-        user = await users_repo.retrieve_user_with_filter(user_id=user_id)
-
-        if not user:
-            raise await pelleum_errors.PelleumErrors(
-                detail="The supplied user_id is invalid."
-            ).invalid_resource_id()
-
-        query_params_raw.update({"user_id": user_id})
-
-    if post_id:
-        post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
-
-        if not post:
-            raise await pelleum_errors.PelleumErrors(
-                detail="The supplied post_id is invalid."
-            ).invalid_resource_id()
-
-        query_params_raw.update({"post_id": post_id})
-
-    return post_comments.PostsCommentsQueryParams(**query_params_raw)
+from app.usecases.schemas import post_reactions, posts, theses, thesis_reactions
 
 
 async def get_post_reactions_query_params(
@@ -122,10 +78,20 @@ async def get_posts_query_params(
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[posts.Sentiment] = Query(None),
     by_popularity: Optional[bool] = Query(None),
+    is_post_comment_on: Optional[conint(gt=0, lt=100000000000)] = Query(None),
+    is_thesis_comment_on: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     users_repo: IUserRepo = Depends(get_users_repo),
+    posts_repo: IPostsRepo = Depends(get_posts_repo),
+    theses_repo: IThesesRepo = Depends(get_theses_repo),
 ) -> posts.PostQueryParams:
 
     query_params_raw = {}
+
+    if is_post_comment_on and is_thesis_comment_on:
+        raise await pelleum_errors.PelleumErrors(
+            detail="Please supply is_thesis_comment_on or is_post_comment_on, "
+            "not both."
+        ).invalid_query_params()
 
     if user_id:
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
@@ -143,6 +109,24 @@ async def get_posts_query_params(
         query_params_raw.update({"sentiment": sentiment})
     if by_popularity:
         query_params_raw.update({"popularity": by_popularity})
+    if is_post_comment_on:
+        post = await posts_repo.retrieve_post_with_filter(post_id=is_post_comment_on)
+        if not post:
+            raise await pelleum_errors.PelleumErrors(
+                detail="The supplied is_post_comment_on ID is invalid."
+            ).invalid_resource_id()
+
+        query_params_raw.update({"is_post_comment_on": is_post_comment_on})
+    if is_thesis_comment_on:
+        thesis = await theses_repo.retrieve_thesis_with_filter(
+            thesis_id=is_thesis_comment_on
+        )
+        if not thesis:
+            raise await pelleum_errors.PelleumErrors(
+                detail="The supplied is_thesis_comment_on ID is invalid."
+            ).invalid_resource_id()
+
+        query_params_raw.update({"is_thesis_comment_on": is_thesis_comment_on})
 
     return posts.PostQueryParams(**query_params_raw)
 
@@ -174,45 +158,6 @@ async def get_theses_query_params(
         query_params_raw.update({"popularity": by_popularity})
 
     return theses.ThesesQueryParams(**query_params_raw)
-
-
-async def get_thesis_comments_query_params(
-    user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    thesis_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    by_popularity: Optional[bool] = Query(None),  # pylint: disable = unused-argument
-    users_repo: IUserRepo = Depends(get_users_repo),
-    theses_repo: IThesesRepo = Depends(get_theses_repo),
-) -> thesis_comments.ThesisCommentsQueryParams:
-
-    if not user_id and not thesis_id:
-        raise await pelleum_errors.PelleumErrors(
-            detail="No query parameters were sent. Please send valid query parameters."
-        ).invalid_query_params()
-
-    query_params_raw = {}
-
-    if user_id:
-        user = await users_repo.retrieve_user_with_filter(user_id=user_id)
-
-        if not user:
-            raise await pelleum_errors.PelleumErrors(
-                detail="The supplied user_id is invalid."
-            ).invalid_resource_id()
-
-        query_params_raw.update({"user_id": user_id})
-    if thesis_id:
-        thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-            thesis_id=thesis_id
-        )
-
-        if not thesis:
-            raise await pelleum_errors.PelleumErrors(
-                detail="The supplied thesis_id is invalid."
-            ).invalid_resource_id()
-
-        query_params_raw.update({"thesis_id": thesis_id})
-
-    return thesis_comments.ThesisCommentsQueryParams(**query_params_raw)
 
 
 async def get_thesis_reactions_query_params(

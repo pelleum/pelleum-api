@@ -9,11 +9,9 @@ from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints.public import (
     auth,
     portfolio,
-    post_comments,
     post_reactions,
     posts,
     theses,
-    thesis_comments,
     thesis_reactions,
 )
 from app.settings import settings
@@ -30,16 +28,9 @@ def setup_app():
     app.include_router(
         thesis_reactions.thesis_reactions_router, prefix="/public/theses/reactions"
     )
-    app.include_router(
-        thesis_comments.thesis_comments_router, prefix="/public/theses/comments"
-    )
-
     app.include_router(posts.posts_router, prefix="/public/posts")
     app.include_router(
         post_reactions.post_reactions_router, prefix="/public/posts/reactions"
-    )
-    app.include_router(
-        post_comments.post_comments_router, prefix="/public/posts/comments"
     )
     app.include_router(portfolio.portfolio_router, prefix="/public/portfolio")
     app.include_router(example_private.example_private_router, prefix="/private")

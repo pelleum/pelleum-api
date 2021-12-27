@@ -5,8 +5,6 @@ from .repos import (
     get_posts_repo,
     get_thesis_reactions_repo,
     get_post_reactions_repo,
-    get_thesis_comments_repo,
-    get_post_comments_repo,
     get_portfolio_repo,
 )
 from .event_loop import get_event_loop
@@ -21,10 +19,8 @@ from .auth import (
 )
 from .request_pagination import paginate
 from .query_params import (
-    get_post_comments_query_params,
     get_post_reactions_query_params,
     get_posts_query_params,
     get_theses_query_params,
-    get_thesis_comments_query_params,
     get_thesis_reactions_query_params,
 )
