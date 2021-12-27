@@ -29,8 +29,9 @@ async def create_new_thesis(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
-    if len(body.sources) > 10:
-        raise pelleum_errors.array_too_long
+    if body.sources:
+        if len(body.sources) > 10:
+            raise pelleum_errors.array_too_long
 
     create_thesis_request_raw = body.dict()
     create_thesis_request_raw.update(
