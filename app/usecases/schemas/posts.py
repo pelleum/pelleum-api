@@ -84,6 +84,8 @@ class PostInDB(CreatePostRequest):
 class PostResponse(PostInDB):
     """Response returned to user"""
 
+    is_liked_by_user: bool = False
+
 
 class Posts(BaseModel):
     posts: List[PostResponse]
