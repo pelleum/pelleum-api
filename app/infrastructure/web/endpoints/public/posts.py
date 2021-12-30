@@ -111,7 +111,7 @@ async def get_many_posts(
     )
 
     posts_response = posts.Posts(posts=posts_list)
-    
+
     # 2. Obtiain the requesting user's liked posts with the time range of retrieved posts
     if posts_list:
         newest_post_created_at = posts_list[0].created_at
