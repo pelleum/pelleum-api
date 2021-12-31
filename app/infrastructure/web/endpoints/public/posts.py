@@ -128,13 +128,15 @@ async def get_many_posts(
             page_size=request_pagination.records_per_page,
         )
 
-        liked_post_ids = [reaction.post_id for reaction in posts_reactions_list]
-
         # 3. Update post objects with like data where necessary
-
+        # O(N) = O(|posts_response.posts|) * O(|posts_reactions_list|)
+        # This can get pretty high if the user likes a lot of posts...
+        # Would be more perfomant is we outsourced this to the frontend as we scale
+        # Backend work = O(N) * requests from user, which can get really high
         for post in posts_response.posts:
-            if post.post_id in liked_post_ids:
-                post.is_liked_by_user = True
+            for reaction in posts_reactions_list:
+                if post.post_id == reaction.post_id:
+                    post.user_reaction_value = reaction.reaction
 
     return posts.ManyPostsResponse(
         records=posts_response,

@@ -93,6 +93,8 @@ class ThesisInDB(ThesisBase):
 class ThesisResponse(ThesisInDB):
     """Response returned to user"""
 
+    user_reaction_value: Optional[int] = None
+
 
 class Theses(BaseModel):
     theses: List[ThesisResponse]

@@ -1,18 +1,19 @@
 import math
 
 from fastapi import APIRouter, Body, Depends, Path
-from fastapi.param_functions import Query
 from pydantic import conint
 
 from app.dependencies import (
     get_current_active_user,
     get_theses_query_params,
     get_theses_repo,
+    get_thesis_reactions_repo,
     paginate,
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import theses, users
+from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
+from app.usecases.schemas import theses, thesis_reactions, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 theses_router = APIRouter(tags=["Theses"])
@@ -109,17 +110,52 @@ async def get_many_theses(
     query_params: theses.ThesesQueryParams = Depends(get_theses_query_params),
     request_pagination: RequestPagination = Depends(paginate),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
+    thesis_reaction_repo: IThesisReactionRepo = Depends(get_thesis_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ManyThesesResponse:
+    """This endpiont returns many theses based on query parameters that were sent to it."""
 
+    # 1. Retrieve theses based on query parameters
     theses_list, total_theses_count = await theses_repo.retrieve_many_with_filter(
         query_params=query_params,
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )
 
+    theses_response = theses.Theses(theses=theses_list)
+
+    # 2. Obtiain the requesting user's liked posts with the time range of retrieved posts
+    if theses_list:
+        newest_thesis_created_at = theses_list[0].created_at
+        oldest_thesis_created_at = theses_list[-1].created_at
+
+        (
+            theses_reactions_list,
+            _,
+        ) = await thesis_reaction_repo.retrieve_many_with_filter(
+            query_params=thesis_reactions.ThesisReactionsQueryParams(
+                user_id=authorized_user.user_id,
+                time_range=thesis_reactions.TimeRange(
+                    start_time=oldest_thesis_created_at,
+                    end_time=newest_thesis_created_at,
+                ),
+            ),
+            page_number=request_pagination.page,
+            page_size=request_pagination.records_per_page,
+        )
+
+        # 3. Update thesis objects with like data where necessary
+        # O(N) = O(|theses_response.theses|) * O(|theses_reactions_list|)
+        # This can get pretty high if the user likes a lot of theses...
+        # Would be more perfomant is we outsourced this to the frontend as we scale
+        # Backend work = O(N) * requests from user, which can get really high
+        for thesis in theses_response.theses:
+            for reaction in theses_reactions_list:
+                if thesis.thesis_id == reaction.thesis_id:
+                    thesis.user_reaction_value = reaction.reaction
+
     return theses.ManyThesesResponse(
-        records=theses.Theses(theses=theses_list),
+        records=theses_response,
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,

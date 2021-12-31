@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from app.usecases.schemas import thesis_reactions
 
@@ -27,5 +27,5 @@ class IThesisReactionRepo(ABC):
         query_params: thesis_reactions.ThesisReactionsQueryParams,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[thesis_reactions.ThesisReactionInDB]:
+    ) -> Tuple[List[thesis_reactions.ThesisReactionInDB], int]:
         """Retrieve many reactions"""

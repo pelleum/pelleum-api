@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from app.usecases.schemas import post_reactions
 
@@ -21,5 +21,5 @@ class IPostReactionRepo(ABC):
         query_params: post_reactions.PostsReactionsQueryParams,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[post_reactions.PostReactionInDB]:
+    ) -> Tuple[List[post_reactions.PostReactionInDB], int]:
         """Retrieve many reactions"""

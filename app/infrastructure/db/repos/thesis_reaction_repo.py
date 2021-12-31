@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Tuple
 
 import asyncpg
 from databases import Database
-from sqlalchemy import and_, delete, desc, func, select
+from sqlalchemy import and_, between, delete, desc, func, select
 
-from app.infrastructure.db.models.theses import THESES_REACTIONS
+from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
 from app.usecases.schemas import thesis_reactions
@@ -67,7 +67,7 @@ class ThesisReactionRepo(IThesisReactionRepo):
         query_params: thesis_reactions.ThesisReactionsQueryParams,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[thesis_reactions.ThesisReactionInDB]:
+    ) -> Tuple[List[thesis_reactions.ThesisReactionInDB], int]:
         """Retrieve many reactions"""
 
         conditions = []
@@ -81,23 +81,34 @@ class ThesisReactionRepo(IThesisReactionRepo):
         if query_params.reaction:
             conditions.append(THESES_REACTIONS.c.reaction == query_params.reaction)
 
+        if query_params.time_range:
+            conditions.append(
+                between(
+                    THESES.c.created_at,
+                    query_params.time_range.start_time,
+                    query_params.time_range.end_time,
+                )
+            )
+
         if len(conditions) == 0:
             raise Exception(
                 "Please pass a condition parameter to query by to the function, retrieve_many_with_filter()"
             )
+
+        j = THESES_REACTIONS.join(
+            THESES, THESES_REACTIONS.c.thesis_id == THESES.c.thesis_id
+        )
+
         query = (
-            THESES_REACTIONS.select()
+            select([THESES_REACTIONS])
+            .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(THESES_REACTIONS.c.created_at))
         )
 
-        query_count = (
-            select([func.count()])
-            .select_from(THESES_REACTIONS)
-            .where(and_(*conditions))
-        )
+        query_count = select([func.count()]).select_from(j).where(and_(*conditions))
 
         async with self.db.transaction():
             query_results = await self.db.fetch_all(query)
