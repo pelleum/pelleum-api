@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from app.usecases.schemas import thesis_reactions
 
@@ -29,3 +29,9 @@ class IThesisReactionRepo(ABC):
         page_size: int = 200,
     ) -> Tuple[List[thesis_reactions.ThesisReactionInDB], int]:
         """Retrieve many reactions"""
+
+    @abstractmethod
+    async def retrieve_single(
+        self, thesis_id: int, user_id: int
+    ) -> Optional[thesis_reactions.ThesisReactionInDB]:
+        """Retrieves single thesis reaction"""

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import asyncpg
 from databases import Database
@@ -120,3 +120,18 @@ class ThesisReactionRepo(IThesisReactionRepo):
         theses_reactions_count = count_results[0][0]
 
         return theses_reactions_list, theses_reactions_count
+
+    async def retrieve_single(
+        self, thesis_id: int, user_id: int
+    ) -> Optional[thesis_reactions.ThesisReactionInDB]:
+        """Retrieves single thesis reaction"""
+
+        query = THESES_REACTIONS.select().where(
+            and_(
+                THESES_REACTIONS.c.thesis_id == thesis_id,
+                THESES_REACTIONS.c.user_id == user_id,
+            )
+        )
+
+        result = await self.db.fetch_one(query)
+        return thesis_reactions.ThesisReactionInDB(**result) if result else None

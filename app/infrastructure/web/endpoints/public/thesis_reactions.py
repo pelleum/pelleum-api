@@ -28,12 +28,30 @@ async def create_thesis_reaction(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
+    # 1. Ensure the thesis exists
     thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
+
+    # 2. Check to see if this user already has a reaction on this thesis
+    existing_thesis_reaction = await thesis_reactions_repo.retrieve_single(
+        thesis_id=thesis_id, user_id=authorized_user.user_id
+    )
+
+    # 3. If a thesis exists, and the new request has the opposite reaction, update the reaction
+    if existing_thesis_reaction:
+        if existing_thesis_reaction.reaction != body.reaction:
+            updated_reaction = thesis_reactions.ThesisReactionRepoAdapter(
+                thesis_id=thesis_id,
+                user_id=authorized_user.user_id,
+                reaction=body.reaction,
+            )
+            return await thesis_reactions_repo.update(
+                thesis_reaction_update=updated_reaction
+            )
 
     thesis_reaction = thesis_reactions.ThesisReactionRepoAdapter(
         thesis_id=thesis_id, user_id=authorized_user.user_id, reaction=body.reaction
@@ -108,7 +126,7 @@ async def get_many_thesis_reactions(
     status_code=204,
 )
 async def delete_thesis_reaction(
-    thesis_id: str = Path(...),
+    thesis_id: conint(gt=0, lt=100000000000) = Path(...),
     thesis_reactions_repo: IThesisReactionRepo = Depends(get_thesis_reactions_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
@@ -116,7 +134,7 @@ async def delete_thesis_reaction(
 
     thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
-    if not thesis or thesis.user_id != authorized_user.user_id:
+    if not thesis:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
