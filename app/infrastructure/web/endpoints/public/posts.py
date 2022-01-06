@@ -24,13 +24,14 @@ posts_router = APIRouter(tags=["Posts"])
 @posts_router.post(
     "",
     status_code=201,
+    response_model=posts.PostResponse,
 )
 async def create_new_feed_post(
     body: posts.CreatePostRequest = Body(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
-) -> None:
+) -> posts.PostResponse:
     """Creates a new post. This can be a stand-alone post, a post comment, or a
     thesis comment."""
 
@@ -65,8 +66,7 @@ async def create_new_feed_post(
 
     new_feed_post = posts.CreatePostRepoAdapter(**create_feed_post_request_raw)
 
-    await posts_repo.create(new_feed_post=new_feed_post)
-
+    return await posts_repo.create(new_feed_post=new_feed_post)
 
 @posts_router.get(
     "/{post_id}",
@@ -101,7 +101,7 @@ async def get_many_posts(
     post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.ManyPostsResponse:
-    """This endpiont returns many posts based on query parameters that were sent to it."""
+    """This endpoint returns many posts based on query parameters that were sent to it."""
 
     # 1. Retrieve posts based on query parameters
     posts_list, total_theses_count = await posts_repo.retrieve_many_with_filter(

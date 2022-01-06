@@ -12,8 +12,8 @@ class PostsRepo(IPostsRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, new_feed_post: posts.CreatePostRepoAdapter) -> None:
-
+    async def create(self, new_feed_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
+        
         create_post_insert_stmt = POSTS.insert().values(
             user_id=new_feed_post.user_id,
             username=new_feed_post.username,
@@ -25,8 +25,8 @@ class PostsRepo(IPostsRepo):
             is_post_comment_on=new_feed_post.is_post_comment_on,
             is_thesis_comment_on=new_feed_post.is_thesis_comment_on,
         )
-
-        await self.db.execute(create_post_insert_stmt)
+        post_id = await self.db.execute(create_post_insert_stmt)
+        return await self.retrieve_post_with_filter(post_id=post_id)
 
     async def retrieve_post_with_filter(
         self,
