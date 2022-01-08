@@ -26,7 +26,7 @@ posts_router = APIRouter(tags=["Posts"])
     status_code=201,
     response_model=posts.PostResponse,
 )
-async def create_new_feed_post(
+async def create_new_post(
     body: posts.CreatePostRequest = Body(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
@@ -59,21 +59,21 @@ async def create_new_feed_post(
                 detail="The supplied is_thesis_comment_on ID is invalid."
             ).invalid_resource_id()
 
-    create_feed_post_request_raw = body.dict()
-    create_feed_post_request_raw.update(
+    create_post_request_raw = body.dict()
+    create_post_request_raw.update(
         {"user_id": authorized_user.user_id, "username": authorized_user.username}
     )
 
-    new_feed_post = posts.CreatePostRepoAdapter(**create_feed_post_request_raw)
+    new_post = posts.CreatePostRepoAdapter(**create_post_request_raw)
 
-    return await posts_repo.create(new_feed_post=new_feed_post)
+    return await posts_repo.create(new_post=new_post)
 
 @posts_router.get(
     "/{post_id}",
     status_code=200,
     response_model=posts.PostResponse,
 )
-async def get_feed_post(
+async def get_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
@@ -155,7 +155,7 @@ async def get_many_posts(
     "/{post_id}",
     status_code=204,
 )
-async def delete_feed_post(
+async def delete_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
