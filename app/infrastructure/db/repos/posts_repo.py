@@ -12,18 +12,18 @@ class PostsRepo(IPostsRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, new_feed_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
+    async def create(self, new_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
         
         create_post_insert_stmt = POSTS.insert().values(
-            user_id=new_feed_post.user_id,
-            username=new_feed_post.username,
-            thesis_id=new_feed_post.thesis_id,
-            title=new_feed_post.title,
-            content=new_feed_post.content,
-            asset_symbol=new_feed_post.asset_symbol,
-            sentiment=new_feed_post.sentiment,
-            is_post_comment_on=new_feed_post.is_post_comment_on,
-            is_thesis_comment_on=new_feed_post.is_thesis_comment_on,
+            user_id=new_post.user_id,
+            username=new_post.username,
+            thesis_id=new_post.thesis_id,
+            title=new_post.title,
+            content=new_post.content,
+            asset_symbol=new_post.asset_symbol,
+            sentiment=new_post.sentiment,
+            is_post_comment_on=new_post.is_post_comment_on,
+            is_thesis_comment_on=new_post.is_thesis_comment_on,
         )
         post_id = await self.db.execute(create_post_insert_stmt)
         return await self.retrieve_post_with_filter(post_id=post_id)
