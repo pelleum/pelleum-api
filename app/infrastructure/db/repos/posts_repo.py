@@ -12,8 +12,10 @@ class PostsRepo(IPostsRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, new_feed_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
-        
+    async def create(
+        self, new_feed_post: posts.CreatePostRepoAdapter
+    ) -> posts.PostInDB:
+
         create_post_insert_stmt = POSTS.insert().values(
             user_id=new_feed_post.user_id,
             username=new_feed_post.username,

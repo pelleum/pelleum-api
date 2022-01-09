@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, Path
 from pydantic import conint
 
 from app.dependencies import get_current_active_user, get_portfolio_repo
-from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.schemas import portfolios, users
 
@@ -21,11 +20,8 @@ async def get_portfolio_assets(
 ) -> portfolios.UserAssetsResponse:
     """Retrieves assets owned by a Pelleum user."""
 
-    # This should never be null, because we create these objects on signup
-    portfolio = await portfolio_repo.retrieve_portfolio(user_id=user_id)
-
     user_assets = await portfolio_repo.retrieve_assets_with_filter(
-        portfolio_id=portfolio.portfolio_id
+        user_id=authorized_user.user_id  # This would need to change to user_id
     )
 
     return portfolios.UserAssetsResponse(records=user_assets)

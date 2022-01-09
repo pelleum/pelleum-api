@@ -6,7 +6,9 @@ from app.usecases.schemas import posts
 
 class IPostsRepo(ABC):
     @abstractmethod
-    async def create(self, new_feed_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
+    async def create(
+        self, new_feed_post: posts.CreatePostRepoAdapter
+    ) -> posts.PostInDB:
         pass
 
     @abstractmethod

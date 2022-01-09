@@ -12,7 +12,7 @@ load_dotenv()
 
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
-from app.infrastructure.db.models.portfolio import ASSETS, PORTFOLIOS
+from app.infrastructure.db.models.portfolio import ASSETS
 from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
 from app.infrastructure.db.models.theses import (
     THESES,

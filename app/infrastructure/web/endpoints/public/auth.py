@@ -80,9 +80,6 @@ async def create_new_user(
     new_user = await users_repo.create(new_user=body, password_context=password_context)
     new_user_raw = new_user.dict()
 
-    # 3. Create new portfolio object
-    await portfolio_repo.create_portfolio(user_id=new_user.user_id)
-
     access_token = await create_access_token(
         data=auth.AuthDataToCreateToken(sub=body.username)
     )

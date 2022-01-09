@@ -68,6 +68,7 @@ async def create_new_post(
 
     return await posts_repo.create(new_post=new_post)
 
+
 @posts_router.get(
     "/{post_id}",
     status_code=200,
