@@ -102,6 +102,10 @@ class ThesesRepo(IThesesRepo):
 
         conditions = []
 
+        if query_params.theses_ids:
+            theses = await self.retrieve_theses_by_ids(theses_ids=query_params.theses_ids)
+            return theses, len(theses)
+
         if query_params.user_id:
             conditions.append(THESES.c.user_id == query_params.user_id)
 
@@ -110,6 +114,7 @@ class ThesesRepo(IThesesRepo):
 
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
+        
 
         query = (
             THESES.select()
