@@ -34,3 +34,8 @@ class IThesesRepo(ABC):
         page_size: int = 200,
     ) -> Tuple[List[theses.ThesisInDB], int]:
         pass
+
+    @abstractmethod
+    async def retrieve_theses_by_ids(self, theses_ids: List[int]) -> List[theses.ThesisInDB]:
+        """Retrieve many theses by supplied theses_ids list"""
+        

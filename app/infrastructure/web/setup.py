@@ -11,6 +11,7 @@ from app.infrastructure.web.endpoints.public import (
     portfolio,
     post_reactions,
     posts,
+    rationales,
     theses,
     thesis_reactions,
 )
@@ -28,6 +29,7 @@ def setup_app():
     app.include_router(
         thesis_reactions.thesis_reactions_router, prefix="/public/theses/reactions"
     )
+    app.include_router(rationales.rationale_router, prefix="/public/theses/rationales")
     app.include_router(posts.posts_router, prefix="/public/posts")
     app.include_router(
         post_reactions.post_reactions_router, prefix="/public/posts/reactions"

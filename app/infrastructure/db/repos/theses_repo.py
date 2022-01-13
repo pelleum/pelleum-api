@@ -4,7 +4,7 @@ import asyncpg
 from databases import Database
 from sqlalchemy import and_, desc, func, select
 
-from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
+from app.infrastructure.db.models.theses import THESES
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import theses
@@ -131,3 +131,16 @@ class ThesesRepo(IThesesRepo):
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
+
+    async def retrieve_theses_by_ids(self, theses_ids: List[int]) -> List[theses.ThesisInDB]:
+        """Retrieve many theses by supplied theses_ids list"""
+
+        query = select(
+            [THESES],
+            THESES.c.thesis_id.in_(theses_ids),
+        )
+
+        query_results = await self.db.fetch_all(query)
+
+        return [theses.ThesisInDB(**result) for result in query_results]
+

@@ -13,10 +13,16 @@ from app.libraries import pelleum_errors
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.user_repo import IUserRepo
-from app.usecases.schemas import post_reactions, posts, theses, thesis_reactions
+from app.usecases.schemas import (
+    post_reactions,
+    posts,
+    rationales,
+    theses,
+    thesis_reactions,
+)
 
 
-async def get_post_reactions_query_params(
+async def get_post_reactions_query_params(     # pylint: disable = too-many-arguments
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     post_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     reaction: Optional[post_reactions.ReactionString] = Query(None),
@@ -73,7 +79,7 @@ async def get_post_reactions_query_params(
     return post_reactions.PostsReactionsQueryParams(**query_params_raw)
 
 
-async def get_posts_query_params(
+async def get_posts_query_params(        # pylint: disable = too-many-arguments
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[posts.Sentiment] = Query(None),
@@ -199,3 +205,24 @@ async def get_thesis_reactions_query_params(
         query_params_raw.update({"reaction": reaction})
 
     return thesis_reactions.ThesisReactionsQueryParams(**query_params_raw)
+
+
+async def get_rationales_query_params(
+    user_id: conint(gt=0, lt=100000000000) = Query(None),
+    asset_symbol: Optional[constr(max_length=10)] = Query(None),
+    users_repo: IUserRepo = Depends(get_users_repo),
+) -> rationales.RationaleQueryParams:
+
+    user = await users_repo.retrieve_user_with_filter(user_id=user_id)
+
+    if not user:
+        raise await pelleum_errors.PelleumErrors(
+            detail="The supplied user_id is invalid."
+        ).invalid_resource_id()
+
+    query_params_raw = {"user_id": user_id}
+
+    if asset_symbol:
+        query_params_raw.update({"asset_symbol": asset_symbol})
+
+    return rationales.RationaleQueryParams(**query_params_raw)
