@@ -132,15 +132,16 @@ class ThesesRepo(IThesesRepo):
 
         return theses_list, theses_count
 
-    async def retrieve_theses_by_ids(self, theses_ids: List[int]) -> List[theses.ThesisInDB]:
+    async def retrieve_theses_by_ids(
+        self, theses_ids: List[int]
+    ) -> List[theses.ThesisInDB]:
         """Retrieve many theses by supplied theses_ids list"""
 
         query = select(
             [THESES],
             THESES.c.thesis_id.in_(theses_ids),
-        )
+        ).order_by(desc(THESES.c.created_at))
 
         query_results = await self.db.fetch_all(query)
 
         return [theses.ThesisInDB(**result) for result in query_results]
-

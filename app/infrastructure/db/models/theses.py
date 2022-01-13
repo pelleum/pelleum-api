@@ -57,33 +57,4 @@ THESES_REACTIONS = sa.Table(
     ),
 )
 
-
-THESES_ADOPTIONS = sa.Table(
-    "theses_adoptions",
-    METADATA,
-    sa.Column(
-        "thesis_id",
-        sa.BigInteger,
-        sa.ForeignKey("theses.thesis_id"),
-        primary_key=True,
-        index=True,
-    ),
-    sa.Column(
-        "user_id",
-        sa.Integer,
-        sa.ForeignKey("users.user_id"),
-        primary_key=True,
-        index=True,
-    ),
-    sa.Column("is_current", sa.Boolean, nullable=False, default=True),
-    sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
-    sa.Column(
-        "updated_at",
-        sa.DateTime,
-        nullable=False,
-        server_default=sa.func.now(),
-        onupdate=sa.func.now(),
-    ),
-)
-
 sa.UniqueConstraint(THESES.c.user_id, THESES.c.title)

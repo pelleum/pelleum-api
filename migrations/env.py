@@ -15,11 +15,7 @@ from app.infrastructure.db.metadata import METADATA
 from app.infrastructure.db.models.portfolio import ASSETS
 from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
 from app.infrastructure.db.models.rationales import RATIONALES
-from app.infrastructure.db.models.theses import (
-    THESES,
-    THESES_ADOPTIONS,
-    THESES_REACTIONS,
-)
+from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from app.infrastructure.db.models.users import USERS
 
 # this is the Alembic Config object, which provides

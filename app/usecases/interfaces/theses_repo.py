@@ -36,6 +36,7 @@ class IThesesRepo(ABC):
         pass
 
     @abstractmethod
-    async def retrieve_theses_by_ids(self, theses_ids: List[int]) -> List[theses.ThesisInDB]:
+    async def retrieve_theses_by_ids(
+        self, theses_ids: List[int]
+    ) -> List[theses.ThesisInDB]:
         """Retrieve many theses by supplied theses_ids list"""
-        

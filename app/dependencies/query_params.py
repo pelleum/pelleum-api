@@ -22,7 +22,7 @@ from app.usecases.schemas import (
 )
 
 
-async def get_post_reactions_query_params(     # pylint: disable = too-many-arguments
+async def get_post_reactions_query_params(  # pylint: disable = too-many-arguments
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     post_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     reaction: Optional[post_reactions.ReactionString] = Query(None),
@@ -79,7 +79,7 @@ async def get_post_reactions_query_params(     # pylint: disable = too-many-argu
     return post_reactions.PostsReactionsQueryParams(**query_params_raw)
 
 
-async def get_posts_query_params(        # pylint: disable = too-many-arguments
+async def get_posts_query_params(  # pylint: disable = too-many-arguments
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[posts.Sentiment] = Query(None),
