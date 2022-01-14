@@ -21,7 +21,7 @@ async def get_portfolio_assets(
     """Retrieves assets owned by a Pelleum user."""
 
     user_assets = await portfolio_repo.retrieve_assets_with_filter(
-        user_id=authorized_user.user_id  # This would need to change to user_id
+        user_id=user_id
     )
 
     return portfolios.UserAssetsResponse(records=user_assets)

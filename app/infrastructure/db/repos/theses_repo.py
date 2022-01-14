@@ -103,8 +103,8 @@ class ThesesRepo(IThesesRepo):
         conditions = []
 
         if query_params.theses_ids:
-            theses = await self.retrieve_theses_by_ids(theses_ids=query_params.theses_ids)
-            return theses, len(theses)
+            retrieved_theses = await self.retrieve_theses_by_ids(theses_ids=query_params.theses_ids)
+            return retrieved_theses, len(retrieved_theses)
 
         if query_params.user_id:
             conditions.append(THESES.c.user_id == query_params.user_id)

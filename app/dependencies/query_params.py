@@ -164,6 +164,10 @@ async def get_theses_query_params(
     if by_popularity:
         query_params_raw.update({"popularity": by_popularity})
     if theses_ids:
+        if len(theses_ids) > 250:
+            raise await pelleum_errors.PelleumErrors(
+                detail="Query parameter list is too long."
+            ).invalid_query_params()
         query_params_raw.update({"theses_ids": theses_ids})
 
     return theses.ThesesQueryParams(**query_params_raw)
