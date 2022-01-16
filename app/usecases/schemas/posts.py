@@ -70,6 +70,16 @@ class PostQueryParams(BaseModel):
     is_thesis_comment_on: Optional[int]
 
 
+class PostQueryRepoAdapter(PostQueryParams):
+    """Used to send to Repo function"""
+
+    requesting_user_id: int = Field(
+        ...,
+        description="The user_id of the user that sent the request.",
+        example=1233
+    )
+
+
 class PostInDB(CreatePostRequest):
     """Database Model"""
 
@@ -81,10 +91,13 @@ class PostInDB(CreatePostRequest):
     updated_at: Optional[datetime]
 
 
-class PostResponse(PostInDB):
-    """Response returned to user"""
+class PostWithUserReaction(PostInDB):
+    """Returned from database via join"""
 
     user_reaction_value: Optional[int] = None
+
+class PostResponse(PostWithUserReaction):
+    """Response returned to user"""
 
 
 class Posts(BaseModel):

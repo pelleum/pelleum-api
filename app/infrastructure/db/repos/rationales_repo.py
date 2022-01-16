@@ -5,7 +5,7 @@ from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
 from app.infrastructure.db.models.rationales import RATIONALES
-from app.infrastructure.db.models.theses import THESES
+from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.schemas import rationales
@@ -73,10 +73,10 @@ class RationalesRepo(IRationalesRepo):
 
     async def retrieve_many_rationales_with_filter(
         self,
-        query_params: rationales.RationaleQueryParams,
+        query_params: rationales.RationaleQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[rationales.RationaleInDb]:
+    ) -> List[rationales.ThesisWithRationaleId]:
         """Retrieve many rationales by function parameters"""
 
         conditions = []
@@ -98,15 +98,15 @@ class RationalesRepo(IRationalesRepo):
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
             )
 
-        j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id)
+        j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id).join(THESES_REACTIONS, and_(THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id, THESES_REACTIONS.c.user_id == query_params.requesting_user_id), isouter=True)
 
         query = (
-            select([RATIONALES])
+            select([RATIONALES.c.rationale_id, THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
             .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
-            .order_by(desc(RATIONALES.c.created_at))
+            .order_by(desc(THESES.c.created_at))
         )
 
         query_count = select([func.count()]).select_from(j).where(and_(*conditions))
@@ -116,7 +116,7 @@ class RationalesRepo(IRationalesRepo):
             count_results = await self.db.fetch_all(query_count)
 
         rationales_list = [
-            rationales.RationaleInDb(**result) for result in query_results
+            rationales.ThesisWithRationaleId(**result) for result in query_results
         ]
         rationales_count = count_results[0][0]
 

@@ -24,10 +24,10 @@ class IPostsRepo(ABC):
     @abstractmethod
     async def retrieve_many_with_filter(
         self,
-        query_params: posts.PostQueryParams,
+        query_params: posts.PostQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[posts.PostInDB], int]:
+    ) -> Tuple[List[posts.PostWithUserReaction], int]:
         pass
 
     @abstractmethod

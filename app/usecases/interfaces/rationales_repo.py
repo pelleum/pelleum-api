@@ -22,10 +22,10 @@ class IRationalesRepo(ABC):
     @abstractmethod
     async def retrieve_many_rationales_with_filter(
         self,
-        query_params: rationales.RationaleQueryParams,
+        query_params: rationales.RationaleQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[rationales.RationaleInDb]:
+    ) -> List[rationales.ThesisWithRationaleId]:
         """Retrieve many rationales"""
 
     @abstractmethod

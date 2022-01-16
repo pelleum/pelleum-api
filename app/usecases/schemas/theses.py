@@ -72,11 +72,25 @@ class UpdateThesisRequest(BaseModel):
 
 
 class ThesesQueryParams(BaseModel):
-    user_id: Optional[int]
+    user_id: Optional[int] = Field(
+        None,
+        description="The user_id of a thesis Author you're querying for.",
+        example=1233
+    )
     asset_symbol: Optional[str]
     sentiment: Optional[str]
     popularity: Optional[bool]
     theses_ids: Optional[List[int]]
+
+
+class ThesesQueryRepoAdapter(ThesesQueryParams):
+    """Used to send to Repo function"""
+
+    requesting_user_id: int = Field(
+        ...,
+        description="The user_id of the user that sent the request.",
+        example=1233
+    )
 
 
 class ThesisInDB(ThesisBase):
@@ -91,10 +105,14 @@ class ThesisInDB(ThesisBase):
     updated_at: Optional[datetime]
 
 
-class ThesisResponse(ThesisInDB):
-    """Response returned to user"""
+class ThesisWithUserReaction(ThesisInDB):
+    """Returned from database via join"""
 
     user_reaction_value: Optional[int] = None
+
+
+class ThesisResponse(ThesisWithUserReaction):
+    """Response returned to user"""
 
 
 class Theses(BaseModel):

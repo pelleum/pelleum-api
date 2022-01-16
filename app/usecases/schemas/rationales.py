@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from app.usecases.schemas.request_pagination import MetaData
-from app.usecases.schemas.theses import Theses
+from app.usecases.schemas.theses import ThesisWithUserReaction
 
 
 class AddRationaleRequest(BaseModel):
@@ -26,6 +26,16 @@ class RationaleQueryParams(BaseModel):
     sentiment: Optional[str]
 
 
+class RationaleQueryRepoAdapter(RationaleQueryParams):
+    """Used to send to Repo function"""
+
+    requesting_user_id: int = Field(
+        ...,
+        description="The user_id of the user that sent the request.",
+        example=1233
+    )
+
+
 class RationaleInDb(BaseModel):
     """Database Model"""
 
@@ -36,8 +46,14 @@ class RationaleInDb(BaseModel):
     updated_at: datetime
 
 
-class RationaleResponse(RationaleInDb):
-    """Same as database object"""
+class ThesisWithRationaleId(ThesisWithUserReaction):
+    """Returned from database join"""
+
+    rationale_id: int
+    user_reaction_value: Optional[int] = None
+
+class RationaleResponse(ThesisWithRationaleId):
+    """Individual rationale returned to user"""
 
 
 class MaxRationaleReachedResponse(BaseModel):
@@ -52,5 +68,5 @@ class Rationales(BaseModel):
 
 
 class ManyRationalesResponse(BaseModel):
-    records: Optional[Theses]
+    records: Optional[Rationales]
     meta_data: MetaData

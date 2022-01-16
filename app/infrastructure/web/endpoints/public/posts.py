@@ -5,17 +5,15 @@ from pydantic import conint
 
 from app.dependencies import (
     get_current_active_user,
-    get_post_reactions_repo,
     get_posts_query_params,
     get_posts_repo,
     get_theses_repo,
     paginate,
 )
 from app.libraries import pelleum_errors
-from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import post_reactions, posts, users
+from app.usecases.schemas import posts, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 posts_router = APIRouter(tags=["Posts"])
@@ -99,10 +97,13 @@ async def get_many_posts(
     query_params: posts.PostQueryParams = Depends(get_posts_query_params),
     request_pagination: RequestPagination = Depends(paginate),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
-    post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.ManyPostsResponse:
     """This endpoint returns many posts based on query parameters that were sent to it."""
+
+    query_params_raw = query_params.dict()
+    query_params_raw.update({"requesting_user_id": authorized_user.user_id})
+    query_params = posts.PostQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve posts based on query parameters
     posts_list, total_theses_count = await posts_repo.retrieve_many_with_filter(
@@ -111,36 +112,8 @@ async def get_many_posts(
         page_size=request_pagination.records_per_page,
     )
 
-    posts_response = posts.Posts(posts=posts_list)
-
-    # 2. Obtiain the requesting user's liked posts with the time range of retrieved posts
-    if posts_list:
-        newest_post_created_at = posts_list[0].created_at
-        oldest_post_created_at = posts_list[-1].created_at
-
-        (posts_reactions_list, _) = await post_reactions_repo.retrieve_many_with_filter(
-            query_params=post_reactions.PostsReactionsQueryParams(
-                user_id=authorized_user.user_id,
-                time_range=post_reactions.TimeRange(
-                    start_time=oldest_post_created_at, end_time=newest_post_created_at
-                ),
-            ),
-            page_number=request_pagination.page,
-            page_size=request_pagination.records_per_page,
-        )
-
-        # 3. Update post objects with like data where necessary
-        # O(N) = O(|posts_response.posts|) * O(|posts_reactions_list|)
-        # This can get pretty high if the user likes a lot of posts...
-        # Would be more perfomant is we outsourced this to the frontend as we scale
-        # Backend work = O(N) * requests from user, which can get really high
-        for post in posts_response.posts:
-            for reaction in posts_reactions_list:
-                if post.post_id == reaction.post_id:
-                    post.user_reaction_value = reaction.reaction
-
     return posts.ManyPostsResponse(
-        records=posts_response,
+        records=posts.Posts(posts=posts_list),
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,

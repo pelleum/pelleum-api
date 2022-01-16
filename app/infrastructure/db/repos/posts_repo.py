@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
-from app.infrastructure.db.models.posts import POSTS
+from app.infrastructure.db.models.posts import POSTS, POST_REACTIONS
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 
@@ -62,10 +62,10 @@ class PostsRepo(IPostsRepo):
 
     async def retrieve_many_with_filter(
         self,
-        query_params: posts.PostQueryParams,
+        query_params: posts.PostQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[posts.PostInDB], int]:
+    ) -> Tuple[List[posts.PostWithUserReaction], int]:
 
         conditions = []
 
@@ -88,21 +88,25 @@ class PostsRepo(IPostsRepo):
                 POSTS.c.is_thesis_comment_on == query_params.is_thesis_comment_on
             )
 
+    
+        j = POSTS.join(POST_REACTIONS, and_(POSTS.c.post_id == POST_REACTIONS.c.post_id, POST_REACTIONS.c.user_id == query_params.requesting_user_id), isouter=True)
+
         query = (
-            POSTS.select()
+            select([POSTS, POST_REACTIONS.c.reaction.label("user_reaction_value")])
+            .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(POSTS.c.created_at))
         )
 
-        query_count = select([func.count()]).select_from(POSTS).where(and_(*conditions))
+        query_count = select([func.count()]).select_from(j).where(and_(*conditions))
 
         async with self.db.transaction():
             query_results = await self.db.fetch_all(query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [posts.PostInDB(**result) for result in query_results]
+        theses_list = [posts.PostWithUserReaction(**result) for result in query_results]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count

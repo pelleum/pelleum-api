@@ -29,10 +29,10 @@ class IThesesRepo(ABC):
     @abstractmethod
     async def retrieve_many_with_filter(
         self,
-        query_params: theses.ThesesQueryParams,
+        query_params: theses.ThesesQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[theses.ThesisInDB], int]:
+    ) -> Tuple[List[theses.ThesisWithUserReaction], int]:
         pass
 
     @abstractmethod
