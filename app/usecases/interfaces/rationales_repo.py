@@ -12,11 +12,11 @@ class IRationalesRepo(ABC):
     @abstractmethod
     async def retrieve_rationale_with_filter(
         self,
-        rationale_id: Optional[int],
-        asset_symbol: Optional[str],
-        thesis_id: Optional[int],
-        user_id: Optional[int],
-    ) -> Optional[rationales.RationaleInDb]:
+        rationale_id: Optional[int] = None,
+        asset_symbol: Optional[str] = None,
+        thesis_id: Optional[int] = None,
+        user_id: Optional[int] = None,
+    ) -> Optional[rationales.ThesisWithRationaleId]:
         """Retrive a rationale"""
 
     @abstractmethod

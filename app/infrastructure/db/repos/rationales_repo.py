@@ -66,7 +66,13 @@ class RationalesRepo(IRationalesRepo):
         j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id)
 
         query = (
-            select([RATIONALES.c.rationale_id, THESES])
+            select(
+                [
+                    RATIONALES.c.rationale_id,
+                    RATIONALES.c.user_id.label("rationale_user_id"),
+                    THESES,
+                ]
+            )
             .select_from(j)
             .where(and_(*conditions))
         )
@@ -115,6 +121,7 @@ class RationalesRepo(IRationalesRepo):
             select(
                 [
                     RATIONALES.c.rationale_id,
+                    RATIONALES.c.user_id.label("rationale_user_id"),
                     THESES,
                     THESES_REACTIONS.c.reaction.label("user_reaction_value"),
                 ]

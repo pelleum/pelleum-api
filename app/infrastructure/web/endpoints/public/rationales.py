@@ -121,7 +121,7 @@ async def delete_rationale(
         rationale_id=rationale_id
     )
 
-    if not rationale or rationale.user_id != authorized_user.user_id:
+    if not rationale or rationale.rationale_user_id != authorized_user.user_id:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied rationale_id is invalid."
         ).invalid_resource_id()

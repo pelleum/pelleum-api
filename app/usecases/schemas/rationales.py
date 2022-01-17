@@ -48,7 +48,7 @@ class ThesisWithRationaleId(ThesisWithUserReaction):
     """Returned from database join"""
 
     rationale_id: int
-    user_reaction_value: Optional[int] = None
+    rationale_user_id: int
 
 
 class RationaleResponse(ThesisWithRationaleId):
