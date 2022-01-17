@@ -75,7 +75,7 @@ class ThesesQueryParams(BaseModel):
     user_id: Optional[int] = Field(
         None,
         description="The user_id of a thesis Author you're querying for.",
-        example=1233
+        example=1233,
     )
     asset_symbol: Optional[str]
     sentiment: Optional[str]
@@ -87,9 +87,7 @@ class ThesesQueryRepoAdapter(ThesesQueryParams):
     """Used to send to Repo function"""
 
     requesting_user_id: int = Field(
-        ...,
-        description="The user_id of the user that sent the request.",
-        example=1233
+        ..., description="The user_id of the user that sent the request.", example=1233
     )
 
 

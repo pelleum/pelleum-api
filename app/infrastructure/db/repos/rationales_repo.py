@@ -41,7 +41,7 @@ class RationalesRepo(IRationalesRepo):
         asset_symbol: Optional[str] = None,
         thesis_id: Optional[int] = None,
         user_id: Optional[int] = None,
-    ) -> Optional[rationales.RationaleInDb]:
+    ) -> Optional[rationales.ThesisWithRationaleId]:
         """Retrieve a rationale by function parameters"""
 
         conditions = []
@@ -65,11 +65,15 @@ class RationalesRepo(IRationalesRepo):
 
         j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id)
 
-        query = select([RATIONALES]).select_from(j).where(and_(*conditions))
+        query = (
+            select([RATIONALES.c.rationale_id, THESES])
+            .select_from(j)
+            .where(and_(*conditions))
+        )
 
         result = await self.db.fetch_one(query)
 
-        return rationales.RationaleInDb(**result) if result else None
+        return rationales.ThesisWithRationaleId(**result) if result else None
 
     async def retrieve_many_rationales_with_filter(
         self,
@@ -98,10 +102,23 @@ class RationalesRepo(IRationalesRepo):
                 "Please pass a parameter to query by to the function, retrieve_user_with_filter()"
             )
 
-        j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id).join(THESES_REACTIONS, and_(THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id, THESES_REACTIONS.c.user_id == query_params.requesting_user_id), isouter=True)
+        j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id).join(
+            THESES_REACTIONS,
+            and_(
+                THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
+                THESES_REACTIONS.c.user_id == query_params.requesting_user_id,
+            ),
+            isouter=True,
+        )
 
         query = (
-            select([RATIONALES.c.rationale_id, THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
+            select(
+                [
+                    RATIONALES.c.rationale_id,
+                    THESES,
+                    THESES_REACTIONS.c.reaction.label("user_reaction_value"),
+                ]
+            )
             .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)

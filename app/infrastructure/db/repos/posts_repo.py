@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
-from app.infrastructure.db.models.posts import POSTS, POST_REACTIONS
+from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 
@@ -88,8 +88,14 @@ class PostsRepo(IPostsRepo):
                 POSTS.c.is_thesis_comment_on == query_params.is_thesis_comment_on
             )
 
-    
-        j = POSTS.join(POST_REACTIONS, and_(POSTS.c.post_id == POST_REACTIONS.c.post_id, POST_REACTIONS.c.user_id == query_params.requesting_user_id), isouter=True)
+        j = POSTS.join(
+            POST_REACTIONS,
+            and_(
+                POSTS.c.post_id == POST_REACTIONS.c.post_id,
+                POST_REACTIONS.c.user_id == query_params.requesting_user_id,
+            ),
+            isouter=True,
+        )
 
         query = (
             select([POSTS, POST_REACTIONS.c.reaction.label("user_reaction_value")])

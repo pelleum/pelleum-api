@@ -20,7 +20,7 @@ class AddRationaleRequest(BaseModel):
 class RationaleQueryParams(BaseModel):
     """Object to query rationales by"""
 
-    user_id: int
+    user_id: Optional[int]
     asset_symbol: Optional[str]
     thesis_id: Optional[int]
     sentiment: Optional[str]
@@ -30,9 +30,7 @@ class RationaleQueryRepoAdapter(RationaleQueryParams):
     """Used to send to Repo function"""
 
     requesting_user_id: int = Field(
-        ...,
-        description="The user_id of the user that sent the request.",
-        example=1233
+        ..., description="The user_id of the user that sent the request.", example=1233
     )
 
 
@@ -51,6 +49,7 @@ class ThesisWithRationaleId(ThesisWithUserReaction):
 
     rationale_id: int
     user_reaction_value: Optional[int] = None
+
 
 class RationaleResponse(ThesisWithRationaleId):
     """Individual rationale returned to user"""

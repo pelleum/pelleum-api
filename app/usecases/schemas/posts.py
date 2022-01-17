@@ -74,9 +74,7 @@ class PostQueryRepoAdapter(PostQueryParams):
     """Used to send to Repo function"""
 
     requesting_user_id: int = Field(
-        ...,
-        description="The user_id of the user that sent the request.",
-        example=1233
+        ..., description="The user_id of the user that sent the request.", example=1233
     )
 
 
@@ -95,6 +93,7 @@ class PostWithUserReaction(PostInDB):
     """Returned from database via join"""
 
     user_reaction_value: Optional[int] = None
+
 
 class PostResponse(PostWithUserReaction):
     """Response returned to user"""

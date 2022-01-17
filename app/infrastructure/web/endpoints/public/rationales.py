@@ -43,8 +43,8 @@ async def add_thesis_to_rationales(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 
-    query_params = rationales.RationaleQueryParams(
-        user_id=authorized_user.user_id,
+    query_params = rationales.RationaleQueryRepoAdapter(
+        requesting_user_id=authorized_user.user_id,
         asset_symbol=thesis.asset_symbol,
         sentiment=thesis.sentiment,
     )

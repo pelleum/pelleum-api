@@ -103,7 +103,9 @@ class ThesesRepo(IThesesRepo):
         conditions = []
 
         if query_params.theses_ids:
-            retrieved_theses = await self.retrieve_theses_by_ids(theses_ids=query_params.theses_ids)
+            retrieved_theses = await self.retrieve_theses_by_ids(
+                theses_ids=query_params.theses_ids
+            )
             return retrieved_theses, len(retrieved_theses)
 
         if query_params.user_id:
@@ -115,8 +117,14 @@ class ThesesRepo(IThesesRepo):
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
 
-        
-        j = THESES.join(THESES_REACTIONS, and_(THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id, THESES_REACTIONS.c.user_id == query_params.requesting_user_id), isouter=True)
+        j = THESES.join(
+            THESES_REACTIONS,
+            and_(
+                THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
+                THESES_REACTIONS.c.user_id == query_params.requesting_user_id,
+            ),
+            isouter=True,
+        )
 
         query = (
             select([THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
@@ -133,7 +141,9 @@ class ThesesRepo(IThesesRepo):
             query_results = await self.db.fetch_all(query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [theses.ThesisWithUserReaction(**result) for result in query_results]
+        theses_list = [
+            theses.ThesisWithUserReaction(**result) for result in query_results
+        ]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
