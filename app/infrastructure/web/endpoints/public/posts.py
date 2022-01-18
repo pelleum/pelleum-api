@@ -13,7 +13,7 @@ from app.dependencies import (
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import posts, users
+from app.usecases.schemas import posts, theses, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 posts_router = APIRouter(tags=["Posts"])
@@ -111,6 +111,18 @@ async def get_many_posts(
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )
+
+    # for post in posts_list:
+    #     if post.thesis_thesis_id:
+    #         post_raw = posts_list.dict()
+    #         thesis_object_raw = {}
+
+    #         for key, value in post_raw.items():
+    #             if "thesis_" in key:
+    #                 thesis_object_raw[key[7:]] = value
+    #                 post_raw.pop('key', None)
+
+    # post_thesis = theses.ThesisInDB(**thesis_object_raw)
 
     return posts.ManyPostsResponse(
         records=posts.Posts(posts=posts_list),

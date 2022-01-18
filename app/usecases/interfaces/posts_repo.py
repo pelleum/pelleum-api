@@ -27,7 +27,7 @@ class IPostsRepo(ABC):
         query_params: posts.PostQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[posts.PostWithUserReaction], int]:
+    ) -> Tuple[List[posts.PostInfoFromDB], int]:
         pass
 
     @abstractmethod

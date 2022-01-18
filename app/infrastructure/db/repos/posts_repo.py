@@ -4,6 +4,7 @@ from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
 from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
+from app.infrastructure.db.models.theses import THESES
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 
@@ -65,7 +66,7 @@ class PostsRepo(IPostsRepo):
         query_params: posts.PostQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[posts.PostWithUserReaction], int]:
+    ) -> Tuple[List[posts.PostInfoFromDB], int]:
 
         conditions = []
 
@@ -89,6 +90,10 @@ class PostsRepo(IPostsRepo):
             )
 
         j = POSTS.join(
+            THESES,
+            POSTS.c.thesis_id == THESES.c.thesis_id,
+            isouter=True,
+        ).join(
             POST_REACTIONS,
             and_(
                 POSTS.c.post_id == POST_REACTIONS.c.post_id,
@@ -97,8 +102,17 @@ class PostsRepo(IPostsRepo):
             isouter=True,
         )
 
+        thesis_columns = []
+        for col in THESES.columns:
+            thesis_columns.append(col.label("thesis_" + str(col).split(".")[1]))
+
+        columns_to_select = [
+            POSTS,
+            POST_REACTIONS.c.reaction.label("user_reaction_value"),
+        ] + thesis_columns
+
         query = (
-            select([POSTS, POST_REACTIONS.c.reaction.label("user_reaction_value")])
+            select(columns_to_select)
             .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
@@ -112,7 +126,7 @@ class PostsRepo(IPostsRepo):
             query_results = await self.db.fetch_all(query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [posts.PostWithUserReaction(**result) for result in query_results]
+        theses_list = [posts.PostInfoFromDB(**result) for result in query_results]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
