@@ -12,11 +12,11 @@ from app.dependencies import (
     paginate,
 )
 from app.libraries import pelleum_errors
+from app.settings import settings
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import rationales, theses, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
-from app.settings import settings
 
 rationale_router = APIRouter(tags=["Rationales"])
 
