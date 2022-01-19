@@ -16,6 +16,7 @@ from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import rationales, theses, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
+from app.settings import settings
 
 rationale_router = APIRouter(tags=["Rationales"])
 
@@ -52,7 +53,7 @@ async def add_thesis_to_rationales(
         query_params=query_params
     )
 
-    if len(users_rationales) > 9:
+    if len(users_rationales) >= settings.max_rationale_limit:
         # The maximum amount of rationales has been reached - ask the user if they want to remove one to add this
         response.status_code = 403
         return rationales.MaxRationaleReachedResponse(

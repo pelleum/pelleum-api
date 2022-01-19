@@ -80,7 +80,6 @@ class ThesesQueryParams(BaseModel):
     asset_symbol: Optional[str]
     sentiment: Optional[str]
     popularity: Optional[bool]
-    theses_ids: Optional[List[int]]
 
 
 class ThesesQueryRepoAdapter(ThesesQueryParams):

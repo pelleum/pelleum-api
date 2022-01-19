@@ -102,12 +102,6 @@ class ThesesRepo(IThesesRepo):
 
         conditions = []
 
-        if query_params.theses_ids:
-            retrieved_theses = await self.retrieve_theses_by_ids(
-                theses_ids=query_params.theses_ids
-            )
-            return retrieved_theses, len(retrieved_theses)
-
         if query_params.user_id:
             conditions.append(THESES.c.user_id == query_params.user_id)
 
@@ -147,17 +141,3 @@ class ThesesRepo(IThesesRepo):
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
-
-    async def retrieve_theses_by_ids(
-        self, theses_ids: List[int]
-    ) -> List[theses.ThesisInDB]:
-        """Retrieve many theses by supplied theses_ids list"""
-
-        query = select(
-            [THESES],
-            THESES.c.thesis_id.in_(theses_ids),
-        ).order_by(desc(THESES.c.created_at))
-
-        query_results = await self.db.fetch_all(query)
-
-        return [theses.ThesisInDB(**result) for result in query_results]

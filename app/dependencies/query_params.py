@@ -142,7 +142,6 @@ async def get_theses_query_params(
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[theses.Sentiment] = Query(None),
     by_popularity: Optional[bool] = Query(None),
-    theses_ids: Optional[List[conint(gt=0, lt=100000000000)]] = Query(None),
     users_repo: IUserRepo = Depends(get_users_repo),
 ) -> theses.ThesesQueryParams:
 
@@ -163,12 +162,6 @@ async def get_theses_query_params(
         query_params_raw.update({"sentiment": sentiment})
     if by_popularity:
         query_params_raw.update({"popularity": by_popularity})
-    if theses_ids:
-        if len(theses_ids) > 250:
-            raise await pelleum_errors.PelleumErrors(
-                detail="Query parameter list is too long."
-            ).invalid_query_params()
-        query_params_raw.update({"theses_ids": theses_ids})
 
     return theses.ThesesQueryParams(**query_params_raw)
 
