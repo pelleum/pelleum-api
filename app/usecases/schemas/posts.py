@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, constr
 
-from app.usecases.schemas import theses
+from app.usecases.schemas.theses import ThesisInDB
 from app.usecases.schemas.request_pagination import MetaData
 
 
@@ -121,6 +121,7 @@ class PostInfoFromDB(PostWithReaction):
     thesis_thesis_id: Optional[int]
     thesis_user_id: Optional[int]
     thesis_username: Optional[str]
+    thesis_is_authors_current: Optional[bool]
     thesis_sources: Optional[List[str]]
     thesis_created_at: Optional[datetime]
     thesis_updated_at: Optional[datetime]
@@ -129,7 +130,7 @@ class PostInfoFromDB(PostWithReaction):
 class PostResponse(PostWithReaction):
     """Response returned to user"""
 
-    thesis: Optional[theses.ThesisInDB]
+    thesis: Optional[ThesisInDB]
 
 
 class Posts(BaseModel):

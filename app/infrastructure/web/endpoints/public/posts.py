@@ -112,20 +112,21 @@ async def get_many_posts(
         page_size=request_pagination.records_per_page,
     )
 
-    # for post in posts_list:
-    #     if post.thesis_thesis_id:
-    #         post_raw = posts_list.dict()
-    #         thesis_object_raw = {}
-
-    #         for key, value in post_raw.items():
-    #             if "thesis_" in key:
-    #                 thesis_object_raw[key[7:]] = value
-    #                 post_raw.pop('key', None)
-
-    # post_thesis = theses.ThesisInDB(**thesis_object_raw)
+    # 2. Format the data
+    formatted_posts = []
+    for post in posts_list:
+        post_raw = post.dict()
+        thesis_object_raw = {}
+        for key, value in post_raw.items():
+            if key[0:7] == "thesis_" and value is not None:
+                thesis_object_raw[key[7:]] = value
+        formatted_posts.append(posts.PostResponse(
+            thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
+            **post_raw
+        ))
 
     return posts.ManyPostsResponse(
-        records=posts.Posts(posts=posts_list),
+        records=posts.Posts(posts=formatted_posts),
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,

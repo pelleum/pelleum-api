@@ -14,7 +14,7 @@ from app.dependencies import (
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import rationales, users
+from app.usecases.schemas import rationales, users, theses
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 rationale_router = APIRouter(tags=["Rationales"])
@@ -59,8 +59,20 @@ async def add_thesis_to_rationales(
             detail=f"The maximium amount of {thesis.sentiment} theses for {thesis.asset_symbol} has been reached for this user."
         )
 
-    return await rationales_repo.create(
+    rationale_with_thesis = await rationales_repo.create(
         thesis_id=body.thesis_id, user_id=authorized_user.user_id
+    )
+
+    # 2. Format the data
+    rationale_raw = rationale_with_thesis.dict()
+    thesis_object_raw = {}
+    for key, value in rationale_raw.items():
+        if key[0:7] == "thesis_" and value is not None:
+            thesis_object_raw[key[7:]] = value
+
+    return rationales.RationaleResponse(
+        thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
+        **rationale_raw
     )
 
 
@@ -93,8 +105,21 @@ async def get_many_rationales(
         page_size=request_pagination.records_per_page,
     )
 
+    # 2. Format the data
+    formatted_rationales = []
+    for rationale in retrieved_rationales:
+        rationale_raw = rationale.dict()
+        thesis_object_raw = {}
+        for key, value in rationale_raw.items():
+            if key[0:7] == "thesis_" and value is not None:
+                thesis_object_raw[key[7:]] = value
+        formatted_rationales.append(rationales.RationaleResponse(
+            thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
+            **rationale_raw
+        ))
+
     return rationales.ManyRationalesResponse(
-        records=rationales.Rationales(rationales=retrieved_rationales),
+        records=rationales.Rationales(rationales=formatted_rationales),
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,
@@ -121,7 +146,7 @@ async def delete_rationale(
         rationale_id=rationale_id
     )
 
-    if not rationale or rationale.rationale_user_id != authorized_user.user_id:
+    if not rationale or rationale.user_id != authorized_user.user_id:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied rationale_id is invalid."
         ).invalid_resource_id()

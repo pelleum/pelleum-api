@@ -6,7 +6,7 @@ from app.usecases.schemas import rationales
 
 class IRationalesRepo(ABC):
     @abstractmethod
-    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleInDb:
+    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleWithThesis:
         """Create a rationale"""
 
     @abstractmethod
@@ -16,7 +16,7 @@ class IRationalesRepo(ABC):
         asset_symbol: Optional[str] = None,
         thesis_id: Optional[int] = None,
         user_id: Optional[int] = None,
-    ) -> Optional[rationales.ThesisWithRationaleId]:
+    ) -> Optional[rationales.RationaleWithThesis]:
         """Retrive a rationale"""
 
     @abstractmethod
@@ -25,7 +25,7 @@ class IRationalesRepo(ABC):
         query_params: rationales.RationaleQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[rationales.ThesisWithRationaleId]:
+    ) -> List[rationales.RationaleWithThesis]:
         """Retrieve many rationales"""
 
     @abstractmethod

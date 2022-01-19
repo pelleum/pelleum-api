@@ -15,7 +15,7 @@ class RationalesRepo(IRationalesRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleInDb:
+    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleWithThesis:
         """Creates a rationale in the rationales table"""
 
         create_rationale_insert_stmt = RATIONALES.insert().values(
@@ -41,7 +41,7 @@ class RationalesRepo(IRationalesRepo):
         asset_symbol: Optional[str] = None,
         thesis_id: Optional[int] = None,
         user_id: Optional[int] = None,
-    ) -> Optional[rationales.ThesisWithRationaleId]:
+    ) -> Optional[rationales.RationaleWithThesis]:
         """Retrieve a rationale by function parameters"""
 
         conditions = []
@@ -65,28 +65,26 @@ class RationalesRepo(IRationalesRepo):
 
         j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id)
 
+        thesis_columns = [column.label("thesis_" + str(column).split(".")[1]) for column in THESES.columns]
+
+        columns_to_select = [RATIONALES] + thesis_columns
+
         query = (
-            select(
-                [
-                    RATIONALES.c.rationale_id,
-                    RATIONALES.c.user_id.label("rationale_user_id"),
-                    THESES,
-                ]
-            )
+            select(columns_to_select)
             .select_from(j)
             .where(and_(*conditions))
         )
 
         result = await self.db.fetch_one(query)
 
-        return rationales.ThesisWithRationaleId(**result) if result else None
+        return rationales.RationaleWithThesis(**result) if result else None
 
     async def retrieve_many_rationales_with_filter(
         self,
         query_params: rationales.RationaleQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> List[rationales.ThesisWithRationaleId]:
+    ) -> List[rationales.RationaleWithThesis]:
         """Retrieve many rationales by function parameters"""
 
         conditions = []
@@ -117,15 +115,14 @@ class RationalesRepo(IRationalesRepo):
             isouter=True,
         )
 
+        thesis_columns = [column.label("thesis_" + str(column).split(".")[1]) for column in THESES.columns]
+
+        columns_to_select = [
+            RATIONALES, THESES_REACTIONS.c.reaction.label("user_reaction_value")
+        ] + thesis_columns
+
         query = (
-            select(
-                [
-                    RATIONALES.c.rationale_id,
-                    RATIONALES.c.user_id.label("rationale_user_id"),
-                    THESES,
-                    THESES_REACTIONS.c.reaction.label("user_reaction_value"),
-                ]
-            )
+            select(columns_to_select)
             .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
@@ -140,7 +137,7 @@ class RationalesRepo(IRationalesRepo):
             count_results = await self.db.fetch_all(query_count)
 
         rationales_list = [
-            rationales.ThesisWithRationaleId(**result) for result in query_results
+            rationales.RationaleWithThesis(**result) for result in query_results
         ]
         rationales_count = count_results[0][0]
 
