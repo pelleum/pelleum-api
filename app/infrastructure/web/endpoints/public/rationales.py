@@ -14,7 +14,7 @@ from app.dependencies import (
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import rationales, users, theses
+from app.usecases.schemas import rationales, theses, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 rationale_router = APIRouter(tags=["Rationales"])
@@ -72,7 +72,7 @@ async def add_thesis_to_rationales(
 
     return rationales.RationaleResponse(
         thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
-        **rationale_raw
+        **rationale_raw,
     )
 
 
@@ -113,10 +113,14 @@ async def get_many_rationales(
         for key, value in rationale_raw.items():
             if key[0:7] == "thesis_" and value is not None:
                 thesis_object_raw[key[7:]] = value
-        formatted_rationales.append(rationales.RationaleResponse(
-            thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
-            **rationale_raw
-        ))
+        formatted_rationales.append(
+            rationales.RationaleResponse(
+                thesis=theses.ThesisInDB(**thesis_object_raw)
+                if thesis_object_raw
+                else None,
+                **rationale_raw,
+            )
+        )
 
     return rationales.ManyRationalesResponse(
         records=rationales.Rationales(rationales=formatted_rationales),

@@ -15,7 +15,9 @@ class RationalesRepo(IRationalesRepo):
     def __init__(self, db: Database):
         self.db = db
 
-    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleWithThesis:
+    async def create(
+        self, thesis_id: int, user_id: int
+    ) -> rationales.RationaleWithThesis:
         """Creates a rationale in the rationales table"""
 
         create_rationale_insert_stmt = RATIONALES.insert().values(
@@ -65,15 +67,14 @@ class RationalesRepo(IRationalesRepo):
 
         j = RATIONALES.join(THESES, RATIONALES.c.thesis_id == THESES.c.thesis_id)
 
-        thesis_columns = [column.label("thesis_" + str(column).split(".")[1]) for column in THESES.columns]
+        thesis_columns = [
+            column.label("thesis_" + str(column).split(".")[1])
+            for column in THESES.columns
+        ]
 
         columns_to_select = [RATIONALES] + thesis_columns
 
-        query = (
-            select(columns_to_select)
-            .select_from(j)
-            .where(and_(*conditions))
-        )
+        query = select(columns_to_select).select_from(j).where(and_(*conditions))
 
         result = await self.db.fetch_one(query)
 
@@ -115,10 +116,14 @@ class RationalesRepo(IRationalesRepo):
             isouter=True,
         )
 
-        thesis_columns = [column.label("thesis_" + str(column).split(".")[1]) for column in THESES.columns]
+        thesis_columns = [
+            column.label("thesis_" + str(column).split(".")[1])
+            for column in THESES.columns
+        ]
 
         columns_to_select = [
-            RATIONALES, THESES_REACTIONS.c.reaction.label("user_reaction_value")
+            RATIONALES,
+            THESES_REACTIONS.c.reaction.label("user_reaction_value"),
         ] + thesis_columns
 
         query = (

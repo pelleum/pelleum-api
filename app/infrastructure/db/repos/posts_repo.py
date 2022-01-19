@@ -102,7 +102,10 @@ class PostsRepo(IPostsRepo):
             isouter=True,
         )
 
-        thesis_columns = [column.label("thesis_" + str(column).split(".")[1]) for column in THESES.columns]
+        thesis_columns = [
+            column.label("thesis_" + str(column).split(".")[1])
+            for column in THESES.columns
+        ]
 
         columns_to_select = [
             POSTS,

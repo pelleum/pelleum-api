@@ -120,10 +120,14 @@ async def get_many_posts(
         for key, value in post_raw.items():
             if key[0:7] == "thesis_" and value is not None:
                 thesis_object_raw[key[7:]] = value
-        formatted_posts.append(posts.PostResponse(
-            thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
-            **post_raw
-        ))
+        formatted_posts.append(
+            posts.PostResponse(
+                thesis=theses.ThesisInDB(**thesis_object_raw)
+                if thesis_object_raw
+                else None,
+                **post_raw
+            )
+        )
 
     return posts.ManyPostsResponse(
         records=posts.Posts(posts=formatted_posts),

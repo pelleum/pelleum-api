@@ -44,8 +44,6 @@ class RationaleInDb(BaseModel):
     updated_at: datetime
 
 
-
-
 class RationaleWithThesis(RationaleInDb):
     """Returned from database join"""
 
@@ -62,10 +60,9 @@ class RationaleWithThesis(RationaleInDb):
     thesis_updated_at: Optional[datetime]
 
 
-
-
 class RationaleResponse(RationaleInDb):
     """Individual rationale returned to user"""
+
     thesis: Optional[ThesisInDB]
 
 

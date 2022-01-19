@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, constr
 
-from app.usecases.schemas.theses import ThesisInDB
 from app.usecases.schemas.request_pagination import MetaData
+from app.usecases.schemas.theses import ThesisInDB
 
 
 class Sentiment(str, Enum):

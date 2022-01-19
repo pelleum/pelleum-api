@@ -6,7 +6,9 @@ from app.usecases.schemas import rationales
 
 class IRationalesRepo(ABC):
     @abstractmethod
-    async def create(self, thesis_id: int, user_id: int) -> rationales.RationaleWithThesis:
+    async def create(
+        self, thesis_id: int, user_id: int
+    ) -> rationales.RationaleWithThesis:
         """Create a rationale"""
 
     @abstractmethod
