@@ -132,7 +132,7 @@ class RationalesRepo(IRationalesRepo):
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
-            .order_by(desc(THESES.c.created_at))
+            .order_by(desc(RATIONALES.c.created_at))
         )
 
         query_count = select([func.count()]).select_from(j).where(and_(*conditions))
