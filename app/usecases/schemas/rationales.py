@@ -71,7 +71,6 @@ class MaxRationaleReachedResponse(BaseModel):
     amount of rationales have been added to the user's rationale library"""
 
     detail: str
-    status: int
 
 
 class Rationales(BaseModel):

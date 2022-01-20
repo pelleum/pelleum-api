@@ -58,7 +58,6 @@ async def add_thesis_to_rationales(
         response.status_code = 403
         return rationales.MaxRationaleReachedResponse(
             detail=f"The maximium amount of {thesis.sentiment} theses for {thesis.asset_symbol} has been reached for this user.",
-            status=403,
         )
 
     rationale_with_thesis = await rationales_repo.create(
