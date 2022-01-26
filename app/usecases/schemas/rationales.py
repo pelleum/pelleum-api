@@ -29,10 +29,6 @@ class RationaleQueryParams(BaseModel):
 class RationaleQueryRepoAdapter(RationaleQueryParams):
     """Used to send to Repo function"""
 
-    requesting_user_id: int = Field(
-        ..., description="The user_id of the user that sent the request.", example=1233
-    )
-
 
 class RationaleInDb(BaseModel):
     """Database Model"""

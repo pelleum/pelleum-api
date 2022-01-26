@@ -208,19 +208,20 @@ async def get_thesis_reactions_query_params(
 
 
 async def get_rationales_query_params(
-    user_id: conint(gt=0, lt=100000000000) = Query(None),
+    user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     users_repo: IUserRepo = Depends(get_users_repo),
 ) -> rationales.RationaleQueryParams:
 
-    user = await users_repo.retrieve_user_with_filter(user_id=user_id)
+    if user_id:
+        user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 
-    if not user:
-        raise await pelleum_errors.PelleumErrors(
-            detail="The supplied user_id is invalid."
-        ).invalid_resource_id()
+        if not user:
+            raise await pelleum_errors.PelleumErrors(
+                detail="The supplied user_id is invalid."
+            ).invalid_resource_id()
 
-    query_params_raw = {"user_id": user_id}
+        query_params_raw = {"user_id": user_id}
 
     if asset_symbol:
         query_params_raw.update({"asset_symbol": asset_symbol})

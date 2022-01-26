@@ -88,11 +88,6 @@ class RationalesRepo(IRationalesRepo):
     ) -> List[rationales.RationaleWithThesis]:
         """Retrieve many rationales by function parameters"""
 
-        if query_params.user_id and query_params.requesting_user_id:
-            raise Exception(
-                "Cannot pass user_id and requesting_user_id to retrieve_many_rationales_with_filter()"
-            )
-
         conditions = []
 
         if query_params.thesis_id:
@@ -100,9 +95,6 @@ class RationalesRepo(IRationalesRepo):
 
         if query_params.user_id:
             conditions.append(RATIONALES.c.user_id == query_params.user_id)
-
-        if query_params.requesting_user_id:
-            conditions.append(RATIONALES.c.user_id == query_params.requesting_user_id)
 
         if query_params.asset_symbol:
             conditions.append(THESES.c.asset_symbol == query_params.asset_symbol)

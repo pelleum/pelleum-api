@@ -45,7 +45,7 @@ async def add_thesis_to_rationales(
         ).invalid_resource_id()
 
     query_params = rationales.RationaleQueryRepoAdapter(
-        requesting_user_id=authorized_user.user_id,
+        user_id=authorized_user.user_id,
         asset_symbol=thesis.asset_symbol,
         sentiment=thesis.sentiment,
     )
@@ -92,9 +92,11 @@ async def get_many_rationales(
 ) -> rationales.ManyRationalesResponse:
     """This endpoint returns many rationales based on supplied query parameters."""
 
+    # 1. if no user_id is supplied, use requesting user, else use suplied user
     query_params_raw = query_params.dict()
-    query_params_raw.update({"requesting_user_id": authorized_user.user_id})
     query_params = rationales.RationaleQueryRepoAdapter(**query_params_raw)
+    if not query_params.user_id:
+        query_params.user_id = authorized_user.user_id
 
     # 1. Retrieve rationales
     (
