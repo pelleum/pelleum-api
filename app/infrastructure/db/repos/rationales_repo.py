@@ -111,7 +111,7 @@ class RationalesRepo(IRationalesRepo):
             THESES_REACTIONS,
             and_(
                 THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
-                THESES_REACTIONS.c.user_id == query_params.requesting_user_id,
+                THESES_REACTIONS.c.user_id == query_params.user_id,
             ),
             isouter=True,
         )
