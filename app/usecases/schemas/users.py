@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     email: constr(max_length=100) = Field(
         ..., description="The user's email.", example="johndoe@example.com"
     )
-    username: constr(max_length=100) = Field(
+    username: constr(max_length=15) = Field(
         ..., description="The user's Pelleum username.", example="johndoe"
     )
 

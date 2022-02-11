@@ -144,7 +144,7 @@ async def get_many_posts(
 
 @posts_router.delete(
     "/{post_id}",
-    status_code=204,
+    status_code=200,
 )
 async def delete_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),

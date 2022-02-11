@@ -82,7 +82,7 @@ async def get_many_post_reactions(
 
 @post_reactions_router.delete(
     "/{post_id}",
-    status_code=204,
+    status_code=200,
 )
 async def delete_post_reaction(
     post_id: str = Path(...),

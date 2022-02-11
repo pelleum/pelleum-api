@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 
+
 from app.infrastructure.db.metadata import METADATA
 
 POSTS = sa.Table(
@@ -42,7 +43,7 @@ POST_REACTIONS = sa.Table(
     sa.Column(
         "post_id",
         sa.BigInteger,
-        sa.ForeignKey("posts.post_id"),
+        sa.ForeignKey("posts.post_id", ondelete="cascade"),
         primary_key=True,
         index=True,
     ),

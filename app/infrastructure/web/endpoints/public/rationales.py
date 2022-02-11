@@ -140,7 +140,7 @@ async def get_many_rationales(
 
 @rationale_router.delete(
     "/{rationale_id}",
-    status_code=204,
+    status_code=200,
 )
 async def delete_rationale(
     rationale_id: conint(gt=0, lt=100000000000) = Path(...),
