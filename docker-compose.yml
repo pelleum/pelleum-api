@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+    backend:                    
+        build: .
+        ports:
+        - "8000:8000"
+        container_name: pelleum-api
+        env_file: 
+          - env_file.env
+        depends_on:
+        - db   
     db:
         image: library/postgres:12-alpine
         environment:

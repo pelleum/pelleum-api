@@ -21,6 +21,9 @@ lint:
 run:
 	python -m app --reload
 
+make run-container:
+	docker-compose up -d
+
 check:
 	black --check $(formatted_code)
 
