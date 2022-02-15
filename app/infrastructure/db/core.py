@@ -11,6 +11,8 @@ async def get_or_create_database():
     if DATABASE is not None:
         return DATABASE
 
+    print("\n\n\n\n\n TEST PRINT: ", settings.db_engine, "\n\n\n\n\n\n")
+
     DATABASE = databases.Database(DATABASE_URL, min_size=5)
 
     await DATABASE.connect()
