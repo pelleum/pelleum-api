@@ -8,6 +8,6 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 COPY . /app
 
-CMD ["make", "run"]
+CMD ["python", "-m", "app"]
 
 

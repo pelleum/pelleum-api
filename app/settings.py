@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     environment: str = "unknown"
     log_level: str = "info"
     server_host: str = "0.0.0.0"
-    server_port: int = 8000
+    server_port: int = 8624
     server_prefix: str = ""
 
     database_url: str
