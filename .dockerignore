@@ -15,3 +15,15 @@ env/
 
 #Ignore Dockerfile
 Dockerfile
+
+#Ignore docker-compose
+docker-compose.yml
+
+#Miscellaneous - remove some of these when configuring CI/CD (ex: tests)
+setup.cfg
+README.md
+pytest.ini
+Makefile
+alembic.ini
+.isort.cfg
+migrations/
