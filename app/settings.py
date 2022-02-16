@@ -13,13 +13,8 @@ class Settings(BaseSettings):
     server_port: int = 8624
     server_prefix: str = ""
 
-    db_username: str
-    db_password: str
-    db_host: str
-    db_port: str
-    db_name: str
-    db_engine: str
-
+    db_url: str
+    
     token_url: str
     json_web_token_secret: str
     json_web_token_algorithm: str
