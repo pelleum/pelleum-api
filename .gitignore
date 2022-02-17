@@ -11,5 +11,3 @@ venv
 env/
 make_black_before_pushing_to_github
 tasks.py
-env_file.env
-copilot/

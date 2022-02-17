@@ -21,8 +21,4 @@ class Settings(BaseSettings):
     access_token_expire_minutes: float
     max_rationale_limit: int = 25
 
-    class Config:
-        env_file = DOTENV_FILE
-
-
 settings: Settings = Settings()

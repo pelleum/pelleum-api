@@ -1,5 +1,4 @@
 #Ignore the environment-related things
-env_file.env
 .env
 .env.*
 venv
