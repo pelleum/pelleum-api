@@ -1,6 +1,5 @@
 import sqlalchemy as sa
 
-
 from app.infrastructure.db.metadata import METADATA
 
 POSTS = sa.Table(

@@ -26,3 +26,4 @@ from .query_params import (
     get_thesis_reactions_query_params,
     get_rationales_query_params,
 )
+from .account_connections import get_account_connections_client

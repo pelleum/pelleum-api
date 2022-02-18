@@ -7,6 +7,7 @@ from app.infrastructure.db.core import get_or_create_database
 from app.infrastructure.web.endpoints import health
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints.public import (
+    account_connections,
     auth,
     portfolio,
     post_reactions,
@@ -22,7 +23,7 @@ def setup_app():
     app = FastAPI(
         title="Pelleum Backend API",
         description="The following are endpoints for the Pelleum mobile appliaction to utilize.",
-        openapi_url=settings.openapi_url
+        openapi_url=settings.openapi_url,
     )
     app.include_router(auth.auth_router, prefix="/public/auth/users")
 
@@ -36,6 +37,9 @@ def setup_app():
         post_reactions.post_reactions_router, prefix="/public/posts/reactions"
     )
     app.include_router(portfolio.portfolio_router, prefix="/public/portfolio")
+    app.include_router(
+        account_connections.institution_router, prefix="/public/institutions"
+    )
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
 

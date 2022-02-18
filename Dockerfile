@@ -12,19 +12,18 @@ COPY . /app
 ENV DB_URL=postgres://postgres:postgres@localhost:5432/pelleum-dev
 ENV SCHEMA=nope
 
-# JWT Environment Variables
-ENV JSON_WEB_TOKEN_SECRET=nicetry
-
 # Auth Environment Variables
+ENV JSON_WEB_TOKEN_SECRET=nicetry
 ENV TOKEN_URL=/public/auth/users/login
 ENV ACCESS_TOKEN_EXPIRE_MINUTES=120.0
 ENV JSON_WEB_TOKEN_ALGORITHM=nope
 
-# Environment Environment Variables
+# Server Environment Variables
 ENV OPENAPI_URL="/openapi.json"
-
-# Pelleum API port
 ENV SERVER_PORT=8000
+
+# External Connection Evnrionment Variables
+ENV ACCOUNT_CONNECTIONS_BASE_URL=http://0.0.0.0:1201
 
 EXPOSE $SERVER_PORT
 
