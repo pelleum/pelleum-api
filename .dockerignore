@@ -3,6 +3,7 @@
 .env.*
 venv
 env/
+env_file.env
 
 #Ignoring git and cache folders
 .git

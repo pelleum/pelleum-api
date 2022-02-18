@@ -22,6 +22,7 @@ def setup_app():
     app = FastAPI(
         title="Pelleum Backend API",
         description="The following are endpoints for the Pelleum mobile appliaction to utilize.",
+        openapi_url=settings.openapi_url
     )
     app.include_router(auth.auth_router, prefix="/public/auth/users")
 

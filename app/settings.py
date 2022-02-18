@@ -7,11 +7,12 @@ DOTENV_FILE = ".env" if path.isfile(".env") else None
 
 class Settings(BaseSettings):
     application_name: str = "pelleum-api"
-    environment: str = "unknown"
+    environment: str = "development"
     log_level: str = "info"
     server_host: str = "0.0.0.0"
-    server_port: int = 8624
+    server_port: int
     server_prefix: str = ""
+    openapi_url: str = "/openapi.json"
 
     db_url: str
     
@@ -20,5 +21,8 @@ class Settings(BaseSettings):
     json_web_token_algorithm: str
     access_token_expire_minutes: float
     max_rationale_limit: int = 25
+
+    class Config:
+        env_file = DOTENV_FILE
 
 settings: Settings = Settings()
