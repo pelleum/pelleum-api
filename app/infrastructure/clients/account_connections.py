@@ -49,7 +49,9 @@ class AccountConnectionsClient(IAccountConnectionsClient):
         """Sends request to get all supported brokerages to account-connections API"""
 
         return await self.api_call(
-            method="GET", endpoint="", headers={"Authorization": user_auth}
+            method="GET",
+            endpoint="/private/institutions",
+            headers={"Authorization": user_auth},
         )
 
     async def get_account_connections(
@@ -58,7 +60,9 @@ class AccountConnectionsClient(IAccountConnectionsClient):
         """Sends request to get all account connections to account-connections API"""
 
         return await self.api_call(
-            method="GET", endpoint="/connections", headers={"Authorization": user_auth}
+            method="GET",
+            endpoint="/private/institutions/connections",
+            headers={"Authorization": user_auth},
         )
 
     async def delete_connection(
@@ -68,7 +72,7 @@ class AccountConnectionsClient(IAccountConnectionsClient):
 
         return await self.api_call(
             method="DELETE",
-            endpoint=f"/{institution_id}",
+            endpoint=f"/private/institutions/{institution_id}",
             headers={"Authorization": user_auth},
         )
 
@@ -79,7 +83,7 @@ class AccountConnectionsClient(IAccountConnectionsClient):
 
         return await self.api_call(
             method="POST",
-            endpoint=f"/login/{institution_id}",
+            endpoint=f"/private/institutions/login/{institution_id}",
             json_body=payload,
             headers={"Authorization": user_auth},
         )
@@ -91,7 +95,7 @@ class AccountConnectionsClient(IAccountConnectionsClient):
 
         return await self.api_call(
             method="POST",
-            endpoint=f"/login/{institution_id}/verify",
+            endpoint=f"/private/institutions/login/{institution_id}/verify",
             json_body=payload,
             headers={"Authorization": user_auth},
         )
