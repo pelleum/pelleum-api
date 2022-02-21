@@ -27,7 +27,7 @@ This repository contains code relevant to Pelleum's backend API. This API respon
 - Run `docker push pelleum/pelleum-api` to push the image to Docker Hub
 - Verify that the image has been updated in Docker Hub
 
-## Deploy cluster in AWS
+## Deploy Cluster in AWS
 - Update pelleum-api service in AWS console
 - Make sure to use latest version and check the "Force new deployment" box
 - Verify by viewing logs in CloudWatch
