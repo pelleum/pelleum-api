@@ -10,7 +10,7 @@ This repository contains code relevant to Pelleum's backend API. This API respon
 - Activate virtual environment with `source env/bin/activate`
 - Install packages with `python3 -m pip install -r requirements.txt`
 
-## Run the API
+## Run the API (Locally)
 - Install Docker
 - Set environment variables in `.env` file in the project's root directory (get from senior engineer)
 - Run `docker-compose up -d db` (this spins up a local PostgreSQL database for the API to utilize)
