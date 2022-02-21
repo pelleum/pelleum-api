@@ -114,5 +114,5 @@ async def update_user(
 @auth_router.get("", response_model=users.UserResponse)
 async def get_current_user(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
-):
+) -> users.UserResponse:
     return users.UserResponse(**authorized_user.dict())
