@@ -7,7 +7,7 @@ services:
         - "8000:8000"
         container_name: pelleum-api
         env_file: 
-        - env_file.env
+        - .env
         depends_on:
         - db   
     db:
