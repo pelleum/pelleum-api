@@ -3,8 +3,8 @@ from typing import List, Optional, Tuple
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
-from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
-from app.infrastructure.db.models.theses import THESES
+from app.infrastructure.db.models.public.posts import POST_REACTIONS, POSTS
+from app.infrastructure.db.models.public.theses import THESES
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 

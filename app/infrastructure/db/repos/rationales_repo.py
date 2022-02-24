@@ -4,8 +4,8 @@ import asyncpg
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
-from app.infrastructure.db.models.rationales import RATIONALES
-from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
+from app.infrastructure.db.models.public.rationales import RATIONALES
+from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.schemas import rationales

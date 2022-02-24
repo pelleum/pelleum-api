@@ -3,7 +3,7 @@ from typing import List, Optional
 from databases import Database
 from sqlalchemy import and_, delete
 
-from app.infrastructure.db.models.portfolio import ASSETS
+from app.infrastructure.db.models.public.portfolio import ASSETS
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.schemas import portfolios
 

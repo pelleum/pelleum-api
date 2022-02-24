@@ -4,7 +4,7 @@ from databases import Database
 from passlib.context import CryptContext
 from sqlalchemy import and_
 
-from app.infrastructure.db.models.users import USERS
+from app.infrastructure.db.models.public.users import USERS
 from app.usecases.interfaces.user_repo import IUserRepo
 from app.usecases.schemas import users
 
