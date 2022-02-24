@@ -54,10 +54,10 @@ def run_tests(context):
 def suite(context):
     """Orchestrates continuous integration tasks"""
 
-    # _insight_title("LINTING CODE")
-    # lint_app(context)
-    # _insight_title("CHECKING CODE FORMAT")
-    # check_format(context)
+    _insight_title("LINTING CODE")
+    lint_app(context)
+    _insight_title("CHECKING CODE FORMAT")
+    check_format(context)
     _insight_title("SETTING UP DATABASE")
     set_up_database(context)
     _insight_title("RUNNING TESTS")
