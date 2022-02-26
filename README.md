@@ -26,7 +26,7 @@ The following are helpful commands that utilize this project's [Makefile](https:
 
 1. Install `make`. If on MacOS, you can use [Homebrew](https://formulae.brew.sh/formula/make).
 2. Add `alias make='gmake'` to your `bash_profile` (or similar), which you can access at `~/.bash_profile`. After adding this, you'll need to restart your terminal for it to take effect.
-3. `make --verision` should be **4.3** or higher.
+3. `make --version` should be **4.3** or higher.
 
 - `make run`: runs the API locally
 - `make build`: builds the app's docker image
@@ -52,7 +52,7 @@ As mentioned above, continuous integration is initiated by running `make test`. 
 **Note:** These docker containers utilize a `tests.env` file.
 
 ### Run Unit Tests Manually
-Unit tests can be run manually by running `invoke test` or by running them individually using your IDE. Before running them, be sure to:
+Unit tests can be run manually by running `invoke tests` or by running them individually using your IDE. Before running them, be sure to:
 1. Spin up the test postgreSQL docker container by running `docker-compose up -d test_db`
 2. Create account_connections schema using PgAdmin or by running: `CREATE SCHEMA account_connections`.
 3. Migrate database tables by running `alembic upgrade head` (you can temporarily change the database URL in the [env.py](https://github.com/pelleum/pelleum-api/blob/master/migrations/env.py) file to run alembic against the test database)

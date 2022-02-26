@@ -13,7 +13,7 @@ from app.dependencies import (
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
-from app.usecases.interfaces.user_repo import IUserRepo
+from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import auth, users
 
 auth_router = APIRouter(tags=["Users"])
@@ -22,7 +22,7 @@ auth_router = APIRouter(tags=["Users"])
 @auth_router.post("/login", response_model=users.UserWithAuthTokenResponse)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
 ) -> users.UserWithAuthTokenResponse:
 
     user = await users_repo.retrieve_user_with_filter(username=form_data.username)
@@ -51,7 +51,7 @@ async def login_for_access_token(
 )
 async def create_new_user(
     body: users.UserCreate = Body(...),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
     portfolio_repo: IPortfolioRepo = Depends(get_portfolio_repo),
 ) -> users.UserWithAuthTokenResponse:
     """Upon signup, validates inputs, creates new user object, and creates new portfolio object."""
@@ -95,8 +95,8 @@ async def create_new_user(
     response_model=users.UserResponse,
 )
 async def update_user(
-    body: users.UserCreate = Body(...),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    body: users.UserUpdate = Body(...),
+    users_repo: IUsersRepo = Depends(get_users_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
 

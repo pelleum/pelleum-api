@@ -8,7 +8,7 @@ from app.usecases.schemas.request_pagination import MetaData
 
 
 class Sentiment(str, Enum):
-    Bull = "Bull"
+    BULL = "Bull"
     BEAR = "Bear"
 
 

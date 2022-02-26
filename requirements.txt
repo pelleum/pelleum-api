@@ -188,7 +188,7 @@ click==8.0.1 \
     #   black
     #   pip-tools
     #   uvicorn
-coverage==6.3.2 \
+coverage[toml]==6.3.2 \
     --hash=sha256:03e2a7826086b91ef345ff18742ee9fc47a6839ccd517061ef8fa1976e652ce9 \
     --hash=sha256:07e6db90cd9686c767dcc593dff16c8c09f9814f5e9c51034066cad3373b914d \
     --hash=sha256:18d520c6860515a771708937d2f78f63cc47ab3b80cb78e86573b0a760161faf \
@@ -230,7 +230,9 @@ coverage==6.3.2 \
     --hash=sha256:f7331dbf301b7289013175087636bbaf5b2405e57259dd2c42fdcc9fcc47325e \
     --hash=sha256:f9987b0354b06d4df0f4d3e0ec1ae76d7ce7cbca9a2f98c25041eb79eec766f1 \
     --hash=sha256:fd9e830e9d8d89b20ab1e5af09b32d33e1a08ef4c4e14411e559556fd788e6b2
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   pytest-cov
 cryptography==3.4.8 \
     --hash=sha256:0a7dcbcd3f1913f664aca35d47c1331fce738d44ec34b7be8b9d332151b0b01e \
     --hash=sha256:1eb7bb0df6f6f583dd8e054689def236255161ebbcf62b226454ab9ec663746b \
@@ -679,6 +681,17 @@ pyparsing==3.0.7 \
 pytest==7.0.1 \
     --hash=sha256:9ce3ff477af913ecf6321fe337b93a2c0dcf2a0a1439c43f5452112c1e4280db \
     --hash=sha256:e30905a0c131d3d94b89624a1cc5afec3e0ba2fbdb151867d8e0ebd49850f171
+    # via
+    #   -r requirements.in
+    #   pytest-asyncio
+    #   pytest-cov
+pytest-asyncio==0.18.1 \
+    --hash=sha256:c43fcdfea2335dd82ffe0f2774e40285ddfea78a8e81e56118d47b6a90fbb09e \
+    --hash=sha256:c9ec48e8bbf5cc62755e18c4d8bc6907843ec9c5f4ac8f61464093baeba24a7e
+    # via -r requirements.in
+pytest-cov==3.0.0 \
+    --hash=sha256:578d5d15ac4a25e5f961c938b85a05b09fdaae9deef3bb6de9a6e766622ca7a6 \
+    --hash=sha256:e7f0f5b1617d2210a2cabc266dfe2f4c75a8d32fb89eafb7ad9d06f6d076d470
     # via -r requirements.in
 python-dotenv==0.19.0 \
     --hash=sha256:aae25dc1ebe97c420f50b81fb0e5c949659af713f31fdb63c749ca68748f34b1 \

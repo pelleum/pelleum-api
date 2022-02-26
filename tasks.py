@@ -1,7 +1,8 @@
 from invoke import task
 from invoke.exceptions import Exit
 
-TESTS = "test"
+APP = "app"
+TESTS = "tests"
 PYLINT_THRESHOLD = 9
 PYTHON_CODE = "app/ tests/ tasks.py"
 MIN_COVERAGE = 50  # Need to increase this
@@ -42,23 +43,22 @@ def set_up_database(context):
 
 
 @task
-def run_tests(context):
+def tests(context):
     """Runs all tests"""
-    print("\n\n\nWe got here to tests!\n\n\n")
-    # context.run(f"coverage run --source {PYTHON_CODE} -m pytest {TESTS} --color=yes")
-    # context.run(f"coverage report --fail-under={MIN_COVERAGE}")
-    # context.run("coverage html")
+    context.run(f"coverage run --source {APP} -m pytest {TESTS} --color=yes")
+    context.run(f"coverage report --fail-under={MIN_COVERAGE}")
+    context.run("coverage html")
 
 
 @task
 def suite(context):
     """Orchestrates continuous integration tasks"""
 
-    _insight_title("LINTING CODE")
-    lint_app(context)
-    _insight_title("CHECKING CODE FORMAT")
-    check_format(context)
+    # _insight_title("LINTING CODE")
+    # lint_app(context)
+    # _insight_title("CHECKING CODE FORMAT")
+    # check_format(context)
     _insight_title("SETTING UP DATABASE")
     set_up_database(context)
     _insight_title("RUNNING TESTS")
-    run_tests(context)
+    tests(context)

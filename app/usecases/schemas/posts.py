@@ -9,7 +9,7 @@ from app.usecases.schemas.theses import ThesisInDB
 
 
 class Sentiment(str, Enum):
-    Bull = "Bull"
+    BULL = "Bull"
     BEAR = "Bear"
 
 

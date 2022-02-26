@@ -12,6 +12,29 @@ class PortfolioRepo(IPortfolioRepo):
     def __init__(self, db: Database):
         self.db = db
 
+    async def create(
+        self, new_asset: portfolios.CreateAssetRepoAdapter
+    ) -> portfolios.AssetInDB:
+        """This function only exists for unit tests -- this repo doesn't handle asset
+        creation"""
+
+        asset_insert_statement = ASSETS.insert().values(
+            user_id=new_asset.user_id,
+            institution_id=new_asset.institution_id,
+            thesis_id=new_asset.thesis_id,
+            asset_symbol=new_asset.asset_symbol,
+            name=new_asset.name,
+            position_value=new_asset.position_value,
+            quantity=new_asset.quantity,
+            skin_rating=new_asset.skin_rating,
+            average_buy_price=new_asset.average_buy_price,
+            total_contribution=new_asset.total_contribution,
+            is_up_to_date=True,
+        )
+
+        asset_id = await self.db.execute(asset_insert_statement)
+        return await self.retrieve_asset(asset_id=asset_id)
+
     async def retrieve_asset(
         self,
         asset_id: int = None,
@@ -20,7 +43,6 @@ class PortfolioRepo(IPortfolioRepo):
         asset_symbol: str = None,
     ) -> Optional[portfolios.AssetInDB]:
         """Retrieve signle asset"""
-        # NOTE: Might not need this function... It's here just in case
 
         conditions = []
 
@@ -59,10 +81,3 @@ class PortfolioRepo(IPortfolioRepo):
         query = ASSETS.select().where(and_(*conditions))
         results = await self.db.fetch_all(query)
         return [portfolios.AssetInDB(**result) for result in results]
-
-    async def delete_asset(self, asset_id: int) -> None:
-        """Delete asset"""
-
-        delete_statement = delete(ASSETS).where(ASSETS.c.asset_id == asset_id)
-
-        await self.db.execute(delete_statement)

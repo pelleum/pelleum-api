@@ -24,12 +24,13 @@ services:
         image: library/postgres:12-alpine
         environment:
             - POSTGRES_HOST=db
-            - POSTGRES_PORT=5432
+            - POSTGRES_PORT=5444
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=pelleum-dev-test
         ports:
-            - 5586:5586
+            - 5444:5444
+        command: -p 5444
 
     db:
         image: library/postgres:12-alpine
