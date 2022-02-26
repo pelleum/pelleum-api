@@ -1,43 +1,12 @@
 from typing import List
 
 import pytest
-import pytest_asyncio
 from databases import Database
 
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
-from app.usecases.schemas.users import UserInDB
 
-MANY_POSTS_NUMBER_NEEDED = 3
-
-
-@pytest_asyncio.fixture
-async def create_post_object(
-    inserted_user_object: UserInDB,
-) -> posts.CreatePostRepoAdapter:
-    return posts.CreatePostRepoAdapter(
-        content="This is a test post!",
-        asset_symbol="TSLA",
-        sentiment=posts.Sentiment.BULL,
-        user_id=inserted_user_object.user_id,
-        username=inserted_user_object.username,
-    )
-
-
-@pytest_asyncio.fixture
-async def create_many_posts(
-    posts_repo: IPostsRepo, create_post_object: posts.CreatePostRepoAdapter
-) -> List[posts.PostInDB]:
-
-    created_posts = []
-    for i, _ in enumerate(range(MANY_POSTS_NUMBER_NEEDED)):
-        if i % 2 == 0:
-            create_post_object.sentiment = posts.Sentiment.BEAR
-            create_post_object.asset_symbol = "AAPL"
-
-        created_posts.append(await posts_repo.create(new_post=create_post_object))
-
-    return created_posts
+from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
 
 @pytest.mark.asyncio
@@ -58,17 +27,17 @@ async def test_create(
 
 @pytest.mark.asyncio
 async def test_retrieve_many_with_filter(
-    posts_repo: IPostsRepo, create_many_posts: List[posts.PostInDB]
+    posts_repo: IPostsRepo, many_inserted_posts: List[posts.PostInDB]
 ):
 
     test_posts = await posts_repo.retrieve_many_with_filter(
         query_params=posts.PostQueryRepoAdapter(
-            user_id=create_many_posts[0].user_id,
-            requesting_user_id=create_many_posts[0].user_id,
+            user_id=many_inserted_posts[0].user_id,
+            requesting_user_id=many_inserted_posts[0].user_id,
         )
     )
 
-    assert len(test_posts[0]) >= MANY_POSTS_NUMBER_NEEDED
+    assert len(test_posts[0]) >= DEFAULT_NUMBER_OF_INSERTED_OBJECTS
     for post in test_posts[0]:
         assert isinstance(post, posts.PostInfoFromDB)
 

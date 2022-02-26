@@ -4,12 +4,10 @@ import pytest
 import pytest_asyncio
 from databases import Database
 
-from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
 from app.usecases.schemas import theses, thesis_reactions
 from app.usecases.schemas.users import UserInDB
-
-MANY_REACTIONS_NUMBER_NEEDED = 3
+from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
 
 @pytest_asyncio.fixture
@@ -31,36 +29,6 @@ async def inserted_thesis_reaction(
         "thesis_id": inserted_thesis_object.thesis_id,
         "user_id": inserted_user_object.user_id,
     }
-
-
-@pytest_asyncio.fixture
-async def create_thesis_object(
-    inserted_user_object: UserInDB,
-) -> theses.CreateThesisRepoAdapter:
-    return theses.CreateThesisRepoAdapter(
-        title="Different Test Thesis Title",
-        content="This is a test thesis on a test asset.",
-        asset_symbol="BTC",
-        sentiment=theses.Sentiment.BULL,
-        sources=["https://www.pelleum.com", "https://www.youtube.com"],
-        user_id=inserted_user_object.user_id,
-        username=inserted_user_object.username,
-    )
-
-
-@pytest_asyncio.fixture
-async def many_inserted_theses(
-    theses_repo: IThesesRepo,
-    create_thesis_object: theses.CreateThesisRepoAdapter,
-) -> List[theses.ThesisInDB]:
-    """Create many posts, so many post reactions can be created"""
-
-    inserted_theses = []
-    for i, _ in enumerate(range(MANY_REACTIONS_NUMBER_NEEDED)):
-        create_thesis_object.title += str(i)
-        inserted_theses.append(await theses_repo.create(thesis=create_thesis_object))
-
-    return inserted_theses
 
 
 @pytest_asyncio.fixture
@@ -150,7 +118,7 @@ async def test_retrieve_many_with_filter(
         )
     )
 
-    assert len(test_thesis_reactions[0]) >= MANY_REACTIONS_NUMBER_NEEDED
+    assert len(test_thesis_reactions[0]) >= DEFAULT_NUMBER_OF_INSERTED_OBJECTS
     for thesis in test_thesis_reactions[0]:
         assert isinstance(thesis, thesis_reactions.ThesisReactionInDB)
 

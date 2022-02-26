@@ -27,6 +27,8 @@ from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import posts, theses, users
 
 
+DEFAULT_NUMBER_OF_INSERTED_OBJECTS = 3
+
 # Database Connection
 @pytest_asyncio.fixture
 async def test_db_url():
@@ -151,6 +153,20 @@ async def inserted_thesis_object(
         )
     )
 
+@pytest_asyncio.fixture
+async def create_thesis_object(
+    inserted_user_object: users.UserInDB,
+) -> theses.CreateThesisRepoAdapter:
+    return theses.CreateThesisRepoAdapter(
+        title="Test Thesis Title",
+        content="This is a test thesis on a test asset.",
+        asset_symbol="BTC",
+        sentiment=theses.Sentiment.BULL,
+        sources=["https://www.pelleum.com", "https://www.youtube.com"],
+        user_id=inserted_user_object.user_id,
+        username=inserted_user_object.username,
+    )
+
 
 @pytest_asyncio.fixture
 async def many_inserted_theses(
@@ -158,15 +174,42 @@ async def many_inserted_theses(
 ) -> List[theses.ThesisInDB]:
 
     created_theses = []
-    for i, _ in enumerate(range(3)):
+    for i, _ in enumerate(range(DEFAULT_NUMBER_OF_INSERTED_OBJECTS)):
         create_thesis_object.title += str(i)
-
-        created_theses.append(await theses_repo.create(thesis=create_thesis_object))
+        created_theses.append(
+            await theses_repo.create(
+                thesis=create_thesis_object
+            )
+        )
 
     return created_theses
 
+@pytest_asyncio.fixture
+async def create_post_object(
+    inserted_user_object: users.UserInDB,
+) -> posts.CreatePostRepoAdapter:
+    return posts.CreatePostRepoAdapter(
+        content="This is a test post!",
+        asset_symbol="TSLA",
+        sentiment=posts.Sentiment.BULL,
+        user_id=inserted_user_object.user_id,
+        username=inserted_user_object.username,
+    )
 
-# Place repo fixtures here
+@pytest_asyncio.fixture
+async def many_inserted_posts(
+    posts_repo: IPostsRepo,
+    create_post_object: posts.CreatePostRepoAdapter,
+) -> List[posts.PostInDB]:
+    """Create many posts, so many post reactions can be created"""
+
+    return [
+        await posts_repo.create(new_post=create_post_object)
+        for _ in range(DEFAULT_NUMBER_OF_INSERTED_OBJECTS)
+    ]
+
+
+
 @pytest_asyncio.fixture
 def test_active_user() -> users.UserInDB:
     return users.UserInDB(

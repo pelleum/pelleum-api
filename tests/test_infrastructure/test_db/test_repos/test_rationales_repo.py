@@ -8,37 +8,9 @@ from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import rationales, theses
 from app.usecases.schemas.users import UserInDB
+from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
-MANY_RATIONALES_NUMBER_NEEDED = 3
-
-
-@pytest_asyncio.fixture
-async def create_thesis_object(
-    inserted_user_object: UserInDB,
-) -> theses.CreateThesisRepoAdapter:
-    return theses.CreateThesisRepoAdapter(
-        title="Test Thesis Title",
-        content="This is a test thesis on a test asset.",
-        asset_symbol="BTC",
-        sentiment=theses.Sentiment.BULL,
-        sources=["https://www.pelleum.com", "https://www.youtube.com"],
-        user_id=inserted_user_object.user_id,
-        username=inserted_user_object.username,
-    )
-
-
-@pytest_asyncio.fixture
-async def many_inserted_theses(
-    theses_repo: IThesesRepo, create_thesis_object: theses.CreateThesisRepoAdapter
-) -> List[theses.ThesisInDB]:
-
-    created_theses = []
-    for i, _ in enumerate(range(MANY_RATIONALES_NUMBER_NEEDED)):
-        create_thesis_object.title += str(i)
-
-        created_theses.append(await theses_repo.create(thesis=create_thesis_object))
-
-    return created_theses
+DEFAULT_NUMBER_OF_INSERTED_OBJECTS = 3
 
 
 @pytest_asyncio.fixture
@@ -107,7 +79,7 @@ async def test_retrieve_many_rationales_with_filter(
         )
     )
 
-    assert len(test_rationales[0]) >= MANY_RATIONALES_NUMBER_NEEDED
+    assert len(test_rationales[0]) >= DEFAULT_NUMBER_OF_INSERTED_OBJECTS
     for rationale in test_rationales[0]:
         assert isinstance(rationale, rationales.RationaleWithThesis)
 

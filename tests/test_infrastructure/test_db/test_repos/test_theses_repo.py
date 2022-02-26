@@ -5,24 +5,7 @@ import pytest_asyncio
 
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import theses
-from app.usecases.schemas.users import UserInDB
-
-MANY_THESES_NUMBER_NEEDED = 3
-
-
-@pytest_asyncio.fixture
-async def create_thesis_object(
-    inserted_user_object: UserInDB,
-) -> theses.CreateThesisRepoAdapter:
-    return theses.CreateThesisRepoAdapter(
-        title="Test Thesis Title",
-        content="This is a test thesis on a test asset.",
-        asset_symbol="BTC",
-        sentiment=theses.Sentiment.BULL,
-        sources=["https://www.pelleum.com", "https://www.youtube.com"],
-        user_id=inserted_user_object.user_id,
-        username=inserted_user_object.username,
-    )
+from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
 
 @pytest_asyncio.fixture
@@ -34,20 +17,6 @@ async def update_thesis_object(
         content="Updated thesis content",
         thesis_id=inserted_thesis_object.thesis_id,
     )
-
-
-@pytest_asyncio.fixture
-async def create_many_theses(
-    theses_repo: IThesesRepo, create_thesis_object: theses.CreateThesisRepoAdapter
-) -> List[theses.ThesisInDB]:
-
-    created_theses = []
-    for i, _ in enumerate(range(MANY_THESES_NUMBER_NEEDED)):
-        create_thesis_object.title += str(i)
-
-        created_theses.append(await theses_repo.create(thesis=create_thesis_object))
-
-    return created_theses
 
 
 @pytest.mark.asyncio
@@ -80,16 +49,16 @@ async def test_update(
 
 @pytest.mark.asyncio
 async def test_retrieve_many_with_filter(
-    theses_repo: IThesesRepo, create_many_theses: List[theses.ThesisInDB]
+    theses_repo: IThesesRepo, many_inserted_theses: List[theses.ThesisInDB]
 ):
 
     test_theses = await theses_repo.retrieve_many_with_filter(
         query_params=theses.ThesesQueryRepoAdapter(
-            user_id=create_many_theses[0].user_id,
-            requesting_user_id=create_many_theses[0].user_id,
+            user_id=many_inserted_theses[0].user_id,
+            requesting_user_id=many_inserted_theses[0].user_id,
         )
     )
 
-    assert len(test_theses[0]) >= MANY_THESES_NUMBER_NEEDED
+    assert len(test_theses[0]) >= DEFAULT_NUMBER_OF_INSERTED_OBJECTS
     for thesis in test_theses[0]:
         assert isinstance(thesis, theses.ThesisWithUserReaction)
