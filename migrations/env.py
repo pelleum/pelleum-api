@@ -17,6 +17,7 @@ from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
 from app.infrastructure.db.models.rationales import RATIONALES
 from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
 from app.infrastructure.db.models.users import USERS
+from app.infrastructure.db.models.subscriptions import SUBSCRIPTIONS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

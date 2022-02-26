@@ -27,3 +27,40 @@ class WebhookRequest(BaseModel):
 
 class WebhookResponse(BaseModel):
     pass
+
+# class CustomerRequest(BaseModel):
+#     pass
+
+# class CustomerResponse(BaseModel):
+#     pass
+
+class SubscriptionRequest(BaseModel):
+    userId: int = Field(
+        ...,
+        description='The user_id of the current logged in user',
+        example='1'
+    )
+    priceId: str = Field(
+        ...,
+        description='The price_id of the selected subscription',
+        example='price_1KXWJqLn3LY7wE9KXna1IPLV'
+    )
+    subscriptionId: Optional[str] = Field(
+        None,
+        description='The subscription_id for the subscription you want to modify',
+        example='sub_JgRjFjhKbtD2qz'
+    )
+
+class SubscriptionResponse(BaseModel):
+    subscriptionId: Optional[str] = Field(
+        None,
+        description='The subscription_id of the created subscription',
+        example='sub_JgRjFjhKbtD2qz'
+    )
+    clienSecret: Optional[str] = Field(
+        None,
+        description='The client secret for the paymentIntent of the latest invoice for the subscription',
+        example=''
+    )
+
+
