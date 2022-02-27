@@ -25,7 +25,7 @@ class UserUpdate(BaseModel):
     email: Optional[constr(max_length=100)] = Field(
         None, description="The user's email.", example="johndoe@example.com"
     )
-    username: Optional[constr(max_length=100)] = Field(
+    username: Optional[constr(max_length=15)] = Field(
         None, description="The user's Pelleum username.", example="johndoe"
     )
     password: Optional[constr(max_length=100)] = Field(

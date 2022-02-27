@@ -49,10 +49,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
         )
         username: str = payload.get("sub")
         if username is None:
-            raise pelleum_errors.invalid_credentials
+            raise await pelleum_errors.PelleumErrors().invalid_credentials()
         token_data = auth.JWTData(username=username)
     except JWTError:
-        raise pelleum_errors.invalid_credentials  # pylint: disable = raise-missing-from
+        raise await pelleum_errors.PelleumErrors().invalid_credentials()  # pylint: disable = raise-missing-from
 
     return await verify_user_exists(username=token_data.username)
 
@@ -61,7 +61,7 @@ async def verify_user_exists(username: str) -> UserInDB:
     users_repo = await get_users_repo()
     user = await users_repo.retrieve_user_with_filter(username=username)
     if user is None:
-        raise pelleum_errors.invalid_credentials
+        raise await pelleum_errors.PelleumErrors().invalid_credentials()
     return user
 
 
@@ -69,7 +69,7 @@ async def get_current_active_user(
     current_user: UserInDB = Depends(get_current_user),
 ) -> UserInDB:
     if not current_user.is_active:
-        raise pelleum_errors.inactive_user_error
+        raise await pelleum_errors.PelleumErrors().inactive_user()
     return current_user
 
 
