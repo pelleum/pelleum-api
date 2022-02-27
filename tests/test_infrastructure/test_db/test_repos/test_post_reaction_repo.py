@@ -10,7 +10,6 @@ from app.usecases.schemas.users import UserInDB
 from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
 
-
 @pytest_asyncio.fixture
 async def inserted_post_reaction(
     post_reaction_repo: IPostReactionRepo,

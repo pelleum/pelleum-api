@@ -27,10 +27,11 @@ async def create_new_thesis(
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
+    """Create a thesis."""
 
     if body.sources:
         if len(body.sources) > 10:
-            raise pelleum_errors.array_too_long
+            raise await pelleum_errors.PelleumErrors().array_too_long()
 
     create_thesis_request_raw = body.dict()
     create_thesis_request_raw.update(
@@ -55,9 +56,10 @@ async def update_thesis(
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
+    """Update a thesis."""
 
     if len(body.sources) > 10:
-        raise pelleum_errors.array_too_long
+        raise await pelleum_errors.PelleumErrors().array_too_long()
 
     thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
         thesis_id=thesis_id

@@ -5,7 +5,6 @@ from databases import Database
 
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
-
 from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
 
 

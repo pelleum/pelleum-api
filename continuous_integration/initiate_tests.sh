@@ -10,4 +10,4 @@ set -evx
 cd /app
 
 # Run continuous integration tasks
-inv suite
+inv ci

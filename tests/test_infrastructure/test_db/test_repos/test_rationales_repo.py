@@ -5,12 +5,9 @@ import pytest_asyncio
 from databases import Database
 
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
-from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import rationales, theses
 from app.usecases.schemas.users import UserInDB
 from tests.conftest import DEFAULT_NUMBER_OF_INSERTED_OBJECTS
-
-DEFAULT_NUMBER_OF_INSERTED_OBJECTS = 3
 
 
 @pytest_asyncio.fixture

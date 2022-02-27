@@ -213,6 +213,11 @@ async def get_rationales_query_params(
     users_repo: IUsersRepo = Depends(get_users_repo),
 ) -> rationales.RationaleQueryParams:
 
+    if not user_id and not asset_symbol:
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
+
     if user_id:
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)
 

@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import APIRouter, Body, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -28,12 +30,16 @@ async def login_for_access_token(
     user = await users_repo.retrieve_user_with_filter(username=form_data.username)
 
     if not user:
-        raise pelleum_errors.login_error
+        raise await pelleum_errors.PelleumErrors(
+            detail="Incorrect username or password."
+        ).invalid_credentials()
 
     password_matches = await verify_password(user=user, password=form_data.password)
 
     if not password_matches:
-        raise pelleum_errors.login_error
+        raise await pelleum_errors.PelleumErrors(
+            detail="Incorrect username or password."
+        ).invalid_credentials()
 
     access_token = await create_access_token(
         data=auth.AuthDataToCreateToken(sub=user.username)
@@ -57,26 +63,10 @@ async def create_new_user(
     """Upon signup, validates inputs, creates new user object, and creates new portfolio object."""
 
     # 1. Validate inputs
-    await validate_password(password=body.password)
-    await validate_email(email=body.email)
-
-    password_context = await get_password_context()
-
-    email_already_exists = await users_repo.retrieve_user_with_filter(email=body.email)
-    if email_already_exists:
-        raise await pelleum_errors.PelleumErrors(
-            detail="An account with this email already exists. Please choose another email."
-        ).account_exists()
-
-    username_already_exists = await users_repo.retrieve_user_with_filter(
-        username=body.username
-    )
-    if username_already_exists:
-        raise await pelleum_errors.PelleumErrors(
-            detail="An account with this username already exists. Please choose another username."
-        ).account_exists()
+    await validate_inputs(users_repo=users_repo, data=body)
 
     # 2. Create new user object
+    password_context = await get_password_context()
     new_user = await users_repo.create(new_user=body, password_context=password_context)
     new_user_raw = new_user.dict()
 
@@ -99,7 +89,12 @@ async def update_user(
     users_repo: IUsersRepo = Depends(get_users_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
+    """Update a user object's attributes."""
 
+    # 1. Validate inputes
+    await validate_inputs(users_repo=users_repo, data=body)
+
+    # 2. Update user
     password_context = await get_password_context()
     updated_user = await users_repo.update(
         updated_user=body,
@@ -108,7 +103,13 @@ async def update_user(
     )
     updated_user_raw = updated_user.dict()
 
-    return users.UserResponse(**updated_user_raw)
+    access_token = await create_access_token(
+        data=auth.AuthDataToCreateToken(sub=updated_user.username)
+    )
+
+    return users.UserWithAuthTokenResponse(
+        **updated_user_raw, access_token=access_token, token_type="bearer"
+    )
 
 
 @auth_router.get("", response_model=users.UserResponse)
@@ -116,3 +117,31 @@ async def get_current_user(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
     return users.UserResponse(**authorized_user.dict())
+
+
+async def validate_inputs(
+    users_repo: IUsersRepo, data=Union[users.UserCreate, users.UserUpdate]
+) -> None:
+    """Validate data inputes at user creation and update"""
+
+    if data.password:
+        await validate_password(password=data.password)
+
+    if data.email:
+        await validate_email(email=data.email)
+        email_already_exists = await users_repo.retrieve_user_with_filter(
+            email=data.email
+        )
+        if email_already_exists:
+            raise await pelleum_errors.PelleumErrors(
+                detail="An account with this email already exists. Please choose another email."
+            ).account_exists()
+
+    if data.username:
+        username_already_exists = await users_repo.retrieve_user_with_filter(
+            username=data.username
+        )
+        if username_already_exists:
+            raise await pelleum_errors.PelleumErrors(
+                detail="An account with this username already exists. Please choose another username."
+            ).account_exists()

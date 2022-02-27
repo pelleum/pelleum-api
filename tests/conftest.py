@@ -8,7 +8,16 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from passlib.context import CryptContext
 
-from app.dependencies import get_current_active_user
+from app.dependencies import (
+    get_current_active_user,
+    get_portfolio_repo,
+    get_post_reactions_repo,
+    get_posts_repo,
+    get_rationales_repo,
+    get_theses_repo,
+    get_thesis_reactions_repo,
+    get_users_repo,
+)
 from app.infrastructure.db.repos.portfolio_repo import PortfolioRepo
 from app.infrastructure.db.repos.post_reaction_repo import PostReactionRepo
 from app.infrastructure.db.repos.posts_repo import PostsRepo
@@ -26,8 +35,9 @@ from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
 from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import posts, theses, users
 
-
 DEFAULT_NUMBER_OF_INSERTED_OBJECTS = 3
+NON_HASHED_USER_PASSWORD = "AFGADaHAF$HADFHA1R"
+TEST_USERNAME = "inserted_name"
 
 # Database Connection
 @pytest_asyncio.fixture
@@ -104,7 +114,7 @@ async def inserted_user_object(
         new_user=users.UserCreate(
             email="inserted@test.com",
             username="inserted_name",
-            password="inserted_password",
+            password=NON_HASHED_USER_PASSWORD,
         ),
         password_context=CryptContext(schemes=["bcrypt"], deprecated="auto"),
     )
@@ -153,6 +163,7 @@ async def inserted_thesis_object(
         )
     )
 
+
 @pytest_asyncio.fixture
 async def create_thesis_object(
     inserted_user_object: users.UserInDB,
@@ -176,13 +187,10 @@ async def many_inserted_theses(
     created_theses = []
     for i, _ in enumerate(range(DEFAULT_NUMBER_OF_INSERTED_OBJECTS)):
         create_thesis_object.title += str(i)
-        created_theses.append(
-            await theses_repo.create(
-                thesis=create_thesis_object
-            )
-        )
+        created_theses.append(await theses_repo.create(thesis=create_thesis_object))
 
     return created_theses
+
 
 @pytest_asyncio.fixture
 async def create_post_object(
@@ -195,6 +203,7 @@ async def create_post_object(
         user_id=inserted_user_object.user_id,
         username=inserted_user_object.username,
     )
+
 
 @pytest_asyncio.fixture
 async def many_inserted_posts(
@@ -209,24 +218,26 @@ async def many_inserted_posts(
     ]
 
 
-
-@pytest_asyncio.fixture
-def test_active_user() -> users.UserInDB:
-    return users.UserInDB(
-        user_id=1,
-        hashed_password="some-password",
-        is_active=True,
-        is_superuser=False,
-        is_verified=False,
-    )
-
-
 @pytest_asyncio.fixture
 def test_app(
-    test_active_user: users.UserInDB,
+    inserted_user_object: users.UserInDB,
+    user_repo: IUsersRepo,
+    theses_repo: IThesesRepo,
+    posts_repo: IPostsRepo,
+    thesis_reaction_repo: IThesisReactionRepo,
+    post_reaction_repo: IPostReactionRepo,
+    portfolio_repo: IPortfolioRepo,
+    rationales_repo: IRationalesRepo,
 ) -> FastAPI:
     app = setup_app()
-    app.dependency_overrides[get_current_active_user] = lambda: test_active_user
+    app.dependency_overrides[get_current_active_user] = lambda: inserted_user_object
+    app.dependency_overrides[get_users_repo] = lambda: user_repo
+    app.dependency_overrides[get_theses_repo] = lambda: theses_repo
+    app.dependency_overrides[get_posts_repo] = lambda: posts_repo
+    app.dependency_overrides[get_thesis_reactions_repo] = lambda: thesis_reaction_repo
+    app.dependency_overrides[get_post_reactions_repo] = lambda: post_reaction_repo
+    app.dependency_overrides[get_portfolio_repo] = lambda: portfolio_repo
+    app.dependency_overrides[get_rationales_repo] = lambda: rationales_repo
     return app
 
 
