@@ -15,6 +15,16 @@ This repository contains code relevant to Pelleum's backend API. This API respon
 1. With an activated virtual environment, run `pip freeze > requirements.in`
 2. Run `make requirements.txt`
 
+### Migrating Database Schemas
+To migrate a new table or make a change to an existing table:
+1. Add a new model file or change an existing one found in the [/models](https://github.com/pelleum/pelleum-api/tree/continuous-integration-setup/app/infrastructure/db/models/public) directory
+2. Run:
+```make migration rev_id=<YOUR REVISION ID> migration_message="your migration message"```
+Example:
+```make migration rev_id=0002 migration_message="Added payments table"```
+  - This will auto-generate alembic files in the [/migrations/versions](https://github.com/pelleum/pelleum-api/tree/master/migrations/versions) directory, which are used for migration
+3. From there, provided you have a docker postgreSQL database up and running (`docker-compose up -d db`), you can migrate your changes by running `make migrate`
+
 ### Run the API (Locally)
 - Install [Docker](https://www.docker.com/)
 - Set environment variables in `.env` file in the project's root directory (get from senior engineer)
@@ -33,6 +43,8 @@ The following are helpful commands that utilize this project's [Makefile](https:
 - `make push`: pushes image to Docker Hub
 - `make format`: formats the code using [black](https://black.readthedocs.io/en/stable/) and sorts imports using [isort](https://pycqa.github.io/isort/). Running this target is necessary for continuous integration.
 - `make test`: starts continuous integration, which includes running all unit tests
+- `make migration`: see "Migrating Database Schemas" section
+- `make migrate`: migrates a schema to a target database
 
 ## Testing
 
@@ -54,7 +66,7 @@ As mentioned above, continuous integration is initiated by running `make test`. 
 ### Run Unit Tests Manually
 Unit tests can be run manually by running `invoke tests` or by running them individually using your IDE. Before running them, be sure to:
 1. Spin up the test postgreSQL docker container by running `docker-compose up -d test_db`
-2. Create account_connections schema using PgAdmin or by running: `CREATE SCHEMA account_connections`.
+2. Create `account_connections` schema using PgAdmin or by running: `CREATE SCHEMA account_connections`.
 3. Migrate database tables by running `alembic upgrade head` (you can temporarily change the database URL in the [env.py](https://github.com/pelleum/pelleum-api/blob/master/migrations/env.py) file to run alembic against the test database)
 
 ## Deployment
