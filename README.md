@@ -12,7 +12,6 @@ This repository contains code relevant to Pelleum's backend API. This API respon
 - See "Makefile Targets" section for Makefile setup
 
 ### Updating Requirements
-___
 1. With an activated virtual environment, run `pip freeze > requirements.in`
 2. Run `make requirements.txt`
 
