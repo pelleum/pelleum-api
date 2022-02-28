@@ -33,9 +33,9 @@ class Settings(BaseSettings):
     max_rationale_limit: int = 25
 
     # Stripe API Keys
-    stripe_publishable_key: str
-    stripe_secret_key: str
-    stripe_webhook_secret: str
+    stripe_test_publishable_key: str
+    stripe_test_secret_key: str
+    stripe_test_webhook_secret: str
 
     class Config:
         env_file = DOTENV_FILE
