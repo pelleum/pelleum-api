@@ -12,7 +12,7 @@ from app.dependencies import (  # pylint: disable = cyclic-import
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.interfaces.user_repo import IUserRepo
+from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import (
     post_reactions,
     posts,
@@ -28,7 +28,7 @@ async def get_post_reactions_query_params(  # pylint: disable = too-many-argumen
     reaction: Optional[post_reactions.ReactionString] = Query(None),
     start_time: Optional[datetime] = Query(None),
     end_time: Optional[datetime] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
 ) -> post_reactions.PostsReactionsQueryParams:
 
@@ -86,7 +86,7 @@ async def get_posts_query_params(  # pylint: disable = too-many-arguments
     by_popularity: Optional[bool] = Query(None),
     is_post_comment_on: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     is_thesis_comment_on: Optional[conint(gt=0, lt=100000000000)] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
 ) -> posts.PostQueryParams:
@@ -142,7 +142,7 @@ async def get_theses_query_params(
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
     sentiment: Optional[theses.Sentiment] = Query(None),
     by_popularity: Optional[bool] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
 ) -> theses.ThesesQueryParams:
 
     query_params_raw = {}
@@ -170,7 +170,7 @@ async def get_thesis_reactions_query_params(
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     thesis_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     reaction: Optional[thesis_reactions.ReactionString] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
 ) -> thesis_reactions.ThesisReactionsQueryParams:
 
@@ -210,8 +210,13 @@ async def get_thesis_reactions_query_params(
 async def get_rationales_query_params(
     user_id: Optional[conint(gt=0, lt=100000000000)] = Query(None),
     asset_symbol: Optional[constr(max_length=10)] = Query(None),
-    users_repo: IUserRepo = Depends(get_users_repo),
+    users_repo: IUsersRepo = Depends(get_users_repo),
 ) -> rationales.RationaleQueryParams:
+
+    if not user_id and not asset_symbol:
+        raise await pelleum_errors.PelleumErrors(
+            detail="No query parameters were sent. Please send valid query parameters."
+        ).invalid_query_params()
 
     if user_id:
         user = await users_repo.retrieve_user_with_filter(user_id=user_id)

@@ -12,11 +12,11 @@ from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.interfaces.user_repo import IUserRepo
+from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.interfaces.subscriptions_repo import ISubscriptionsRepo
 
 
-async def get_users_repo() -> IUserRepo:
+async def get_users_repo() -> IUsersRepo:
     return UsersRepo(db=await get_or_create_database())
 
 

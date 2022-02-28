@@ -4,49 +4,58 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
-class AssetInDB(BaseModel):
+class CreateAssetRepoAdapter(BaseModel):
+    thesis_id: Optional[int] = Field(
+        None, description="The thesis ID that this asset is linked to.", example="29"
+    )
+    skin_rating: Optional[float] = Field(
+        None,
+        description="The skin in the game rating we assign to the individual asset holding.",
+        example=9.8,
+    )
+    average_buy_price: Optional[float] = Field(
+        None,
+        description="The Pelleum user's average (per share) buy price.",
+        example=657.23,
+    )
+    total_contribution: Optional[float] = Field(
+        None,
+        description="The total amount of US dollars the Pelleum user has contributed toward this specific asset holding.",
+        example=39756.65,
+    )
+    user_id: int = Field(
+        ...,
+        description="The unique identifier of the Pelleum user's portfolio that this asset belongs to.",
+        example="29",
+    )
+    institution_id: str = Field(
+        ...,
+        description="The unique identifier of the Pelleum supported institution.",
+        example="c29cdd1a-feca-40b6-a4e1-f49c3a21f2af",
+    )
+    name: Optional[str] = Field(None, description="The asset's name.", example="Tesla")
+    asset_symbol: str = Field(
+        ..., description="The asset's ticker symbol.", example="TSLA"
+    )
+    position_value: Optional[float] = Field(
+        None,
+        description="The total value of the asset positoin in US dollars.",
+        example=102254.98,
+    )
+    quantity: float = Field(
+        ...,
+        description="The total number of shares owned.",
+        example=102254.98,
+    )
+
+
+class AssetInDB(CreateAssetRepoAdapter):
     """Database Model"""
 
     asset_id: int = Field(
         ...,
         description="The unique identifier of a Pelleum user's individually owned asset",
         example=1,
-    )
-    user_id: int = Field(
-        ..., description="Unique identifier for Pelleum user's portfolio.", example=1
-    )
-    institution_id: str = Field(
-        ...,
-        description="The unique identifer for a Pelleum supported institution.",
-        example="d74e2cf4-a4ea-4268-88b3-14bfcdf7c199",
-    )
-    thesis_id: Optional[int] = Field(
-        None,
-        description="The unique identifier of the asset's linked thesis.",
-        example=1,
-    )
-    asset_symbol: str = Field(..., description="The asset's symbol.", example="TSLA")
-    name: Optional[str] = Field(None, description="The asset's name.", example="Tesla")
-    quantity: float = Field(
-        ..., description="The number of asset units owned.", example=135.24
-    )
-    position_value: Optional[float] = Field(
-        None,
-        description="The US dollar value of the owned asset position.",
-        example=1234.56,
-    )
-    skin_rating: Optional[float] = Field(
-        None, description="The Pelleum assigned 'skin rating'.", example=9.8
-    )
-    average_buy_price: Optional[float] = Field(
-        None,
-        description="The average (USD) price that the user bought the asset at.",
-        example=134.35,
-    )
-    total_contribution: Optional[float] = Field(
-        None,
-        description="The sum of all the particular asset's purchases in USD.",
-        example=12345.34,
     )
     is_up_to_date: bool = Field(
         ...,

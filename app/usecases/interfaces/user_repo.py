@@ -6,7 +6,7 @@ from passlib.context import CryptContext
 from app.usecases.schemas import users
 
 
-class IUserRepo(ABC):
+class IUsersRepo(ABC):
     @abstractmethod
     async def create(
         self, new_user: users.UserCreate, password_context: CryptContext

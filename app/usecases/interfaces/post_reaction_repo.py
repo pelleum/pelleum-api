@@ -12,7 +12,7 @@ class IPostReactionRepo(ABC):
         """Create reaction"""
 
     @abstractmethod
-    async def delete(self, thesis_id: int, user_id: int) -> None:
+    async def delete(self, post_id: int, user_id: int) -> None:
         """Delete reaction"""
 
     @abstractmethod

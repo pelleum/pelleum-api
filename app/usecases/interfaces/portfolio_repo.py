@@ -6,6 +6,12 @@ from app.usecases.schemas import portfolios
 
 class IPortfolioRepo(ABC):
     @abstractmethod
+    async def create(
+        self, new_asset: portfolios.CreateAssetRepoAdapter
+    ) -> portfolios.AssetInDB:
+        """Create asset."""
+
+    @abstractmethod
     async def retrieve_asset(
         self,
         asset_id: int = None,

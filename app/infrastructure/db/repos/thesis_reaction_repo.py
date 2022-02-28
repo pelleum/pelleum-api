@@ -4,7 +4,7 @@ import asyncpg
 from databases import Database
 from sqlalchemy import and_, between, delete, desc, func, select
 
-from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
+from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
 from app.usecases.schemas import thesis_reactions
