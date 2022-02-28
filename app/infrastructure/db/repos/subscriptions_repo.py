@@ -3,7 +3,7 @@ from typing import Optional
 from databases import Database
 from sqlalchemy import and_
 
-from app.infrastructure.db.models.subscriptions import SUBSCRIPTIONS
+from app.infrastructure.db.models.public.subscriptions import SUBSCRIPTIONS
 from app.usecases.interfaces.subscriptions_repo import ISubscriptionsRepo
 from app.usecases.schemas import subscriptions
 
@@ -78,7 +78,7 @@ class SubscriptionsRepo(ISubscriptionsRepo):
             )
 
         await self.db.execute(subscription_update_stmt)
-        
+
         return await self.retrieve_subscription_with_filter(
             subscription_id=subscription_id,
             user_id=user_id,
