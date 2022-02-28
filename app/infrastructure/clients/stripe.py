@@ -1,3 +1,5 @@
+from typing import Any
+
 import stripe
 
 from app.usecases.interfaces.clients.stripe import IStripeClient
@@ -50,7 +52,7 @@ class StripeClient(IStripeClient):
 
     async def construct_webhook_event(
         self,
-        payload: dict,
+        payload: Any,
         sig_header: str,
     ) -> subscriptions.WebhookEvent:
         event = stripe.Webhook.construct_event(

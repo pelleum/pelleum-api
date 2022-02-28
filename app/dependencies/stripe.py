@@ -8,5 +8,5 @@ async def get_stripe_client(
     """Instantiate and return stripe client"""
 
     return StripeClient(
-        api_key=settings.stripe_secret_key, webhook_secret=settings.stripe_webhook_secret 
+        api_key=settings.stripe_test_secret_key, webhook_secret=settings.stripe_test_webhook_secret 
     )

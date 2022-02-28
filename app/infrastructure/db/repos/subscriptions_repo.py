@@ -54,7 +54,7 @@ class SubscriptionsRepo(ISubscriptionsRepo):
 
         updated_subscription_dict = {}
 
-        if is_active:
+        if is_active is not None:
             updated_subscription_dict['is_active'] = is_active
 
         if stripe_customer_id:

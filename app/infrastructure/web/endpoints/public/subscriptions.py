@@ -32,10 +32,8 @@ async def create_subscription(
         subscription_tier=subscription_tier
     )
     if existing_customer:
-        print('existing customer')
         customer_id = existing_customer.stripe_customer_id
     else:
-        print('not an existing customer')
         customer = await stripe_client.create_customer(
             email=authorized_user.email
         )
@@ -48,14 +46,12 @@ async def create_subscription(
     )
 
     if existing_subscription:
-        print('existing subscription', existing_subscription.subscription_id)
         await subscriptions_repo.update(
             subscription_id=existing_subscription.subscription_id,
             stripe_subscription_id=created_stripe_subscription.id,
             is_active=False # wait until webhook is received to set this to True
         )
     else:
-        print('not an existing subscription')
         await subscriptions_repo.create(
             user_id=user_id,
             subscription_tier=subscription_tier,
@@ -126,21 +122,18 @@ async def webhook_received(
     data_object = data['object']
 
     if event_type == 'invoice.paid':
-        print("invoice has been paid")
-        stripe_subscription_id = data_object['subscription']
-        await subscriptions_repo.update(
-            stripe_subscription_id=stripe_subscription_id,
-            is_active=True
-        )
+        if stripe_subscription_id := data_object['subscription']:
+            await subscriptions_repo.update(
+                stripe_subscription_id=stripe_subscription_id,
+                is_active=True
+            )
     elif event_type == 'invoice.payment_failed':
-        print("invoice has not been paid")
-        stripe_subscription_id = data_object['subscription']
-        await subscriptions_repo.update(
-            stripe_subscription_id=stripe_subscription_id,
-            is_active=False
-        )
+        if stripe_subscription_id := data_object['subscription']:
+            await subscriptions_repo.update(
+                stripe_subscription_id=stripe_subscription_id,
+                is_active=False
+            )
     elif event_type == 'invoice.payment_succeeded':
-        print("invoice payment succeeded")
         if data_object['billing_reason'] == 'subscription_create':
             stripe_subscription_id = data_object['subscription']
             payment_intent_id = data_object['payment_intent']
