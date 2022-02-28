@@ -18,7 +18,8 @@ SUBSCRIPTIONS = sa.Table(
         sa.String,
         nullable=False,
     ),
-    sa.Column("stripe_customer_id", sa.String, nullable=False, unique=True),
+    sa.Column("stripe_customer_id", sa.String, nullable=False),
+    sa.Column("stripe_subscription_id", sa.String, nullable=False, unique=True, index=True),
     sa.Column("is_active", sa.Boolean, nullable=False, default=True),
     sa.Column("created_at", sa.DateTime, nullable=False, server_default=sa.func.now()),
     sa.Column(

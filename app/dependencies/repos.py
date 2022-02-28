@@ -6,12 +6,14 @@ from app.infrastructure.db.repos.rationales_repo import RationalesRepo
 from app.infrastructure.db.repos.theses_repo import ThesesRepo
 from app.infrastructure.db.repos.thesis_reaction_repo import ThesisReactionRepo
 from app.infrastructure.db.repos.user_repo import UsersRepo
+from app.infrastructure.db.repos.subscriptions_repo import SubscriptionsRepo
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.user_repo import IUserRepo
+from app.usecases.interfaces.subscriptions_repo import ISubscriptionsRepo
 
 
 async def get_users_repo() -> IUserRepo:
@@ -40,3 +42,6 @@ async def get_portfolio_repo() -> IPortfolioRepo:
 
 async def get_rationales_repo() -> IRationalesRepo:
     return RationalesRepo(db=await get_or_create_database())
+
+async def get_subscriptions_repo() -> ISubscriptionsRepo:
+    return SubscriptionsRepo(db=await get_or_create_database())
