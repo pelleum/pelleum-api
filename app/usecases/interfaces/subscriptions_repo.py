@@ -12,7 +12,7 @@ class ISubscriptionsRepo(ABC):
         subscription_tier: str,
         stripe_customer_id: str,
         stripe_subscription_id: str,
-        is_active: bool
+        is_active: bool,
     ) -> Optional[subscriptions.SubscriptionInDB]:
         """Creates a subscription in the subscriptions table"""
 

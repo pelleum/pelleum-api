@@ -15,7 +15,7 @@ from app.infrastructure.web.endpoints.public import (
     rationales,
     subscriptions,
     theses,
-    thesis_reactions
+    thesis_reactions,
 )
 from app.settings import settings
 
@@ -43,7 +43,9 @@ def setup_app():
     )
     app.include_router(example_private.example_private_router, prefix="/private")
     app.include_router(health.health_router, prefix="/health")
-    app.include_router(subscriptions.subscriptions_router, prefix="/public/subscriptions")
+    app.include_router(
+        subscriptions.subscriptions_router, prefix="/public/subscriptions"
+    )
 
     return app
 

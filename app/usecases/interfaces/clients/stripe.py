@@ -29,10 +29,7 @@ class IStripeClient(ABC):
 
     @abstractmethod
     async def construct_webhook_event(
-        self,
-        payload: dict,
-        sig_header: str,
-        secret: str
+        self, payload: dict, sig_header: str, secret: str
     ) -> subscriptions.WebhookEvent:
         """Constructs a webhook event"""
 
@@ -45,8 +42,6 @@ class IStripeClient(ABC):
 
     @abstractmethod
     async def modify_subscription(
-        self,
-        stripe_subscription_id: str,
-        default_payment_method: str
+        self, stripe_subscription_id: str, default_payment_method: str
     ) -> subscriptions.StripeSubscription:
         """Modify a stripe subscription"""

@@ -25,10 +25,9 @@ from app.infrastructure.db.models.account_connections.institutions import (
 from app.infrastructure.db.models.public.portfolio import ASSETS
 from app.infrastructure.db.models.public.posts import POST_REACTIONS, POSTS
 from app.infrastructure.db.models.public.rationales import RATIONALES
+from app.infrastructure.db.models.public.subscriptions import SUBSCRIPTIONS
 from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.infrastructure.db.models.public.users import USERS
-from app.infrastructure.db.models.public.subscriptions import SUBSCRIPTIONS
-
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

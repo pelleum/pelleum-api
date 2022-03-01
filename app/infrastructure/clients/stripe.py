@@ -15,12 +15,8 @@ class StripeClient(IStripeClient):
         self,
         email: str,
     ) -> subscriptions.StripeCustomer:
-        customer = stripe.Customer.create(
-            email=email
-        )
-        return subscriptions.StripeCustomer(
-            id=customer.id
-        )
+        customer = stripe.Customer.create(email=email)
+        return subscriptions.StripeCustomer(id=customer.id)
 
     async def create_subscription(
         self,
@@ -30,15 +26,17 @@ class StripeClient(IStripeClient):
     ) -> subscriptions.StripeSubscription:
         subscription = stripe.Subscription.create(
             customer=customer_id,
-            items=[{
-                'price': price_id,
-            }],
+            items=[
+                {
+                    "price": price_id,
+                }
+            ],
             payment_behavior=payment_behavior,
-            expand=['latest_invoice.payment_intent']
+            expand=["latest_invoice.payment_intent"],
         )
         return subscriptions.StripeSubscription(
             id=subscription.id,
-            client_secret=subscription.latest_invoice.payment_intent.client_secret
+            client_secret=subscription.latest_invoice.payment_intent.client_secret,
         )
 
     async def delete_subscription(
@@ -46,9 +44,7 @@ class StripeClient(IStripeClient):
         stripe_subscription_id: str,
     ) -> subscriptions.StripeSubscription:
         deletedSubscription = stripe.Subscription.delete(stripe_subscription_id)
-        return subscriptions.StripeSubscription(
-            id=deletedSubscription.id
-        )
+        return subscriptions.StripeSubscription(id=deletedSubscription.id)
 
     async def construct_webhook_event(
         self,
@@ -56,14 +52,9 @@ class StripeClient(IStripeClient):
         sig_header: str,
     ) -> subscriptions.WebhookEvent:
         event = stripe.Webhook.construct_event(
-            payload=payload,
-            sig_header=sig_header,
-            secret=self.__webhook_secret
+            payload=payload, sig_header=sig_header, secret=self.__webhook_secret
         )
-        return subscriptions.WebhookEvent(
-            data=event['data'],
-            event_type=event['type']
-        )
+        return subscriptions.WebhookEvent(data=event["data"], event_type=event["type"])
 
     async def retrieve_payment_intent(
         self,
@@ -75,14 +66,9 @@ class StripeClient(IStripeClient):
         )
 
     async def modify_subscription(
-        self,
-        stripe_subscription_id: str,
-        default_payment_method: str
+        self, stripe_subscription_id: str, default_payment_method: str
     ) -> subscriptions.StripeSubscription:
         subscription = stripe.Subscription.modify(
-            stripe_subscription_id,
-            default_payment_method=default_payment_method
+            stripe_subscription_id, default_payment_method=default_payment_method
         )
-        return subscriptions.StripeSubscription(
-            id=subscription.id
-        )
+        return subscriptions.StripeSubscription(id=subscription.id)

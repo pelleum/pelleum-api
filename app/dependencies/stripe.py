@@ -3,10 +3,10 @@ from app.settings import settings
 from app.usecases.interfaces.clients.stripe import IStripeClient
 
 
-async def get_stripe_client(
-) -> IStripeClient:
+async def get_stripe_client() -> IStripeClient:
     """Instantiate and return stripe client"""
 
     return StripeClient(
-        api_key=settings.stripe_test_secret_key, webhook_secret=settings.stripe_test_webhook_secret 
+        api_key=settings.stripe_test_secret_key,
+        webhook_secret=settings.stripe_test_webhook_secret,
     )

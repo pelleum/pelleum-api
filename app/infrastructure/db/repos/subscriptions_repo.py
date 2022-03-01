@@ -18,7 +18,7 @@ class SubscriptionsRepo(ISubscriptionsRepo):
         subscription_tier: str,
         stripe_customer_id: str,
         stripe_subscription_id: str,
-        is_active: bool
+        is_active: bool,
     ) -> Optional[subscriptions.SubscriptionInDB]:
         """Creates a subscription in the subscriptions table"""
 
@@ -27,17 +27,15 @@ class SubscriptionsRepo(ISubscriptionsRepo):
             subscription_tier=subscription_tier,
             stripe_customer_id=stripe_customer_id,
             stripe_subscription_id=stripe_subscription_id,
-            is_active=is_active
+            is_active=is_active,
         )
 
-        await self.db.execute(
-            create_subscriptions_insert_stmt
-        )
+        await self.db.execute(create_subscriptions_insert_stmt)
 
         return await self.retrieve_subscription_with_filter(
             user_id=user_id,
             subscription_tier=subscription_tier,
-            stripe_subscription_id=stripe_subscription_id
+            stripe_subscription_id=stripe_subscription_id,
         )
 
     async def update(
@@ -55,25 +53,32 @@ class SubscriptionsRepo(ISubscriptionsRepo):
         updated_subscription_dict = {}
 
         if is_active is not None:
-            updated_subscription_dict['is_active'] = is_active
+            updated_subscription_dict["is_active"] = is_active
 
         if stripe_customer_id:
-            updated_subscription_dict['stripe_customer_id'] = stripe_customer_id
+            updated_subscription_dict["stripe_customer_id"] = stripe_customer_id
 
         if stripe_subscription_id:
-            updated_subscription_dict['stripe_subscription_id'] = stripe_subscription_id
+            updated_subscription_dict["stripe_subscription_id"] = stripe_subscription_id
 
         query = query.values(updated_subscription_dict)
 
         if subscription_id:
-            subscription_update_stmt = query.where(SUBSCRIPTIONS.c.subscription_id == subscription_id)
+            subscription_update_stmt = query.where(
+                SUBSCRIPTIONS.c.subscription_id == subscription_id
+            )
         elif user_id and subscription_tier:
-            conditions = [SUBSCRIPTIONS.c.user_id == user_id, SUBSCRIPTIONS.c.subscription_tier == subscription_tier]
+            conditions = [
+                SUBSCRIPTIONS.c.user_id == user_id,
+                SUBSCRIPTIONS.c.subscription_tier == subscription_tier,
+            ]
             subscription_update_stmt = query.where(and_(*conditions))
         elif stripe_subscription_id:
-            subscription_update_stmt = query.where(SUBSCRIPTIONS.c.stripe_subscription_id == stripe_subscription_id)
+            subscription_update_stmt = query.where(
+                SUBSCRIPTIONS.c.stripe_subscription_id == stripe_subscription_id
+            )
         else:
-            raise Exception( 
+            raise Exception(
                 "Please pass valid parameter to update by the function, update()"
             )
 
@@ -83,7 +88,7 @@ class SubscriptionsRepo(ISubscriptionsRepo):
             subscription_id=subscription_id,
             user_id=user_id,
             subscription_tier=subscription_tier,
-            stripe_subscription_id=stripe_subscription_id
+            stripe_subscription_id=stripe_subscription_id,
         )
 
     async def retrieve_subscription_with_filter(
@@ -91,7 +96,7 @@ class SubscriptionsRepo(ISubscriptionsRepo):
         subscription_id: int = None,
         user_id: int = None,
         subscription_tier: str = None,
-        stripe_subscription_id: str = None
+        stripe_subscription_id: str = None,
     ) -> Optional[subscriptions.SubscriptionInDB]:
         """Retrieve a subscription given the subscription or (user_id and subscription_tier)"""
         conditions = []
@@ -106,7 +111,9 @@ class SubscriptionsRepo(ISubscriptionsRepo):
             conditions.append(SUBSCRIPTIONS.c.subscription_tier == subscription_tier)
 
         if stripe_subscription_id:
-            conditions.append(SUBSCRIPTIONS.c.stripe_subscription_id == stripe_subscription_id)
+            conditions.append(
+                SUBSCRIPTIONS.c.stripe_subscription_id == stripe_subscription_id
+            )
 
         if not len(conditions):
             raise Exception(
