@@ -115,6 +115,8 @@ async def inserted_user_object(
             email="inserted@test.com",
             username="inserted_name",
             password=NON_HASHED_USER_PASSWORD,
+            gender="FEMALE",
+            birthdate="2002-11-27T06:00:00.000Z",
         ),
         password_context=CryptContext(schemes=["bcrypt"], deprecated="auto"),
     )

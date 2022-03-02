@@ -9,14 +9,20 @@ from app.usecases.schemas.users import UserCreate, UserInDB, UserUpdate
 @pytest_asyncio.fixture
 def create_user_object() -> UserCreate:
     return UserCreate(
-        email="test@test.com", username="test_username", password="test_password"
+        email="test@test.com",
+        username="test_username",
+        password="test_password",
+        gender="FEMALE",
+        birthdate="2002-11-27T06:00:00.000Z",
     )
 
 
 @pytest_asyncio.fixture
 def update_user_object() -> UserUpdate:
     """Only update username and password for test."""
-    return UserUpdate(password="updated_password", username="updated_name")
+    return UserUpdate(
+        password="updated_password", username="updated_name", gender="MALE"
+    )
 
 
 @pytest_asyncio.fixture

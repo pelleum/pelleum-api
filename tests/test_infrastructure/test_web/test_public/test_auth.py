@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from typing import Mapping
 
 import pytest
@@ -14,6 +15,8 @@ async def create_user_request_json() -> Mapping[str, str]:
         "email": "test@test.com",
         "username": "test",
         "password": NON_HASHED_USER_PASSWORD,
+        "gender": "MALE",
+        "birthdate": "2002-11-27T06:00:00.000Z",
     }
 
 
@@ -77,7 +80,10 @@ async def test_create_new_user(
     for key, value in response_data.items():
         assert key in expected_response_fields
         if key in create_user_request_json:
-            assert value == create_user_request_json.get(key)
+            if key != "birthdate":
+                assert value == create_user_request_json.get(key)
+            else:
+                assert isinstance(datetime.strptime(value, "%Y-%m-%d").date(), date)
 
     # Test invalid password
     json_copy = create_user_request_json.copy()
@@ -122,7 +128,7 @@ async def test_update_user(
 
     response = await test_client.patch(endpoint, json=updated_user_request_json)
     response_data = response.json()
-    expected_response_fields = [field for field in UserResponse.__fields__]
+    expected_response_fields = [field for field in UserWithAuthTokenResponse.__fields__]
 
     # Assertions
     assert response.status_code == 200

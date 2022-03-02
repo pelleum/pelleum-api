@@ -2,7 +2,7 @@
 
 Revision ID: 0001
 Revises: 
-Create Date: 2022-02-23 20:45:57.959782
+Create Date: 2022-03-02 12:25:28.827227
 
 """
 import sqlalchemy as sa
@@ -50,6 +50,8 @@ def upgrade():
         sa.Column("email", sa.String(), nullable=False),
         sa.Column("username", sa.String(), nullable=False),
         sa.Column("hashed_password", sa.String(), nullable=False),
+        sa.Column("gender", sa.String(), nullable=False),
+        sa.Column("birth_date", sa.Date(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column("is_verified", sa.Boolean(), nullable=False),
