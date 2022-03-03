@@ -23,6 +23,8 @@ class UsersRepo(IUsersRepo):
             email=new_user.email,
             username=new_user.username,
             hashed_password=hashed_password,
+            gender=new_user.gender,
+            birthdate=new_user.birthdate,
             is_active=True,
             is_superuser=False,
             is_verified=False,

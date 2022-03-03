@@ -82,13 +82,13 @@ async def create_new_user(
 @auth_router.patch(
     "",
     status_code=200,
-    response_model=users.UserResponse,
+    response_model=users.UserWithAuthTokenResponse,
 )
 async def update_user(
     body: users.UserUpdate = Body(...),
     users_repo: IUsersRepo = Depends(get_users_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
-) -> users.UserResponse:
+) -> users.UserWithAuthTokenResponse:
     """Update a user object's attributes."""
 
     # 1. Validate inputes
