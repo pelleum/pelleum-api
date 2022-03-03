@@ -42,19 +42,21 @@ async def create_subscription(
     )
 
     if existing_subscription:
-        await subscriptions_repo.update(
+        updated_record = subscriptions.SubscriptionRepoUpdate(
             subscription_id=existing_subscription.subscription_id,
             stripe_subscription_id=created_stripe_subscription.id,
             is_active=False,  # wait until webhook is received to set this to True
         )
+        await subscriptions_repo.update(updated_subscription=updated_record)
     else:
-        await subscriptions_repo.create(
+        new_record = subscriptions.SubscriptionRepoCreate(
             user_id=user_id,
             subscription_tier=subscription_tier,
             stripe_customer_id=customer_id,
             stripe_subscription_id=created_stripe_subscription.id,
             is_active=False,  # wait until webhook is received to set this to True
         )
+        await subscriptions_repo.create(new_subscription=new_record)
 
     return created_stripe_subscription
 
@@ -76,9 +78,11 @@ async def cancel_subscription(
         body.stripe_subscription_id
     )
 
-    await subscriptions_repo.update(
+    updated_record = subscriptions.SubscriptionRepoUpdate(
         stripe_subscription_id=stripe_subscription.id, is_active=False
     )
+
+    await subscriptions_repo.update(updated_subscription=updated_record)
 
     return stripe_subscription
 
@@ -126,14 +130,16 @@ async def webhook_received(
 
     if event_type == "invoice.paid":
         if stripe_subscription_id := data_object["subscription"]:
-            await subscriptions_repo.update(
+            updated_record = subscriptions.SubscriptionRepoUpdate(
                 stripe_subscription_id=stripe_subscription_id, is_active=True
             )
+            await subscriptions_repo.update(updated_subscription=updated_record)
     elif event_type == "invoice.payment_failed":
         if stripe_subscription_id := data_object["subscription"]:
-            await subscriptions_repo.update(
+            updated_record = subscriptions.SubscriptionRepoUpdate(
                 stripe_subscription_id=stripe_subscription_id, is_active=False
             )
+            await subscriptions_repo.update(updated_subscription=updated_record)
     elif event_type == "invoice.payment_succeeded":
         if data_object["billing_reason"] == "subscription_create":
             stripe_subscription_id = data_object["subscription"]

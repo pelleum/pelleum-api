@@ -14,6 +14,8 @@ from app.dependencies import (
     get_post_reactions_repo,
     get_posts_repo,
     get_rationales_repo,
+    get_stripe_client,
+    get_subscriptions_repo,
     get_theses_repo,
     get_thesis_reactions_repo,
     get_users_repo,
@@ -22,18 +24,22 @@ from app.infrastructure.db.repos.portfolio_repo import PortfolioRepo
 from app.infrastructure.db.repos.post_reaction_repo import PostReactionRepo
 from app.infrastructure.db.repos.posts_repo import PostsRepo
 from app.infrastructure.db.repos.rationales_repo import RationalesRepo
+from app.infrastructure.db.repos.subscriptions_repo import SubscriptionsRepo
 from app.infrastructure.db.repos.theses_repo import ThesesRepo
 from app.infrastructure.db.repos.thesis_reaction_repo import ThesisReactionRepo
 from app.infrastructure.db.repos.user_repo import UsersRepo
 from app.infrastructure.web.setup import setup_app
+from app.usecases.interfaces.clients.stripe import IStripeClient
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.rationales_repo import IRationalesRepo
+from app.usecases.interfaces.subscriptions_repo import ISubscriptionsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
 from app.usecases.interfaces.user_repo import IUsersRepo
-from app.usecases.schemas import posts, theses, users
+from app.usecases.schemas import posts, subscriptions, theses, users
+from tests.mocks.mock_stripe_client import MockStripeClient
 
 DEFAULT_NUMBER_OF_INSERTED_OBJECTS = 3
 NON_HASHED_USER_PASSWORD = "AFGADaHAF$HADFHA1R"
@@ -102,6 +108,16 @@ async def portfolio_repo(test_db: Database) -> IPortfolioRepo:
 @pytest_asyncio.fixture
 async def user_repo(test_db: Database) -> IUsersRepo:
     return UsersRepo(db=test_db)
+
+
+@pytest_asyncio.fixture
+async def subscriptions_repo(test_db: Database) -> ISubscriptionsRepo:
+    return SubscriptionsRepo(db=test_db)
+
+
+@pytest_asyncio.fixture
+async def stripe_client() -> IStripeClient:
+    return MockStripeClient()
 
 
 # Database-inserted Objects
@@ -219,6 +235,20 @@ async def many_inserted_posts(
 
 
 @pytest_asyncio.fixture
+async def inserted_subscription_object(
+    subscriptions_repo: ISubscriptionsRepo, inserted_user_object: users.UserInDB
+) -> subscriptions.SubscriptionInDB:
+    new_record = subscriptions.SubscriptionRepoCreate(
+        user_id=inserted_user_object.user_id,
+        subscription_tier="PRO",
+        stripe_customer_id="cus_123test",
+        stripe_subscription_id="sub_123test",
+        is_active=False,
+    )
+    return await subscriptions_repo.create(new_subscription=new_record)
+
+
+@pytest_asyncio.fixture
 def test_app(
     inserted_user_object: users.UserInDB,
     user_repo: IUsersRepo,
@@ -228,6 +258,8 @@ def test_app(
     post_reaction_repo: IPostReactionRepo,
     portfolio_repo: IPortfolioRepo,
     rationales_repo: IRationalesRepo,
+    subscriptions_repo: ISubscriptionsRepo,
+    stripe_client: IStripeClient,
 ) -> FastAPI:
     app = setup_app()
     app.dependency_overrides[get_current_active_user] = lambda: inserted_user_object
@@ -238,6 +270,8 @@ def test_app(
     app.dependency_overrides[get_post_reactions_repo] = lambda: post_reaction_repo
     app.dependency_overrides[get_portfolio_repo] = lambda: portfolio_repo
     app.dependency_overrides[get_rationales_repo] = lambda: rationales_repo
+    app.dependency_overrides[get_subscriptions_repo] = lambda: subscriptions_repo
+    app.dependency_overrides[get_stripe_client] = lambda: stripe_client
     return app
 
 

@@ -30,17 +30,29 @@ class CancelSubscription(BaseModel):
     )
 
 
-class SubscriptionInDB(BaseModel):
-    """Database Model"""
-
-    subscription_id: int
+class SubscriptionRepoCreate(BaseModel):
     user_id: int
     subscription_tier: str
     stripe_customer_id: str
     stripe_subscription_id: str
     is_active: bool
+
+
+class SubscriptionInDB(SubscriptionRepoCreate):
+    """Database Model"""
+
+    subscription_id: int
     created_at: datetime
     updated_at: datetime
+
+
+class SubscriptionRepoUpdate(BaseModel):
+    subscription_id: Optional[int] = None
+    user_id: Optional[int] = None
+    subscription_tier: Optional[str] = None
+    stripe_customer_id: Optional[str] = None
+    stripe_subscription_id: Optional[str] = None
+    is_active: Optional[bool] = None
 
 
 class StripeCustomer(BaseModel):

@@ -13,69 +13,56 @@ class SubscriptionsRepo(ISubscriptionsRepo):
         self.db = db
 
     async def create(
-        self,
-        user_id: int,
-        subscription_tier: str,
-        stripe_customer_id: str,
-        stripe_subscription_id: str,
-        is_active: bool,
+        self, new_subscription: subscriptions.SubscriptionRepoCreate
     ) -> Optional[subscriptions.SubscriptionInDB]:
         """Creates a subscription in the subscriptions table"""
 
         create_subscriptions_insert_stmt = SUBSCRIPTIONS.insert().values(
-            user_id=user_id,
-            subscription_tier=subscription_tier,
-            stripe_customer_id=stripe_customer_id,
-            stripe_subscription_id=stripe_subscription_id,
-            is_active=is_active,
+            user_id=new_subscription.user_id,
+            subscription_tier=new_subscription.subscription_tier,
+            stripe_customer_id=new_subscription.stripe_customer_id,
+            stripe_subscription_id=new_subscription.stripe_subscription_id,
+            is_active=new_subscription.is_active,
         )
 
         await self.db.execute(create_subscriptions_insert_stmt)
 
         return await self.retrieve_subscription_with_filter(
-            user_id=user_id,
-            subscription_tier=subscription_tier,
-            stripe_subscription_id=stripe_subscription_id,
+            user_id=new_subscription.user_id,
+            subscription_tier=new_subscription.subscription_tier,
+            stripe_subscription_id=new_subscription.stripe_subscription_id,
         )
 
     async def update(
-        self,
-        subscription_id: int = None,
-        user_id: int = None,
-        subscription_tier: str = None,
-        is_active: bool = None,
-        stripe_customer_id: str = None,
-        stripe_subscription_id: str = None,
+        self, updated_subscription: subscriptions.SubscriptionRepoUpdate
     ) -> Optional[subscriptions.SubscriptionInDB]:
         """Updates a subscription in the subscription table"""
         query = SUBSCRIPTIONS.update()
 
         updated_subscription_dict = {}
 
-        if is_active is not None:
-            updated_subscription_dict["is_active"] = is_active
-
-        if stripe_customer_id:
-            updated_subscription_dict["stripe_customer_id"] = stripe_customer_id
-
-        if stripe_subscription_id:
-            updated_subscription_dict["stripe_subscription_id"] = stripe_subscription_id
+        updated_subscription_raw = updated_subscription.dict()
+        for key, value in updated_subscription_raw.items():
+            if value is not None:
+                updated_subscription_dict[key] = value
 
         query = query.values(updated_subscription_dict)
 
-        if subscription_id:
+        if updated_subscription.subscription_id:
             subscription_update_stmt = query.where(
-                SUBSCRIPTIONS.c.subscription_id == subscription_id
+                SUBSCRIPTIONS.c.subscription_id == updated_subscription.subscription_id
             )
-        elif user_id and subscription_tier:
+        elif updated_subscription.user_id and updated_subscription.subscription_tier:
             conditions = [
-                SUBSCRIPTIONS.c.user_id == user_id,
-                SUBSCRIPTIONS.c.subscription_tier == subscription_tier,
+                SUBSCRIPTIONS.c.user_id == updated_subscription.user_id,
+                SUBSCRIPTIONS.c.subscription_tier
+                == updated_subscription.subscription_tier,
             ]
             subscription_update_stmt = query.where(and_(*conditions))
-        elif stripe_subscription_id:
+        elif updated_subscription.stripe_subscription_id:
             subscription_update_stmt = query.where(
-                SUBSCRIPTIONS.c.stripe_subscription_id == stripe_subscription_id
+                SUBSCRIPTIONS.c.stripe_subscription_id
+                == updated_subscription.stripe_subscription_id
             )
         else:
             raise Exception(
@@ -85,10 +72,10 @@ class SubscriptionsRepo(ISubscriptionsRepo):
         await self.db.execute(subscription_update_stmt)
 
         return await self.retrieve_subscription_with_filter(
-            subscription_id=subscription_id,
-            user_id=user_id,
-            subscription_tier=subscription_tier,
-            stripe_subscription_id=stripe_subscription_id,
+            subscription_id=updated_subscription.subscription_id,
+            user_id=updated_subscription.user_id,
+            subscription_tier=updated_subscription.subscription_tier,
+            stripe_subscription_id=updated_subscription.stripe_subscription_id,
         )
 
     async def retrieve_subscription_with_filter(
