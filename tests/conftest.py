@@ -71,6 +71,7 @@ async def test_db(test_db_url) -> Database:
     await test_db.execute("TRUNCATE theses_reactions CASCADE")
     await test_db.execute("TRUNCATE users CASCADE")
     await test_db.execute("TRUNCATE account_connections.institutions CASCADE")
+    await test_db.execute("TRUNCATE subscriptions CASCADE")
     await test_db.disconnect()
 
 

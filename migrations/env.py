@@ -55,6 +55,7 @@ postgres_password = getenv("POSTGRES_PASSWORD", default="postgres")
 postgres_database = getenv("POSTGRES_DB", default="pelleum-dev")
 
 url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_database}"
+# url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:5444/pelleum-dev-test"
 config.set_main_option("sqlalchemy.url", url)
 
 

@@ -1,7 +1,12 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
+
+
+class SubscriptionTier(str, Enum):
+    PRO = "PRO"
 
 
 class WebhookEvent(BaseModel):
@@ -10,7 +15,7 @@ class WebhookEvent(BaseModel):
 
 
 class CreateSubscription(BaseModel):
-    subscription_tier: str = Field(
+    subscription_tier: SubscriptionTier = Field(
         ...,
         description="The subscription tier for the subscription being created",
         example="PRO",
@@ -32,7 +37,7 @@ class CancelSubscription(BaseModel):
 
 class SubscriptionRepoCreate(BaseModel):
     user_id: int
-    subscription_tier: str
+    subscription_tier: SubscriptionTier
     stripe_customer_id: str
     stripe_subscription_id: str
     is_active: bool
@@ -49,7 +54,7 @@ class SubscriptionInDB(SubscriptionRepoCreate):
 class SubscriptionRepoUpdate(BaseModel):
     subscription_id: Optional[int] = None
     user_id: Optional[int] = None
-    subscription_tier: Optional[str] = None
+    subscription_tier: Optional[SubscriptionTier] = None
     stripe_customer_id: Optional[str] = None
     stripe_subscription_id: Optional[str] = None
     is_active: Optional[bool] = None
