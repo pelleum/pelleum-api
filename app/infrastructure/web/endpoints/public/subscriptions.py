@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, Request, Response
+from fastapi import APIRouter, Body, Depends, Path, Request, Response
 
 from app.dependencies.auth import get_current_active_user
 from app.dependencies.repos import get_subscriptions_repo
@@ -20,49 +20,44 @@ async def create_subscription(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> subscriptions.StripeSubscription:
     """Creates a new Stripe subscription. Also adds/updates a record to the subscription db table."""
-    try:
-        user_id = authorized_user.user_id
-        subscription_tier = body.subscription_tier
-        existing_customer = await subscriptions_repo.retrieve_subscription_with_filter(
+    user_id = authorized_user.user_id
+    subscription_tier = body.subscription_tier
+    existing_customer = await subscriptions_repo.retrieve_subscription_with_filter(
+        user_id=user_id,
+    )
+    existing_subscription = await subscriptions_repo.retrieve_subscription_with_filter(
+        user_id=user_id, subscription_tier=subscription_tier
+    )
+    if existing_customer:
+        customer_id = existing_customer.stripe_customer_id
+    else:
+        customer = await stripe_client.create_customer(email=authorized_user.email)
+        customer_id = customer.id
+
+    created_stripe_subscription = await stripe_client.create_subscription(
+        customer_id=customer_id,
+        price_id=body.price_id,
+        payment_behavior="default_incomplete",
+    )
+
+    if existing_subscription:
+        updated_record = subscriptions.SubscriptionRepoUpdate(
+            subscription_id=existing_subscription.subscription_id,
+            stripe_subscription_id=created_stripe_subscription.id,
+            is_active=False,  # wait until webhook is received to set this to True
+        )
+        await subscriptions_repo.update(updated_subscription=updated_record)
+    else:
+        new_record = subscriptions.SubscriptionRepoCreate(
             user_id=user_id,
+            subscription_tier=subscription_tier,
+            stripe_customer_id=customer_id,
+            stripe_subscription_id=created_stripe_subscription.id,
+            is_active=False,  # wait until webhook is received to set this to True
         )
-        existing_subscription = (
-            await subscriptions_repo.retrieve_subscription_with_filter(
-                user_id=user_id, subscription_tier=subscription_tier
-            )
-        )
-        if existing_customer:
-            customer_id = existing_customer.stripe_customer_id
-        else:
-            customer = await stripe_client.create_customer(email=authorized_user.email)
-            customer_id = customer.id
+        await subscriptions_repo.create(new_subscription=new_record)
 
-        created_stripe_subscription = await stripe_client.create_subscription(
-            customer_id=customer_id,
-            price_id=body.price_id,
-            payment_behavior="default_incomplete",
-        )
-
-        if existing_subscription:
-            updated_record = subscriptions.SubscriptionRepoUpdate(
-                subscription_id=existing_subscription.subscription_id,
-                stripe_subscription_id=created_stripe_subscription.id,
-                is_active=False,  # wait until webhook is received to set this to True
-            )
-            await subscriptions_repo.update(updated_subscription=updated_record)
-        else:
-            new_record = subscriptions.SubscriptionRepoCreate(
-                user_id=user_id,
-                subscription_tier=subscription_tier,
-                stripe_customer_id=customer_id,
-                stripe_subscription_id=created_stripe_subscription.id,
-                is_active=False,  # wait until webhook is received to set this to True
-            )
-            await subscriptions_repo.create(new_subscription=new_record)
-
-        return created_stripe_subscription
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return created_stripe_subscription
 
 
 @subscriptions_router.post(
@@ -77,20 +72,17 @@ async def cancel_subscription(
 ) -> subscriptions.StripeSubscription:
     """Cancels a Stripe subscription. Updates the subscription db record's is_active
     flag to false"""
-    try:
-        stripe_subscription = await stripe_client.delete_subscription(
-            body.stripe_subscription_id
-        )
+    stripe_subscription = await stripe_client.delete_subscription(
+        body.stripe_subscription_id
+    )
 
-        updated_record = subscriptions.SubscriptionRepoUpdate(
-            stripe_subscription_id=stripe_subscription.id, is_active=False
-        )
+    updated_record = subscriptions.SubscriptionRepoUpdate(
+        stripe_subscription_id=stripe_subscription.id, is_active=False
+    )
 
-        await subscriptions_repo.update(updated_subscription=updated_record)
+    await subscriptions_repo.update(updated_subscription=updated_record)
 
-        return stripe_subscription
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return stripe_subscription
 
 
 @subscriptions_router.get(
@@ -105,12 +97,9 @@ async def get_subscription(
 ) -> subscriptions.SubscriptionInDB:
     """This endpoint returns the subscription record for the current logged in user
     and the provided subscription tier"""
-    try:
-        return await subscriptions_repo.retrieve_subscription_with_filter(
-            user_id=authorized_user.user_id, subscription_tier=subscription_tier
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return await subscriptions_repo.retrieve_subscription_with_filter(
+        user_id=authorized_user.user_id, subscription_tier=subscription_tier
+    )
 
 
 @subscriptions_router.post(
@@ -124,46 +113,43 @@ async def webhook_received(
 ) -> Response:
     """Listens for webhook calls from Stripe"""
 
-    try:
-        # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
-        signature = request.headers.get("stripe-signature")
-        payload = await request.body()
-        event = await stripe_client.construct_webhook_event(
-            payload=payload,
-            sig_header=signature,
-        )
+    # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
+    signature = request.headers.get("stripe-signature")
+    payload = await request.body()
+    event = await stripe_client.construct_webhook_event(
+        payload=payload,
+        sig_header=signature,
+    )
 
-        data = event.data
-        event_type = event.event_type
-        data_object = data["object"]
+    data = event.data
+    event_type = event.event_type
+    data_object = data["object"]
 
-        if event_type == "invoice.paid":
-            if stripe_subscription_id := data_object["subscription"]:
-                updated_record = subscriptions.SubscriptionRepoUpdate(
-                    stripe_subscription_id=stripe_subscription_id, is_active=True
-                )
-                await subscriptions_repo.update(updated_subscription=updated_record)
-        elif event_type == "invoice.payment_failed":
-            if stripe_subscription_id := data_object["subscription"]:
-                updated_record = subscriptions.SubscriptionRepoUpdate(
-                    stripe_subscription_id=stripe_subscription_id, is_active=False
-                )
-                await subscriptions_repo.update(updated_subscription=updated_record)
-        elif event_type == "invoice.payment_succeeded":
-            if data_object["billing_reason"] == "subscription_create":
-                stripe_subscription_id = data_object["subscription"]
-                payment_intent_id = data_object["payment_intent"]
+    if event_type == "invoice.paid":
+        if stripe_subscription_id := data_object["subscription"]:
+            updated_record = subscriptions.SubscriptionRepoUpdate(
+                stripe_subscription_id=stripe_subscription_id, is_active=True
+            )
+            await subscriptions_repo.update(updated_subscription=updated_record)
+    elif event_type == "invoice.payment_failed":
+        if stripe_subscription_id := data_object["subscription"]:
+            updated_record = subscriptions.SubscriptionRepoUpdate(
+                stripe_subscription_id=stripe_subscription_id, is_active=False
+            )
+            await subscriptions_repo.update(updated_subscription=updated_record)
+    elif event_type == "invoice.payment_succeeded":
+        if data_object["billing_reason"] == "subscription_create":
+            stripe_subscription_id = data_object["subscription"]
+            payment_intent_id = data_object["payment_intent"]
 
-                payment_intent = await stripe_client.retrieve_payment_intent(
-                    payment_intent_id
-                )
+            payment_intent = await stripe_client.retrieve_payment_intent(
+                payment_intent_id
+            )
 
-                await stripe_client.modify_subscription(
-                    stripe_subscription_id=stripe_subscription_id,
-                    default_payment_method=payment_intent.payment_method,
-                )
+            await stripe_client.modify_subscription(
+                stripe_subscription_id=stripe_subscription_id,
+                default_payment_method=payment_intent.payment_method,
+            )
 
-        response.status_code = 200
-        return response
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    response.status_code = 200
+    return response

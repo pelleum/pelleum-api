@@ -84,3 +84,9 @@ class PelleumErrors:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The maximum amount of supporting sources is 10.",
         )
+
+    async def stripe_client_error(self):
+        return HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=self.detail if self.detail else "There was an external Stripe error",
+        )
