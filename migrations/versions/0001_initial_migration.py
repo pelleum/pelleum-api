@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration
 
 Revision ID: 0001
 Revises: 
-Create Date: 2022-03-02 12:25:28.827227
+Create Date: 2022-03-02 23:44:11.552454
 
 """
 import sqlalchemy as sa
@@ -51,7 +51,7 @@ def upgrade():
         sa.Column("username", sa.String(), nullable=False),
         sa.Column("hashed_password", sa.String(), nullable=False),
         sa.Column("gender", sa.String(), nullable=False),
-        sa.Column("birth_date", sa.Date(), nullable=False),
+        sa.Column("birthdate", sa.Date(), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column("is_verified", sa.Boolean(), nullable=False),
@@ -112,6 +112,35 @@ def upgrade():
         ["user_id", "institution_id"],
         unique=True,
         schema="account_connections",
+    )
+    op.create_table(
+        "subscriptions",
+        sa.Column("subscription_id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("subscription_tier", sa.String(), nullable=False),
+        sa.Column("stripe_customer_id", sa.String(), nullable=False),
+        sa.Column("stripe_subscription_id", sa.String(), nullable=False),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.user_id"],
+        ),
+        sa.PrimaryKeyConstraint("subscription_id"),
+    )
+    op.create_index(
+        op.f("ix_subscriptions_stripe_subscription_id"),
+        "subscriptions",
+        ["stripe_subscription_id"],
+        unique=True,
+    )
+    op.create_index(
+        op.f("ix_subscriptions_user_id"), "subscriptions", ["user_id"], unique=False
     )
     op.create_table(
         "theses",
@@ -345,6 +374,11 @@ def downgrade():
     op.drop_index(op.f("ix_theses_user_id"), table_name="theses")
     op.drop_index(op.f("ix_theses_asset_symbol"), table_name="theses")
     op.drop_table("theses")
+    op.drop_index(op.f("ix_subscriptions_user_id"), table_name="subscriptions")
+    op.drop_index(
+        op.f("ix_subscriptions_stripe_subscription_id"), table_name="subscriptions"
+    )
+    op.drop_table("subscriptions")
     op.drop_index(
         "ix_user_id_institution_id",
         table_name="institution_connections",

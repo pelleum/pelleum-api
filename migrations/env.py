@@ -25,6 +25,7 @@ from app.infrastructure.db.models.account_connections.institutions import (
 from app.infrastructure.db.models.public.portfolio import ASSETS
 from app.infrastructure.db.models.public.posts import POST_REACTIONS, POSTS
 from app.infrastructure.db.models.public.rationales import RATIONALES
+from app.infrastructure.db.models.public.subscriptions import SUBSCRIPTIONS
 from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.infrastructure.db.models.public.users import USERS
 
@@ -54,6 +55,7 @@ postgres_password = getenv("POSTGRES_PASSWORD", default="postgres")
 postgres_database = getenv("POSTGRES_DB", default="pelleum-dev")
 
 url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_database}"
+# url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:5444/pelleum-dev-test"
 config.set_main_option("sqlalchemy.url", url)
 
 
