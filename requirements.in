@@ -68,6 +68,7 @@ six==1.16.0
 sniffio==1.2.0
 SQLAlchemy==1.4.23
 starlette==0.14.2
+stripe==2.66.0
 toml==0.10.2
 tomli==1.2.1
 typing-extensions==3.10.0.2
