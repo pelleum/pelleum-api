@@ -83,7 +83,9 @@ def run_migrations_offline():
 
 def include_object(object, name, type_, reflected, compare_to):
     # If the table has a specified schema, don't include it
-    if type_ == "table" and object.schema:
+    if getenv("ENVIRONMENT") == "testing":
+        return True
+    elif type_ == "table" and object.schema:
         return False
     return True
 
@@ -106,7 +108,7 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            # include_object=include_object,
+            include_object=include_object,
         )
 
         with context.begin_transaction():

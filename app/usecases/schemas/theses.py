@@ -17,7 +17,7 @@ class TimeHorizon(str, Enum):
 
 
 class ThesisBase(BaseModel):
-    title: constr(max_length=256) = Field(
+    title: constr(max_length=100) = Field(
         ..., description="The thesis title.", example="Pelleum to Change the World."
     )
     content: constr(max_length=30000) = Field(
