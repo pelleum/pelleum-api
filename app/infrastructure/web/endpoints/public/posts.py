@@ -93,9 +93,7 @@ async def get_post(
         if key[0:7] == "thesis_" and value is not None:
             thesis_object_raw[key[7:]] = value
     return posts.PostResponse(
-        thesis=theses.ThesisInDB(**thesis_object_raw)
-        if thesis_object_raw
-        else None,
+        thesis=theses.ThesisInDB(**thesis_object_raw) if thesis_object_raw else None,
         **post_raw
     )
 

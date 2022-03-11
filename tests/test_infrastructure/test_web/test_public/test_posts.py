@@ -1,8 +1,8 @@
 from typing import List, Mapping
 
 import pytest
-from databases import Database
 import pytest_asyncio
+from databases import Database
 from httpx import AsyncClient
 
 from app.usecases.schemas.posts import PostInDB, PostResponse
@@ -94,4 +94,3 @@ async def test_delete_post(
     # Assertions
     assert response.status_code == 200
     assert not test_post
-

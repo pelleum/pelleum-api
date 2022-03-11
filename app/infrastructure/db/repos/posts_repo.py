@@ -71,11 +71,7 @@ class PostsRepo(IPostsRepo):
 
         columns_to_select = [POSTS] + thesis_columns
 
-        query = (
-            select(columns_to_select)
-            .select_from(j)
-            .where(and_(*conditions))
-        )
+        query = select(columns_to_select).select_from(j).where(and_(*conditions))
 
         result = await self.db.fetch_one(query)
         return posts.PostInfoFromDB(**result) if result else None
