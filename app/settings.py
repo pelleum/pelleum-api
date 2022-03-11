@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # Pelleum-product-specific Settings
     max_rationale_limit: int = 25
 
+    # Stripe API Keys
+    stripe_test_publishable_key: str
+    stripe_test_secret_key: str
+    stripe_test_webhook_secret: str
+
     class Config:
         env_file = DOTENV_FILE
 

@@ -49,7 +49,7 @@ async def test_delete(
     await posts_repo.delete(post_id=inserted_post_object.post_id)
 
     # 2. Ensure it no longer exists in the database
-    post = await test_db.execute(
+    post = await test_db.fetch_one(
         "SELECT * FROM posts WHERE posts.post_id = :post_id",
         {"post_id": inserted_post_object.post_id},
     )

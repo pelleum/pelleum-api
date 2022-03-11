@@ -7,6 +7,7 @@ from .repos import (
     get_post_reactions_repo,
     get_portfolio_repo,
     get_rationales_repo,
+    get_subscriptions_repo,
 )
 from .event_loop import get_event_loop
 from .http_client import get_client_session
@@ -27,3 +28,4 @@ from .query_params import (
     get_rationales_query_params,
 )
 from .account_connections import get_account_connections_client
+from .stripe import get_stripe_client

@@ -118,6 +118,7 @@ certifi==2021.10.8 \
     #   -r requirements.in
     #   httpcore
     #   httpx
+    #   requests
 cffi==1.14.6 \
     --hash=sha256:06c54a68935738d206570b20da5ef2b6b6d92b38ef3ec45c5422c0ebaf338d4d \
     --hash=sha256:0c0591bee64e438883b0c92a7bed78f6290d40bf02e54c5bf0978eaf36061771 \
@@ -180,6 +181,7 @@ charset-normalizer==2.0.12 \
     # via
     #   -r requirements.in
     #   httpx
+    #   requests
 click==8.0.1 \
     --hash=sha256:8c04c11192119b1ef78ea049e0a6f0463e4c48ef00a30160c704337586f3ad7a \
     --hash=sha256:fba402a4a47334742d782209a7c79bc448911afe1149d07bdabdf480b3e2f4b6
@@ -375,6 +377,8 @@ idna==3.2 \
     #   -r requirements.in
     #   anyio
     #   email-validator
+    #   requests
+    #   rfc3986
     #   yarl
 importlib-resources==5.2.2 \
     --hash=sha256:2480d8e07d1890056cb53c96e3de44fead9c62f2ba949b0f2e4c4345f4afa977 \
@@ -780,6 +784,10 @@ regex==2021.8.28 \
     # via
     #   -r requirements.in
     #   black
+requests==2.27.1 \
+    --hash=sha256:68d7c56fd5a8999887728ef304a6d12edc7be74f1cfa47714fc8b414525c9a61 \
+    --hash=sha256:f22fa1e554c9ddfd16e6e41ac79759e17be9e492b3587efa038054674760e72d
+    # via stripe
 respx==0.19.2 \
     --hash=sha256:417f986fec599b9cc6531e93e494b7a75d1cb7bccff9dde5b53edc51f7954494 \
     --hash=sha256:f3d210bb4de0ccc4c5afabeb87c3c1b03b3765a9c1a73eb042a07bb18ac33705
@@ -853,6 +861,10 @@ starlette==0.14.2 \
     # via
     #   -r requirements.in
     #   fastapi
+stripe==2.66.0 \
+    --hash=sha256:283f6f80d16cc5b473116697e0f4569df46b44826d1c78197880bce6dc066d0d \
+    --hash=sha256:77c6032230f7714b1a1b459074f08c60d60c229b9c3beac372719063e3d1409c
+    # via -r requirements.in
 toml==0.10.2 \
     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b \
     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
@@ -865,6 +877,7 @@ tomli==1.2.1 \
     # via
     #   -r requirements.in
     #   black
+    #   coverage
     #   pep517
     #   pytest
 typing-extensions==3.10.0.2 \
@@ -878,6 +891,10 @@ typing-extensions==3.10.0.2 \
     #   black
     #   pydantic
     #   pylint
+urllib3==1.26.8 \
+    --hash=sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed \
+    --hash=sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c
+    # via requests
 uvicorn==0.15.0 \
     --hash=sha256:17f898c64c71a2640514d4089da2689e5db1ce5d4086c2d53699bf99513421c1 \
     --hash=sha256:d9a3c0dd1ca86728d3e235182683b4cf94cd53a867c288eaeca80ee781b2caff
