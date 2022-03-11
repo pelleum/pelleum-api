@@ -78,6 +78,7 @@ async def get_post(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.PostResponse:
 
+    # 1. Retrieve the post
     post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
     if not post:
@@ -85,7 +86,18 @@ async def get_post(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 
-    return post
+    # 2. Format the post
+    post_raw = post.dict()
+    thesis_object_raw = {}
+    for key, value in post_raw.items():
+        if key[0:7] == "thesis_" and value is not None:
+            thesis_object_raw[key[7:]] = value
+    return posts.PostResponse(
+        thesis=theses.ThesisInDB(**thesis_object_raw)
+        if thesis_object_raw
+        else None,
+        **post_raw
+    )
 
 
 @posts_router.get(

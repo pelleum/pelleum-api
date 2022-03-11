@@ -1,6 +1,7 @@
 from typing import List, Mapping
 
 import pytest
+from databases import Database
 import pytest_asyncio
 from httpx import AsyncClient
 
@@ -76,12 +77,21 @@ async def test_get_many_posts(
 
 @pytest.mark.asyncio
 async def test_delete_post(
-    test_client: AsyncClient, inserted_post_object: PostInDB
+    test_client: AsyncClient, inserted_post_object: PostInDB, test_db: Database
 ) -> None:
 
     endpoint = f"/public/posts/{inserted_post_object.post_id}"
 
     response = await test_client.delete(endpoint)
 
+    test_post = await test_db.fetch_one(
+        "SELECT * FROM posts WHERE post_id=:post_id",
+        {
+            "post_id": inserted_post_object.post_id,
+        },
+    )
+
     # Assertions
     assert response.status_code == 200
+    assert not test_post
+

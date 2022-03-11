@@ -36,7 +36,7 @@ class PostsRepo(IPostsRepo):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> Optional[posts.PostInDB]:
+    ) -> Optional[posts.PostInfoFromDB]:
         """Retrieve post."""
 
         conditions = []
@@ -58,10 +58,27 @@ class PostsRepo(IPostsRepo):
                 "Please pass a condition parameter to query by to the function, retrieve_post_with_filter()"
             )
 
-        query = POSTS.select().where(and_(*conditions))
+        j = POSTS.join(
+            THESES,
+            POSTS.c.thesis_id == THESES.c.thesis_id,
+            isouter=True,
+        )
+
+        thesis_columns = [
+            column.label("thesis_" + str(column).split(".")[1])
+            for column in THESES.columns
+        ]
+
+        columns_to_select = [POSTS] + thesis_columns
+
+        query = (
+            select(columns_to_select)
+            .select_from(j)
+            .where(and_(*conditions))
+        )
 
         result = await self.db.fetch_one(query)
-        return posts.PostInDB(**result) if result else None
+        return posts.PostInfoFromDB(**result) if result else None
 
     async def retrieve_many_with_filter(
         self,
