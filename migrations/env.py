@@ -1,3 +1,4 @@
+# pylint: disable = global-statement
 import pathlib
 import sys
 from logging.config import fileConfig
@@ -12,11 +13,20 @@ load_dotenv()
 
 # Import Tables
 from app.infrastructure.db.metadata import METADATA
-from app.infrastructure.db.models.portfolio import ASSETS
-from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
-from app.infrastructure.db.models.rationales import RATIONALES
-from app.infrastructure.db.models.theses import THESES, THESES_REACTIONS
-from app.infrastructure.db.models.users import USERS
+
+# Account Connections Schema
+from app.infrastructure.db.models.account_connections.institutions import (
+    INSTITUTION_CONNECTIONS,
+    INSTITUTIONS,
+    ROBINHOOD_INSTRUMENTS,
+)
+
+# Public Schema
+from app.infrastructure.db.models.public.portfolio import ASSETS
+from app.infrastructure.db.models.public.posts import POST_REACTIONS, POSTS
+from app.infrastructure.db.models.public.rationales import RATIONALES
+from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
+from app.infrastructure.db.models.public.users import USERS
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -41,7 +51,7 @@ postgres_host = getenv("POSTGRES_HOST", default="localhost")
 postgres_port = getenv("POSTGRES_PORT", default=5432)
 postgres_user = getenv("POSTGRES_USER", default="postgres")
 postgres_password = getenv("POSTGRES_PASSWORD", default="postgres")
-postgres_database = getenv("POSTGRES_DATABASE", default="pelleum-dev")
+postgres_database = getenv("POSTGRES_DB", default="pelleum-dev")
 
 url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_database}"
 config.set_main_option("sqlalchemy.url", url)
@@ -96,7 +106,7 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             include_schemas=True,
-            include_object=include_object,
+            # include_object=include_object,
         )
 
         with context.begin_transaction():

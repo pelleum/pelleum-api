@@ -1,23 +1,19 @@
 from fastapi import HTTPException, status
 
-login_error = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Incorrect username or password",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-invalid_credentials = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
-
-inactive_user_error = HTTPException(status_code=400, detail="Inactive user")
-
 
 class PelleumErrors:
     def __init__(self, detail: str = None):
         self.detail = detail
+
+    async def invalid_credentials(self):
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=self.detail if self.detail else "Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    async def inactive_user(self):
+        return HTTPException(status_code=400, detail="Inactive user")
 
     async def account_exists(self):
         return HTTPException(
@@ -83,8 +79,8 @@ class PelleumErrors:
             else "Invalid query parameters sent to the endpiont.",
         )
 
-
-array_too_long = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
-    detail="The maximum amount of supporting sources is 10.",
-)
+    async def array_too_long(self):
+        return HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The maximum amount of supporting sources is 10.",
+        )

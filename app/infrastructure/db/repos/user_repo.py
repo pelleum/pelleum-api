@@ -4,12 +4,12 @@ from databases import Database
 from passlib.context import CryptContext
 from sqlalchemy import and_
 
-from app.infrastructure.db.models.users import USERS
-from app.usecases.interfaces.user_repo import IUserRepo
+from app.infrastructure.db.models.public.users import USERS
+from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import users
 
 
-class UsersRepo(IUserRepo):
+class UsersRepo(IUsersRepo):
     def __init__(self, db: Database):
         self.db = db
 
@@ -23,6 +23,8 @@ class UsersRepo(IUserRepo):
             email=new_user.email,
             username=new_user.username,
             hashed_password=hashed_password,
+            gender=new_user.gender,
+            birthdate=new_user.birthdate,
             is_active=True,
             is_superuser=False,
             is_verified=False,
@@ -74,6 +76,8 @@ class UsersRepo(IUserRepo):
         query = USERS.update()
 
         updated_user_raw = updated_user.dict()
+        updated_user_raw["hashed_password"] = updated_user.password
+        del updated_user_raw["password"]
         update_user_dict = {}
 
         for key, value in updated_user_raw.items():

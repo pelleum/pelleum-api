@@ -3,8 +3,8 @@ from typing import List, Optional, Tuple
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
-from app.infrastructure.db.models.posts import POST_REACTIONS, POSTS
-from app.infrastructure.db.models.theses import THESES
+from app.infrastructure.db.models.public.posts import POST_REACTIONS, POSTS
+from app.infrastructure.db.models.public.theses import THESES
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import posts
 
@@ -14,6 +14,7 @@ class PostsRepo(IPostsRepo):
         self.db = db
 
     async def create(self, new_post: posts.CreatePostRepoAdapter) -> posts.PostInDB:
+        """Create Post"""
 
         create_post_insert_stmt = POSTS.insert().values(
             user_id=new_post.user_id,
@@ -36,6 +37,7 @@ class PostsRepo(IPostsRepo):
         user_id: str = None,
         asset_symbol: str = None,
     ) -> Optional[posts.PostInDB]:
+        """Retrieve post."""
 
         conditions = []
 
@@ -67,6 +69,7 @@ class PostsRepo(IPostsRepo):
         page_number: int = 1,
         page_size: int = 200,
     ) -> Tuple[List[posts.PostInfoFromDB], int]:
+        """Retrieve many posts based on filter."""
 
         conditions = []
 
@@ -133,6 +136,7 @@ class PostsRepo(IPostsRepo):
         return theses_list, theses_count
 
     async def delete(self, post_id: int) -> None:
+        """Delete a post."""
 
         delete_statement = delete(POSTS).where(POSTS.c.post_id == post_id)
 
