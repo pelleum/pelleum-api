@@ -108,7 +108,7 @@ class ThesisWithUserReaction(ThesisInDB):
     user_reaction_value: Optional[int] = None
 
 
-class ThesisResponse(ThesisInDB):
+class ThesisResponse(ThesisWithUserReaction):
     """Response returned to user"""
 
 
