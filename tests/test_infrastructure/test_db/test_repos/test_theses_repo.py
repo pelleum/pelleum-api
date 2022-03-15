@@ -62,17 +62,18 @@ async def test_retrieve_many_with_filter(
 
     assert len(test_theses[0]) >= DEFAULT_NUMBER_OF_INSERTED_OBJECTS
     for thesis in test_theses[0]:
-        assert isinstance(thesis, theses.ThesisWithUserReaction)
+        assert isinstance(thesis, theses.ThesisInDB)
 
 
 @pytest.mark.asyncio
 async def test_retrieve_thesis_with_reaction(
-    theses_repo: IThesesRepo, inserted_thesis_object: theses.ThesisInDB, inserted_user_object: UserInDB
+    theses_repo: IThesesRepo,
+    inserted_thesis_object: theses.ThesisInDB,
+    inserted_user_object: UserInDB,
 ):
 
     test_thesis = await theses_repo.retrieve_thesis_with_reaction(
-        thesis_id=inserted_thesis_object.thesis_id,
-        user_id=inserted_user_object.user_id
+        thesis_id=inserted_thesis_object.thesis_id, user_id=inserted_user_object.user_id
     )
 
     assert isinstance(test_thesis, theses.ThesisWithUserReaction)

@@ -122,7 +122,7 @@ class ThesesRepo(IThesesRepo):
         query_params: theses.ThesesQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[theses.ThesisWithUserReaction], int]:
+    ) -> Tuple[List[theses.ThesisInDB], int]:
 
         conditions = []
 
@@ -135,33 +135,23 @@ class ThesesRepo(IThesesRepo):
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
 
-        j = THESES.join(
-            THESES_REACTIONS,
-            and_(
-                THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
-                THESES_REACTIONS.c.user_id == query_params.requesting_user_id,
-            ),
-            isouter=True,
-        )
-
         query = (
-            select([THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
-            .select_from(j)
+            THESES.select()
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(THESES.c.created_at))
         )
 
-        query_count = select([func.count()]).select_from(j).where(and_(*conditions))
+        query_count = (
+            select([func.count()]).select_from(THESES).where(and_(*conditions))
+        )
 
         async with self.db.transaction():
             query_results = await self.db.fetch_all(query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [
-            theses.ThesisWithUserReaction(**result) for result in query_results
-        ]
+        theses_list = [theses.ThesisInDB(**result) for result in query_results]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count

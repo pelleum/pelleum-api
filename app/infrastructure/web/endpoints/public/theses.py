@@ -89,7 +89,9 @@ async def get_thesis(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
-    thesis = await theses_repo.retrieve_thesis_with_reaction(thesis_id=thesis_id, user_id=authorized_user.user_id)
+    thesis = await theses_repo.retrieve_thesis_with_reaction(
+        thesis_id=thesis_id, user_id=authorized_user.user_id
+    )
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(

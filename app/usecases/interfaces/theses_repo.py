@@ -18,7 +18,7 @@ class IThesesRepo(ABC):
         title: Optional[str] = None,
     ) -> Optional[theses.ThesisInDB]:
         pass
-    
+
     @abstractmethod
     async def retrieve_thesis_with_reaction(
         self, thesis_id: int, user_id: int
@@ -38,5 +38,5 @@ class IThesesRepo(ABC):
         query_params: theses.ThesesQueryRepoAdapter,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[theses.ThesisWithUserReaction], int]:
+    ) -> Tuple[List[theses.ThesisInDB], int]:
         pass

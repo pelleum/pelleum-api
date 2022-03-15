@@ -72,12 +72,16 @@ class ThesisReactionInDB(ThesisReactionBase):
 
 class ThesesReactions(BaseModel):
     """Equivalent to a list of database models"""
+
     theses_reactions: List[ThesisReactionInDB]
+
 
 class ThesisReactionResponse(BaseModel):
     """Lets requester know if thesis is liked by requester"""
+
     thesis_id: int
     user_reaction_value: Optional[int]
+
 
 class ManyThesesReactionsResponse(BaseModel):
     """Response returned to user"""

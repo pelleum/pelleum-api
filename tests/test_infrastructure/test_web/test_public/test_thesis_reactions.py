@@ -57,8 +57,6 @@ async def test_get_thesis_reaction(
         assert key in expected_response_fields
     assert response_data["user_reaction_value"] == reaction_value
 
-    
-
 
 @pytest.mark.asyncio
 async def test_update_thesis_reaction(

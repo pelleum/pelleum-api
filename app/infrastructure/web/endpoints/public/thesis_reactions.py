@@ -82,6 +82,7 @@ async def update_thesis_reaction(
 
     await thesis_reactions_repo.update(thesis_reaction_update=updated_reaction)
 
+
 @thesis_reactions_router.get("/{thesis_id}", status_code=200)
 async def get_thesis_reaction(
     thesis_id: conint(gt=0, lt=100000000000) = Path(...),
@@ -99,13 +100,16 @@ async def get_thesis_reaction(
         ).invalid_resource_id()
 
     # 2. Retrieve thesis reaction value
-    thesis_reaction = await thesis_reactions_repo.retrieve_single(thesis_id=thesis_id, user_id=authorized_user.user_id)
+    thesis_reaction = await thesis_reactions_repo.retrieve_single(
+        thesis_id=thesis_id, user_id=authorized_user.user_id
+    )
 
     return thesis_reactions.ThesisReactionResponse(
         thesis_id=thesis.thesis_id,
-        user_reaction_value=thesis_reaction.reaction if thesis_reaction else None
+        user_reaction_value=thesis_reaction.reaction if thesis_reaction else None,
     )
-        
+
+
 @thesis_reactions_router.get(
     "/retrieve/many",
     status_code=200,
@@ -142,8 +146,6 @@ async def get_many_thesis_reactions(
             ),
         ),
     )
-
-
 
 
 @thesis_reactions_router.delete(
