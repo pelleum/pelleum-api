@@ -12,12 +12,18 @@ class IThesesRepo(ABC):
     @abstractmethod
     async def retrieve_thesis_with_filter(
         self,
-        thesis_id: int = None,
-        user_id: str = None,
-        asset_symbol: str = None,
-        title: str = None,
+        thesis_id: Optional[int] = None,
+        user_id: Optional[str] = None,
+        asset_symbol: Optional[str] = None,
+        title: Optional[str] = None,
     ) -> Optional[theses.ThesisInDB]:
         pass
+    
+    @abstractmethod
+    async def retrieve_thesis_with_reaction(
+        self, thesis_id: int, user_id: int
+    ) -> Optional[theses.ThesisWithUserReaction]:
+        """Retrieves a thesis with its corresponding user reaction"""
 
     @abstractmethod
     async def update(

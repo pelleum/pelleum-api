@@ -28,23 +28,22 @@ class ThesesRepo(IThesesRepo):
         )
 
         try:
-            await self.db.execute(create_thesis_insert_stmt)
+            thesis_id = await self.db.execute(create_thesis_insert_stmt)
         except asyncpg.exceptions.UniqueViolationError:
             raise await pelleum_errors.PelleumErrors(
                 detail="A thesis with this title already exists on your account. Please choose a new title."
             ).unique_constraint()
 
-        return await self.retrieve_thesis_with_filter(
-            user_id=thesis.user_id, title=thesis.title
-        )
+        return await self.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     async def retrieve_thesis_with_filter(
         self,
-        thesis_id: int = None,
-        user_id: str = None,
-        asset_symbol: str = None,
-        title: str = None,
+        thesis_id: Optional[int] = None,
+        user_id: Optional[str] = None,
+        asset_symbol: Optional[str] = None,
+        title: Optional[str] = None,
     ) -> Optional[theses.ThesisInDB]:
+        """Retrieve Thesis object from database"""
 
         conditions = []
 
@@ -64,10 +63,35 @@ class ThesesRepo(IThesesRepo):
             raise Exception(
                 "Please pass a condition parameter to query by to the function, retrieve_thesis_with_filter()"
             )
+
         query = THESES.select().where(and_(*conditions))
 
         result = await self.db.fetch_one(query)
         return theses.ThesisInDB(**result) if result else None
+
+    async def retrieve_thesis_with_reaction(
+        self, thesis_id: int, user_id: int
+    ) -> Optional[theses.ThesisWithUserReaction]:
+        """Retrieves a thesis with its corresponding user reaction"""
+
+        j = THESES.join(
+            THESES_REACTIONS,
+            and_(
+                THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
+                THESES_REACTIONS.c.user_id == user_id,
+            ),
+            isouter=True,
+        )
+
+        query = (
+            select([THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
+            .select_from(j)
+            .where(THESES.c.thesis_id == thesis_id)
+        )
+
+        query_result = await self.db.fetch_one(query)
+
+        return theses.ThesisWithUserReaction(**query_result) if query_result else None
 
     async def update(
         self,

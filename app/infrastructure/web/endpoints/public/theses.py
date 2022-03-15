@@ -61,9 +61,7 @@ async def update_thesis(
     if len(body.sources) > 10:
         raise await pelleum_errors.PelleumErrors().array_too_long()
 
-    thesis: theses.ThesisInDB = await theses_repo.retrieve_thesis_with_filter(
-        thesis_id=thesis_id
-    )
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
 
     if not thesis or thesis.user_id != authorized_user.user_id:
         raise await pelleum_errors.PelleumErrors(
@@ -91,7 +89,7 @@ async def get_thesis(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
-    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
+    thesis = await theses_repo.retrieve_thesis_with_reaction(thesis_id=thesis_id, user_id=authorized_user.user_id)
 
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
