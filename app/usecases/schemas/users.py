@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, constr
 
@@ -59,6 +59,7 @@ class UserResponse(UserBase):
     is_verified: bool
     gender: Gender
     birthdate: date
+    block_list: Optional[List[int]]
     created_at: datetime
     updated_at: datetime
 
@@ -76,6 +77,7 @@ class UserInDB(UserBase):
     is_active: bool
     gender: Gender
     birthdate: date
+    block_list: Optional[List[int]]
     is_superuser: bool
     is_verified: bool
     created_at: datetime

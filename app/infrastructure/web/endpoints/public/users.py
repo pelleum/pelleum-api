@@ -1,7 +1,9 @@
+from turtle import update
 from typing import Union
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Path
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import conint
 
 from app.dependencies import (
     create_access_token,
@@ -145,3 +147,61 @@ async def validate_inputs(
             raise await pelleum_errors.PelleumErrors(
                 detail="An account with this username already exists. Please choose another username."
             ).account_exists()
+
+
+@auth_router.patch("/block/{blocked_user_id}", status_code=201)
+async def block_user(
+    blocked_user_id: conint(gt=0, lt=100000000000) = Path(...),
+    users_repo: IUsersRepo = Depends(get_users_repo),
+    authorized_user: users.UserInDB = Depends(get_current_active_user),
+) -> None:
+    """Block a user."""
+
+    # 1. See if user is already blocked
+    user_object = await users_repo.retrieve_user_with_filter(
+        user_id=authorized_user.user_id
+    )
+
+    if user_object.block_list:
+        if blocked_user_id in user_object.block_list:
+            raise await pelleum_errors.PelleumErrors(
+                detail="This user has already been blocked."
+            ).unique_constraint()
+
+        user_object.block_list.append(blocked_user_id)
+    else:
+        user_object.block_list = [blocked_user_id]
+    
+    await users_repo.manage_blocks(
+        user_id=authorized_user.user_id, updated_block_list=user_object.block_list
+    )
+
+
+@auth_router.delete("/block/{blocked_user_id}", status_code=200)
+async def unblock_user(
+    blocked_user_id: conint(gt=0, lt=100000000000) = Path(...),
+    users_repo: IUsersRepo = Depends(get_users_repo),
+    authorized_user: users.UserInDB = Depends(get_current_active_user),
+) -> None:
+    """Un-block a user."""
+
+    # 1. See if user is already blocked
+    user_object = await users_repo.retrieve_user_with_filter(
+        user_id=authorized_user.user_id
+    )
+
+    if not user_object.block_list:
+        raise await pelleum_errors.PelleumErrors(
+            detail="This user is not blocked, so you can't remove a block."
+        ).general_error()
+
+    if blocked_user_id not in user_object.block_list:
+        raise await pelleum_errors.PelleumErrors(
+            detail="This user is not blocked, so you can't remove a block."
+        ).general_error()
+
+    # 2. Remove user_id from user's block list
+    user_object.block_list.remove(blocked_user_id)
+    await users_repo.manage_blocks(
+        user_id=authorized_user.user_id, updated_block_list=user_object.block_list
+    )

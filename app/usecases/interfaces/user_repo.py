@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import List, Optional
 
 from passlib.context import CryptContext
 
@@ -30,3 +30,7 @@ class IUsersRepo(ABC):
         password_context: CryptContext,
     ) -> users.UserInDB:
         pass
+
+    @abstractmethod
+    async def manage_blocks(self, user_id: str, updated_block_list: List[int]) -> None:
+        """Manage blocked users."""

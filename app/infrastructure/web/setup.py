@@ -8,7 +8,6 @@ from app.infrastructure.web.endpoints import health
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints.public import (
     account_connections,
-    auth,
     portfolio,
     post_reactions,
     posts,
@@ -16,6 +15,7 @@ from app.infrastructure.web.endpoints.public import (
     subscriptions,
     theses,
     thesis_reactions,
+    users,
 )
 from app.settings import settings
 
@@ -26,7 +26,7 @@ def setup_app():
         description="The following are endpoints for the Pelleum mobile appliaction to utilize.",
         openapi_url=settings.openapi_url,
     )
-    app.include_router(auth.auth_router, prefix="/public/auth/users")
+    app.include_router(users.auth_router, prefix="/public/users")
 
     app.include_router(theses.theses_router, prefix="/public/theses")
     app.include_router(

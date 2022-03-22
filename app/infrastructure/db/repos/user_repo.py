@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from databases import Database
 from passlib.context import CryptContext
@@ -91,3 +91,14 @@ class UsersRepo(IUsersRepo):
         await self.db.execute(user_update_stmt)
 
         return await self.retrieve_user_with_filter(user_id=user_id)
+
+    async def manage_blocks(self, user_id: str, updated_block_list: List[int]) -> None:
+        """Manage blocked users."""
+
+        user_updated_stmt = (
+            USERS.update()
+            .values(block_list=updated_block_list)
+            .where(USERS.c.user_id == user_id)
+        )
+
+        await self.db.execute(user_updated_stmt)

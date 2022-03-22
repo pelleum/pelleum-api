@@ -39,7 +39,7 @@ async def test_login_for_access_token(
         "password": NON_HASHED_USER_PASSWORD,
     }
 
-    endpoint = "/public/auth/users/login"
+    endpoint = "/public/users/login"
 
     response = await test_client.post(endpoint, data=test_login_data)
     response_data = response.json()
@@ -68,7 +68,7 @@ async def test_create_new_user(
     test_client: AsyncClient, create_user_request_json: Mapping[str, str]
 ) -> None:
 
-    endpoint = "/public/auth/users"
+    endpoint = "/public/users"
 
     # Test successful user creation
     response = await test_client.post(endpoint, json=create_user_request_json)
@@ -107,7 +107,7 @@ async def test_create_new_user(
 @pytest.mark.asyncio
 async def test_get_current_user(test_client: AsyncClient) -> None:
 
-    endpoint = "/public/auth/users"
+    endpoint = "/public/users"
 
     response = await test_client.get(endpoint)
     response_data = response.json()
@@ -124,7 +124,7 @@ async def test_update_user(
     test_client: AsyncClient, updated_user_request_json: Mapping[str, str]
 ) -> None:
 
-    endpoint = "/public/auth/users"
+    endpoint = "/public/users"
 
     response = await test_client.patch(endpoint, json=updated_user_request_json)
     response_data = response.json()
