@@ -155,25 +155,47 @@ async def block_user(
     users_repo: IUsersRepo = Depends(get_users_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
-    """Block a user."""
+    """Block a user. This endpoint first handles the updating of the
+    user object that initiated the block. Next, it handles the updating
+    of the user object that was blocked.
+    """
 
-    # 1. See if user is already blocked
-    user_object = await users_repo.retrieve_user_with_filter(
+    blocking_user = await users_repo.retrieve_user_with_filter(
         user_id=authorized_user.user_id
     )
+    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
 
-    if user_object.block_list:
-        if blocked_user_id in user_object.block_list:
+    # 1. Ensure requested, blocked user exists
+    if not blocked_user:
+        raise await pelleum_errors.PelleumErrors(
+            detail="The supplied user_id is invalid."
+        ).invalid_resource_id()
+
+    if blocking_user.block_list:
+        # 2. See if user is already blocked.
+        # Both updates are in one database transaction, so we only need to check
+        # one of them -- we'll never have one updated without the other.
+        if blocked_user_id in blocking_user.block_list:
             raise await pelleum_errors.PelleumErrors(
                 detail="This user has already been blocked."
             ).unique_constraint()
 
-        user_object.block_list.append(blocked_user_id)
+        blocking_user.block_list.append(blocked_user_id)
     else:
-        user_object.block_list = [blocked_user_id]
-    
+        blocking_user.block_list = [blocked_user_id]
+
+    if blocked_user.blocked_by_list:
+        blocked_user.blocked_by_list.append(authorized_user.user_id)
+    else:
+        blocked_user.blocked_by_list = [authorized_user.user_id]
+
+    # 3. Add blocked_user_id to the inititiating user's block_list
+    #    and initiating user's user_id to blocked user's blocked_by_list
     await users_repo.manage_blocks(
-        user_id=authorized_user.user_id, updated_block_list=user_object.block_list
+        initiating_user_id=authorized_user.user_id,
+        receiving_user_id=blocked_user_id,
+        updated_block_list=blocking_user.block_list,
+        updated_blocked_by_list=blocked_user.blocked_by_list,
     )
 
 
@@ -185,23 +207,39 @@ async def unblock_user(
 ) -> None:
     """Un-block a user."""
 
-    # 1. See if user is already blocked
-    user_object = await users_repo.retrieve_user_with_filter(
+    blocking_user = await users_repo.retrieve_user_with_filter(
         user_id=authorized_user.user_id
     )
+    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
 
-    if not user_object.block_list:
+    # 1. Ensure requested user to unblock exists
+    if not blocked_user:
+        raise await pelleum_errors.PelleumErrors(
+            detail="The supplied user_id is invalid."
+        ).invalid_resource_id()
+
+    # 2. Ensure blocker user has block list
+    if not blocking_user.block_list:
         raise await pelleum_errors.PelleumErrors(
             detail="This user is not blocked, so you can't remove a block."
         ).general_error()
 
-    if blocked_user_id not in user_object.block_list:
+    # 3. Ensure the requested, soon-to-be unblocked user is in the initiating
+    #    user's block list. Given one database transaction, this implies that
+    #    the initiating user's user_id is also in the receiving user's blocked_by_list
+    if blocked_user_id not in blocking_user.block_list:
         raise await pelleum_errors.PelleumErrors(
             detail="This user is not blocked, so you can't remove a block."
         ).general_error()
 
-    # 2. Remove user_id from user's block list
-    user_object.block_list.remove(blocked_user_id)
+    # 3. Remove user_id from user's block list
+    blocking_user.block_list.remove(blocked_user_id)
+    blocked_user.blocked_by_list.remove(authorized_user.user_id)
+
+    # 4. Update database records
     await users_repo.manage_blocks(
-        user_id=authorized_user.user_id, updated_block_list=user_object.block_list
+        initiating_user_id=authorized_user.user_id,
+        receiving_user_id=blocked_user_id,
+        updated_block_list=blocking_user.block_list,
+        updated_blocked_by_list=blocked_user.blocked_by_list,
     )

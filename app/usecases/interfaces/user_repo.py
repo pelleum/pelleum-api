@@ -32,5 +32,11 @@ class IUsersRepo(ABC):
         pass
 
     @abstractmethod
-    async def manage_blocks(self, user_id: str, updated_block_list: List[int]) -> None:
+    async def manage_blocks(
+        self,
+        initiating_user_id: str,
+        receiving_user_id: str,
+        updated_block_list: List[int],
+        updated_blocked_by_list: List[int],
+    ) -> None:
         """Manage blocked users."""

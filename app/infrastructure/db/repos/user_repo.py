@@ -92,13 +92,27 @@ class UsersRepo(IUsersRepo):
 
         return await self.retrieve_user_with_filter(user_id=user_id)
 
-    async def manage_blocks(self, user_id: str, updated_block_list: List[int]) -> None:
+    async def manage_blocks(
+        self,
+        initiating_user_id: str,
+        receiving_user_id: str,
+        updated_block_list: List[int],
+        updated_blocked_by_list: List[int],
+    ) -> None:
         """Manage blocked users."""
 
-        user_updated_stmt = (
+        initiating_user_updated_stmt = (
             USERS.update()
             .values(block_list=updated_block_list)
-            .where(USERS.c.user_id == user_id)
+            .where(USERS.c.user_id == initiating_user_id)
         )
 
-        await self.db.execute(user_updated_stmt)
+        receiving_user_updated_stmt = (
+            USERS.update()
+            .values(blocked_by_list=updated_blocked_by_list)
+            .where(USERS.c.user_id == receiving_user_id)
+        )
+
+        async with self.db.transaction():
+            await self.db.execute(initiating_user_updated_stmt)
+            await self.db.execute(receiving_user_updated_stmt)

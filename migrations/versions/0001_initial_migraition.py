@@ -1,8 +1,8 @@
-"""initial migration
+"""initial_migraition
 
 Revision ID: 0001
 Revises: 
-Create Date: 2022-03-02 23:44:11.552454
+Create Date: 2022-03-22 23:49:18.504668
 
 """
 import sqlalchemy as sa
