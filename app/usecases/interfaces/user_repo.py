@@ -32,11 +32,25 @@ class IUsersRepo(ABC):
         pass
 
     @abstractmethod
-    async def manage_blocks(
+    async def add_block(
         self,
         initiating_user_id: str,
         receiving_user_id: str,
-        updated_block_list: List[int],
-        updated_blocked_by_list: List[int],
     ) -> None:
-        """Manage blocked users."""
+        """Add block."""
+
+    @abstractmethod
+    async def remove_block(
+        self,
+        initiating_user_id: str,
+        receiving_user_id: str,
+    ) -> None:
+        """Remove block."""
+
+    @abstractmethod
+    async def retrieve_blocks(
+        self,
+        initiating_user_id: Optional[str] = None,
+        receiving_user_id: Optional[str] = None,
+    ) -> Optional[List[users.BlockInDb]]:
+        """Retrieve blocks."""

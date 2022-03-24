@@ -7,6 +7,7 @@ from app.dependencies import (
     get_current_active_user,
     get_theses_query_params,
     get_theses_repo,
+    get_block_data,
     paginate,
 )
 from app.libraries import pelleum_errors
@@ -86,6 +87,7 @@ async def update_thesis(
 async def get_thesis(
     thesis_id: conint(gt=0, lt=100000000000) = Path(...),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ThesisResponse:
 
@@ -93,10 +95,17 @@ async def get_thesis(
         thesis_id=thesis_id, user_id=authorized_user.user_id
     )
 
+    # 1. Ensure resource exists
     if not thesis:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
+
+    # 2. If user is blocked, prevent access   
+    if thesis.user_id in user_block_data.user_blocks or thesis.user_id in user_block_data.user_blocked_by:
+        raise await pelleum_errors.PelleumErrors(
+            detail="You're account has been blocked by the user of this resource."
+        ).access_forbidden()
 
     return thesis
 
@@ -110,6 +119,7 @@ async def get_many_theses(
     query_params: theses.ThesesQueryParams = Depends(get_theses_query_params),
     request_pagination: RequestPagination = Depends(paginate),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> theses.ManyThesesResponse:
     """This endpiont returns many theses based on query parameters that were sent to it."""
@@ -119,20 +129,29 @@ async def get_many_theses(
     query_params = theses.ThesesQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve theses based on query parameters
-    theses_list, total_theses_count = await theses_repo.retrieve_many_with_filter(
+    theses_list, _ = await theses_repo.retrieve_many_with_filter(
         query_params=query_params,
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )
 
+    # 2. Remove blocked content
+    if user_block_data.user_blocks or user_block_data.user_blocked_by:
+        filtered_theses = []
+        for post in theses_list:
+            if post.user_id not in user_block_data.user_blocks and post.user_id not in user_block_data.user_blocked_by:
+                filtered_theses.append(post)
+    else:
+        filtered_theses = theses_list
+
     return theses.ManyThesesResponse(
-        records=theses.Theses(theses=theses_list),
+        records=theses.Theses(theses=filtered_theses),
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,
-            total_records=total_theses_count,
+            total_records=len(filtered_theses),
             total_pages=math.ceil(
-                total_theses_count / request_pagination.records_per_page
+                len(filtered_theses) / request_pagination.records_per_page
             ),
         ),
     )

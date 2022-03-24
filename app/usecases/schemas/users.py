@@ -59,8 +59,6 @@ class UserResponse(UserBase):
     is_verified: bool
     gender: Gender
     birthdate: date
-    block_list: Optional[List[int]]
-    blocked_by_list: Optional[List[int]]
     created_at: datetime
     updated_at: datetime
 
@@ -78,9 +76,19 @@ class UserInDB(UserBase):
     is_active: bool
     gender: Gender
     birthdate: date
-    block_list: Optional[List[int]]
-    blocked_by_list: Optional[List[int]]
     is_superuser: bool
     is_verified: bool
     created_at: datetime
     updated_at: datetime
+
+
+class BlockInDb(BaseModel):
+    """Database Model"""
+    user_id: int
+    blocked_user_id: int
+    created_at: datetime
+
+
+class BlockData(BaseModel):
+    user_blocks: Optional[List[int]]
+    user_blocked_by: Optional[List[int]]

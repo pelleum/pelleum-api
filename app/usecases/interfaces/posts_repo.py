@@ -16,7 +16,7 @@ class IPostsRepo(ABC):
         thesis_id: int = None,
         user_id: str = None,
         asset_symbol: str = None,
-    ) -> Optional[posts.PostInDB]:
+    ) -> Optional[posts.PostInfoFromDB]:
         pass
 
     @abstractmethod

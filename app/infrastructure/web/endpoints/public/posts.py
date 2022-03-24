@@ -8,6 +8,7 @@ from app.dependencies import (
     get_posts_query_params,
     get_posts_repo,
     get_theses_repo,
+    get_block_data,
     paginate,
 )
 from app.libraries import pelleum_errors
@@ -75,6 +76,7 @@ async def create_new_post(
 async def get_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.PostResponse:
 
@@ -86,7 +88,13 @@ async def get_post(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 
-    # 2. Format the post
+    # 2. If user is blocked, prevent access   
+    if post.user_id in user_block_data.user_blocks or post.user_id in user_block_data.user_blocked_by:
+        raise await pelleum_errors.PelleumErrors(
+            detail="You're account has been blocked by the user of this resource."
+        ).access_forbidden()
+
+    # 3. Format the post
     post_raw = post.dict()
     thesis_object_raw = {}
     for key, value in post_raw.items():
@@ -107,6 +115,7 @@ async def get_many_posts(
     query_params: posts.PostQueryParams = Depends(get_posts_query_params),
     request_pagination: RequestPagination = Depends(paginate),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.ManyPostsResponse:
     """This endpoint returns many posts based on query parameters that were sent to it."""
@@ -116,15 +125,24 @@ async def get_many_posts(
     query_params = posts.PostQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve posts based on query parameters
-    posts_list, total_theses_count = await posts_repo.retrieve_many_with_filter(
+    posts_list, _ = await posts_repo.retrieve_many_with_filter(
         query_params=query_params,
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )
 
-    # 2. Format the data
+    # 2. Remove blocked content
+    if user_block_data.user_blocks or user_block_data.user_blocked_by:
+        filtered_posts = []
+        for post in posts_list:
+            if post.user_id not in user_block_data.user_blocks and post.user_id not in user_block_data.user_blocked_by:
+                filtered_posts.append(post)
+    else:
+        filtered_posts = posts_list
+
+    # 3. Format the data
     formatted_posts = []
-    for post in posts_list:
+    for post in filtered_posts:
         post_raw = post.dict()
         thesis_object_raw = {}
         for key, value in post_raw.items():
@@ -144,9 +162,9 @@ async def get_many_posts(
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,
-            total_records=total_theses_count,
+            total_records=len(filtered_posts),
             total_pages=math.ceil(
-                total_theses_count / request_pagination.records_per_page
+                len(filtered_posts) / request_pagination.records_per_page
             ),
         ),
     )

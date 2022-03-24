@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Optional, List
 
 from databases import Database
 from passlib.context import CryptContext
-from sqlalchemy import and_
+from sqlalchemy import and_, delete
 
-from app.infrastructure.db.models.public.users import USERS
+from app.infrastructure.db.models.public.users import USERS, BLOCKS
 from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import users
 
@@ -92,27 +92,50 @@ class UsersRepo(IUsersRepo):
 
         return await self.retrieve_user_with_filter(user_id=user_id)
 
-    async def manage_blocks(
+    async def add_block(
         self,
         initiating_user_id: str,
         receiving_user_id: str,
-        updated_block_list: List[int],
-        updated_blocked_by_list: List[int],
     ) -> None:
-        """Manage blocked users."""
+        """Add block."""
 
-        initiating_user_updated_stmt = (
-            USERS.update()
-            .values(block_list=updated_block_list)
-            .where(USERS.c.user_id == initiating_user_id)
+        create_block_insert_stmt = BLOCKS.insert().values(
+            user_id=initiating_user_id,
+            blocked_user_id=receiving_user_id
         )
 
-        receiving_user_updated_stmt = (
-            USERS.update()
-            .values(blocked_by_list=updated_blocked_by_list)
-            .where(USERS.c.user_id == receiving_user_id)
-        )
+        await self.db.execute(create_block_insert_stmt)
 
-        async with self.db.transaction():
-            await self.db.execute(initiating_user_updated_stmt)
-            await self.db.execute(receiving_user_updated_stmt)
+    async def remove_block(
+        self,
+        initiating_user_id: str,
+        receiving_user_id: str,
+    ) -> None:
+        """Remove block."""
+
+        delete_statement = delete(BLOCKS).where(and_(BLOCKS.c.user_id == initiating_user_id, BLOCKS.c.blocked_user_id == receiving_user_id))
+
+        await self.db.execute(delete_statement)
+
+    
+    async def retrieve_blocks(
+        self,
+        initiating_user_id: Optional[str] = None,
+        receiving_user_id: Optional[str] = None,
+    ) -> Optional[List[users.BlockInDb]]:
+        """Retrieve blocks."""
+        
+        conditions = []
+
+        if initiating_user_id:
+            conditions.append(BLOCKS.c.user_id == initiating_user_id)
+
+        if receiving_user_id:
+            conditions.append(BLOCKS.c.blocked_user_id == receiving_user_id)
+
+        query = BLOCKS.select().where(and_(*conditions))
+
+        results = await self.db.fetch_all(query)
+        
+        return [users.BlockInDb(**result) for result in results] if results else []
+        

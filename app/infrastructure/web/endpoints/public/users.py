@@ -14,6 +14,7 @@ from app.dependencies import (
     validate_email,
     validate_password,
     verify_password,
+    get_block_data
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
@@ -153,93 +154,55 @@ async def validate_inputs(
 async def block_user(
     blocked_user_id: conint(gt=0, lt=100000000000) = Path(...),
     users_repo: IUsersRepo = Depends(get_users_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
-    """Block a user. This endpoint first handles the updating of the
-    user object that initiated the block. Next, it handles the updating
-    of the user object that was blocked.
-    """
-
-    blocking_user = await users_repo.retrieve_user_with_filter(
-        user_id=authorized_user.user_id
-    )
-    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
+    """Block a user."""
 
     # 1. Ensure requested, blocked user exists
+    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
     if not blocked_user:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied user_id is invalid."
         ).invalid_resource_id()
 
-    if blocking_user.block_list:
-        # 2. See if user is already blocked.
-        # Both updates are in one database transaction, so we only need to check
-        # one of them -- we'll never have one updated without the other.
-        if blocked_user_id in blocking_user.block_list:
+    # 2. Ensure the soon-to-be blocked user is not already blocked
+    if user_block_data.user_blocks:
+        if blocked_user_id in user_block_data.user_blocks:
             raise await pelleum_errors.PelleumErrors(
-                detail="This user has already been blocked."
-            ).unique_constraint()
+                detail="The supplied user_id is already blocked."
+            ).invalid_resource_id()
 
-        blocking_user.block_list.append(blocked_user_id)
-    else:
-        blocking_user.block_list = [blocked_user_id]
-
-    if blocked_user.blocked_by_list:
-        blocked_user.blocked_by_list.append(authorized_user.user_id)
-    else:
-        blocked_user.blocked_by_list = [authorized_user.user_id]
-
-    # 3. Add blocked_user_id to the inititiating user's block_list
-    #    and initiating user's user_id to blocked user's blocked_by_list
-    await users_repo.manage_blocks(
-        initiating_user_id=authorized_user.user_id,
-        receiving_user_id=blocked_user_id,
-        updated_block_list=blocking_user.block_list,
-        updated_blocked_by_list=blocked_user.blocked_by_list,
-    )
+    # 3. Add block to database
+    await users_repo.add_block(initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id)
 
 
 @auth_router.delete("/block/{blocked_user_id}", status_code=200)
 async def unblock_user(
     blocked_user_id: conint(gt=0, lt=100000000000) = Path(...),
     users_repo: IUsersRepo = Depends(get_users_repo),
+    user_block_data: users.BlockData = Depends(get_block_data),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
     """Un-block a user."""
 
-    blocking_user = await users_repo.retrieve_user_with_filter(
-        user_id=authorized_user.user_id
-    )
-    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
-
     # 1. Ensure requested user to unblock exists
+    blocked_user = await users_repo.retrieve_user_with_filter(user_id=blocked_user_id)
     if not blocked_user:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied user_id is invalid."
         ).invalid_resource_id()
 
-    # 2. Ensure blocker user has block list
-    if not blocking_user.block_list:
+    # 2. Ensure the soon-to-be unblocked user is, in fact, blocked
+    if not user_block_data.user_blocks:
         raise await pelleum_errors.PelleumErrors(
-            detail="This user is not blocked, so you can't remove a block."
-        ).general_error()
+                detail="The supplied user_id is not currently blocked, so can't unblock."
+            ).invalid_resource_id()
 
-    # 3. Ensure the requested, soon-to-be unblocked user is in the initiating
-    #    user's block list. Given one database transaction, this implies that
-    #    the initiating user's user_id is also in the receiving user's blocked_by_list
-    if blocked_user_id not in blocking_user.block_list:
+    if blocked_user_id not in user_block_data.user_blocks:
         raise await pelleum_errors.PelleumErrors(
-            detail="This user is not blocked, so you can't remove a block."
-        ).general_error()
+            detail="The supplied user_id is not currently blocked, so can't unblock."
+        ).invalid_resource_id()
 
-    # 3. Remove user_id from user's block list
-    blocking_user.block_list.remove(blocked_user_id)
-    blocked_user.blocked_by_list.remove(authorized_user.user_id)
-
-    # 4. Update database records
-    await users_repo.manage_blocks(
-        initiating_user_id=authorized_user.user_id,
-        receiving_user_id=blocked_user_id,
-        updated_block_list=blocking_user.block_list,
-        updated_blocked_by_list=blocked_user.blocked_by_list,
-    )
+    # 3. Remove block from database
+    await users_repo.remove_block(initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id)

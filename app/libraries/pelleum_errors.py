@@ -79,6 +79,14 @@ class PelleumErrors:
             else "Invalid query parameters sent to the endpiont.",
         )
 
+    async def access_forbidden(self):
+        return HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=self.detail
+            if self.detail
+            else "Access to this resource is forbidden.",
+        )
+
     async def array_too_long(self):
         return HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
