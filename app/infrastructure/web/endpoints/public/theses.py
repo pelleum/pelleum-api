@@ -4,10 +4,10 @@ from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
 from app.dependencies import (
+    get_block_data,
     get_current_active_user,
     get_theses_query_params,
     get_theses_repo,
-    get_block_data,
     paginate,
 )
 from app.libraries import pelleum_errors
@@ -101,8 +101,11 @@ async def get_thesis(
             detail="The supplied thesis_id is invalid."
         ).invalid_resource_id()
 
-    # 2. If user is blocked, prevent access   
-    if thesis.user_id in user_block_data.user_blocks or thesis.user_id in user_block_data.user_blocked_by:
+    # 2. If user is blocked, prevent access
+    if (
+        thesis.user_id in user_block_data.user_blocks
+        or thesis.user_id in user_block_data.user_blocked_by
+    ):
         raise await pelleum_errors.PelleumErrors(
             detail="You're account has been blocked by the user of this resource."
         ).access_forbidden()
@@ -139,7 +142,10 @@ async def get_many_theses(
     if user_block_data.user_blocks or user_block_data.user_blocked_by:
         filtered_theses = []
         for post in theses_list:
-            if post.user_id not in user_block_data.user_blocks and post.user_id not in user_block_data.user_blocked_by:
+            if (
+                post.user_id not in user_block_data.user_blocks
+                and post.user_id not in user_block_data.user_blocked_by
+            ):
                 filtered_theses.append(post)
     else:
         filtered_theses = theses_list

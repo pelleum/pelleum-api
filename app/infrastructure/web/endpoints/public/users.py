@@ -7,6 +7,7 @@ from pydantic import conint
 
 from app.dependencies import (
     create_access_token,
+    get_block_data,
     get_current_active_user,
     get_password_context,
     get_portfolio_repo,
@@ -14,7 +15,6 @@ from app.dependencies import (
     validate_email,
     validate_password,
     verify_password,
-    get_block_data
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
@@ -174,7 +174,9 @@ async def block_user(
             ).invalid_resource_id()
 
     # 3. Add block to database
-    await users_repo.add_block(initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id)
+    await users_repo.add_block(
+        initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id
+    )
 
 
 @auth_router.delete("/block/{blocked_user_id}", status_code=200)
@@ -196,8 +198,8 @@ async def unblock_user(
     # 2. Ensure the soon-to-be unblocked user is, in fact, blocked
     if not user_block_data.user_blocks:
         raise await pelleum_errors.PelleumErrors(
-                detail="The supplied user_id is not currently blocked, so can't unblock."
-            ).invalid_resource_id()
+            detail="The supplied user_id is not currently blocked, so can't unblock."
+        ).invalid_resource_id()
 
     if blocked_user_id not in user_block_data.user_blocks:
         raise await pelleum_errors.PelleumErrors(
@@ -205,4 +207,6 @@ async def unblock_user(
         ).invalid_resource_id()
 
     # 3. Remove block from database
-    await users_repo.remove_block(initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id)
+    await users_repo.remove_block(
+        initiating_user_id=authorized_user.user_id, receiving_user_id=blocked_user_id
+    )

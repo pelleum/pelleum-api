@@ -4,11 +4,11 @@ from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
 
 from app.dependencies import (
+    get_block_data,
     get_current_active_user,
     get_posts_query_params,
     get_posts_repo,
     get_theses_repo,
-    get_block_data,
     paginate,
 )
 from app.libraries import pelleum_errors
@@ -88,8 +88,11 @@ async def get_post(
             detail="The supplied post_id is invalid."
         ).invalid_resource_id()
 
-    # 2. If user is blocked, prevent access   
-    if post.user_id in user_block_data.user_blocks or post.user_id in user_block_data.user_blocked_by:
+    # 2. If user is blocked, prevent access
+    if (
+        post.user_id in user_block_data.user_blocks
+        or post.user_id in user_block_data.user_blocked_by
+    ):
         raise await pelleum_errors.PelleumErrors(
             detail="You're account has been blocked by the user of this resource."
         ).access_forbidden()
@@ -135,7 +138,10 @@ async def get_many_posts(
     if user_block_data.user_blocks or user_block_data.user_blocked_by:
         filtered_posts = []
         for post in posts_list:
-            if post.user_id not in user_block_data.user_blocks and post.user_id not in user_block_data.user_blocked_by:
+            if (
+                post.user_id not in user_block_data.user_blocks
+                and post.user_id not in user_block_data.user_blocked_by
+            ):
                 filtered_posts.append(post)
     else:
         filtered_posts = posts_list

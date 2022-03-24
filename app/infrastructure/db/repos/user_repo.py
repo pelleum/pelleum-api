@@ -1,10 +1,10 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from databases import Database
 from passlib.context import CryptContext
 from sqlalchemy import and_, delete
 
-from app.infrastructure.db.models.public.users import USERS, BLOCKS
+from app.infrastructure.db.models.public.users import BLOCKS, USERS
 from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import users
 
@@ -100,8 +100,7 @@ class UsersRepo(IUsersRepo):
         """Add block."""
 
         create_block_insert_stmt = BLOCKS.insert().values(
-            user_id=initiating_user_id,
-            blocked_user_id=receiving_user_id
+            user_id=initiating_user_id, blocked_user_id=receiving_user_id
         )
 
         await self.db.execute(create_block_insert_stmt)
@@ -113,18 +112,22 @@ class UsersRepo(IUsersRepo):
     ) -> None:
         """Remove block."""
 
-        delete_statement = delete(BLOCKS).where(and_(BLOCKS.c.user_id == initiating_user_id, BLOCKS.c.blocked_user_id == receiving_user_id))
+        delete_statement = delete(BLOCKS).where(
+            and_(
+                BLOCKS.c.user_id == initiating_user_id,
+                BLOCKS.c.blocked_user_id == receiving_user_id,
+            )
+        )
 
         await self.db.execute(delete_statement)
 
-    
     async def retrieve_blocks(
         self,
         initiating_user_id: Optional[str] = None,
         receiving_user_id: Optional[str] = None,
     ) -> Optional[List[users.BlockInDb]]:
         """Retrieve blocks."""
-        
+
         conditions = []
 
         if initiating_user_id:
@@ -136,6 +139,5 @@ class UsersRepo(IUsersRepo):
         query = BLOCKS.select().where(and_(*conditions))
 
         results = await self.db.fetch_all(query)
-        
+
         return [users.BlockInDb(**result) for result in results] if results else []
-        

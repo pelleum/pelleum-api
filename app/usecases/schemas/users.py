@@ -84,6 +84,7 @@ class UserInDB(UserBase):
 
 class BlockInDb(BaseModel):
     """Database Model"""
+
     user_id: int
     blocked_user_id: int
     created_at: datetime
