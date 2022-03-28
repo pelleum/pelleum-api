@@ -85,13 +85,13 @@ async def get_many_post_reactions(
     status_code=200,
 )
 async def delete_post_reaction(
-    post_id: str = Path(...),
+    post_id: conint(gt=0, lt=100000000000) = Path(...),
     post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
-    post = await posts_repo.retrieve_post_with_filter(post_id=int(post_id))
+    post = await posts_repo.retrieve_post_with_filter(post_id=post_id)
 
     if not post:
         raise await pelleum_errors.PelleumErrors(

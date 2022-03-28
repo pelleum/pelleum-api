@@ -47,9 +47,6 @@ class PostsRepo(IPostsRepo):
         if thesis_id:
             conditions.append(POSTS.c.thesis_id == thesis_id)
 
-        if user_id:
-            conditions.append(POSTS.c.user_id == user_id)
-
         if asset_symbol:
             conditions.append(POSTS.c.asset_symbol == asset_symbol)
 
@@ -62,6 +59,13 @@ class PostsRepo(IPostsRepo):
             THESES,
             POSTS.c.thesis_id == THESES.c.thesis_id,
             isouter=True,
+        ).join(
+            POST_REACTIONS,
+            and_(
+                POSTS.c.post_id == POST_REACTIONS.c.post_id,
+                POST_REACTIONS.c.user_id == user_id,
+            ),
+            isouter=True,
         )
 
         thesis_columns = [
@@ -69,7 +73,10 @@ class PostsRepo(IPostsRepo):
             for column in THESES.columns
         ]
 
-        columns_to_select = [POSTS] + thesis_columns
+        columns_to_select = [
+            POSTS,
+            POST_REACTIONS.c.reaction.label("user_reaction_value"),
+        ] + thesis_columns
 
         query = select(columns_to_select).select_from(j).where(and_(*conditions))
 
