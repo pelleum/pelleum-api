@@ -2,6 +2,7 @@ from typing import List, Mapping
 
 import pytest
 import pytest_asyncio
+from databases import Database
 from httpx import AsyncClient
 
 from app.usecases.schemas.theses import ThesisInDB, ThesisResponse
@@ -106,3 +107,27 @@ async def test_update_thesis(
         assert key in expected_response_fields
         if key in update_thesis_request_json:
             assert value == update_thesis_request_json.get(key)
+
+
+@pytest.mark.asyncio
+async def test_delete_thesis(
+    test_client: AsyncClient,
+    inserted_thesis_object: ThesisInDB,
+    update_thesis_request_json: Mapping[str, str],
+    test_db: Database,
+) -> None:
+
+    endpoint = f"/public/theses/{inserted_thesis_object.thesis_id}"
+
+    response = await test_client.delete(endpoint)
+
+    test_thesis = await test_db.fetch_one(
+        "SELECT * FROM theses WHERE thesis_id=:thesis_id",
+        {
+            "thesis_id": inserted_thesis_object.thesis_id,
+        },
+    )
+
+    # Assertions
+    assert response.status_code == 200
+    assert not test_thesis

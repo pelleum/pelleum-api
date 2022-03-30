@@ -9,7 +9,7 @@ RATIONALES = sa.Table(
     sa.Column(
         "thesis_id",
         sa.BigInteger,
-        sa.ForeignKey("theses.thesis_id"),
+        sa.ForeignKey("theses.thesis_id", ondelete="cascade"),
         index=True,
         nullable=False,
     ),

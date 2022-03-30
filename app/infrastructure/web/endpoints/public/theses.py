@@ -161,3 +161,24 @@ async def get_many_theses(
             ),
         ),
     )
+
+
+@theses_router.delete(
+    "/{thesis_id}",
+    status_code=200,
+)
+async def delete_post(
+    thesis_id: conint(gt=0, lt=100000000000) = Path(...),
+    theses_repo: IThesesRepo = Depends(get_theses_repo),
+    authorized_user: users.UserInDB = Depends(get_current_active_user),
+) -> None:
+
+    thesis = await theses_repo.retrieve_thesis_with_filter(thesis_id=thesis_id)
+
+    # 1. Ensure resource exists
+    if not thesis or thesis.user_id != authorized_user.user_id:
+        raise await pelleum_errors.PelleumErrors(
+            detail="The supplied thesis_id is invalid."
+        ).invalid_resource_id()
+
+    await theses_repo.delete(thesis_id=thesis_id)

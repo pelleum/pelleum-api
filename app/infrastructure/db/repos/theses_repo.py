@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 import asyncpg
 from databases import Database
-from sqlalchemy import and_, desc, func, select
+from sqlalchemy import and_, delete, desc, func, select
 
 from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
@@ -155,3 +155,11 @@ class ThesesRepo(IThesesRepo):
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
+
+    async def delete(self, thesis_id: int) -> None:
+        """Delete a thesis. The models that reference thesis_id as a foreign
+        key all have ondelete="cascade", so they should also get deleted."""
+
+        delete_statement = delete(THESES).where(THESES.c.thesis_id == thesis_id)
+
+        await self.db.execute(delete_statement)

@@ -2,6 +2,7 @@ from typing import List
 
 import pytest
 import pytest_asyncio
+from databases import Database
 
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.schemas import theses
@@ -79,3 +80,21 @@ async def test_retrieve_thesis_with_reaction(
     assert isinstance(test_thesis, theses.ThesisWithUserReaction)
     assert test_thesis.title == inserted_thesis_object.title
     assert test_thesis.content == inserted_thesis_object.content
+
+
+@pytest.mark.asyncio
+async def test_delete(
+    theses_repo: IThesesRepo,
+    inserted_thesis_object: theses.ThesisInDB,
+    test_db: Database,
+):
+    # 1. Delete thesis by thesis_id
+    await theses_repo.delete(thesis_id=inserted_thesis_object.thesis_id)
+
+    # 2. Ensure it no longer exists in the database
+    thesis = await test_db.fetch_one(
+        "SELECT * FROM theses WHERE theses.thesis_id = :thesis_id",
+        {"thesis_id": inserted_thesis_object.thesis_id},
+    )
+
+    assert not thesis

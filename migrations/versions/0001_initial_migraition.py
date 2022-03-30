@@ -52,7 +52,6 @@ def upgrade():
         sa.Column("hashed_password", sa.String(), nullable=False),
         sa.Column("gender", sa.String(), nullable=False),
         sa.Column("birthdate", sa.Date(), nullable=False),
-        sa.Column("block_list", sa.ARRAY(sa.Integer()), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column("is_verified", sa.Boolean(), nullable=False),

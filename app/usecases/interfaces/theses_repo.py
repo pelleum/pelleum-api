@@ -40,3 +40,8 @@ class IThesesRepo(ABC):
         page_size: int = 200,
     ) -> Tuple[List[theses.ThesisInDB], int]:
         pass
+
+    @abstractmethod
+    async def delete(self, thesis_id: int) -> None:
+        """Delete a thesis. The models that reference thesis_id as a foreign
+        key all have ondelete="cascade", so they should also get deleted."""

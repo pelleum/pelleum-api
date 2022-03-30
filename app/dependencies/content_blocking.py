@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import Depends
 
 from app.dependencies import (  # pylint: disable = cyclic-import
