@@ -69,6 +69,11 @@ class UpdateThesisRequest(BaseModel):
         description="Whether or not this thesis is the author's current linked thesis for this asset.",
         example=True,
     )
+    asset_symbol: Optional[constr(max_length=10)] = Field(
+        None,
+        description="The symbol for the asset the thesis is being linked to.",
+        example="TSLA",
+    )
 
 
 class ThesesQueryParams(BaseModel):
