@@ -1,4 +1,5 @@
 import math
+from typing import List, Optional
 
 from fastapi import APIRouter, Body, Depends, Path
 from pydantic import conint
@@ -130,27 +131,26 @@ async def get_many_posts(
     query_params = posts.PostQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve posts based on query parameters
-    posts_list, _ = await posts_repo.retrieve_many_with_filter(
+    posts_list, post_count = await posts_repo.retrieve_many_with_filter(
         query_params=query_params,
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )
 
-    # 2. Remove blocked content
-    if user_block_data.user_blocks or user_block_data.user_blocked_by:
-        filtered_posts = []
-        for post in posts_list:
-            if (
-                post.user_id not in user_block_data.user_blocks
-                and post.user_id not in user_block_data.user_blocked_by
-            ):
-                filtered_posts.append(post)
-    else:
-        filtered_posts = posts_list
+    # 2. For each post, retrieve comments and update post object along the way
+    posts_with_replies = await get_and_add_replies(
+        posts_list=posts_list,
+        posts_repo=posts_repo,
+        user_id=authorized_user.user_id,
+        user_block_data=user_block_data,
+        get_max_levels=True
+        if query_params.is_post_comment_on or query_params.is_thesis_comment_on
+        else False,
+    )
 
     # 3. Format the data
     formatted_posts = []
-    for post in filtered_posts:
+    for post in posts_with_replies:
         post_raw = post.dict()
         thesis_object_raw = {}
         for key, value in post_raw.items():
@@ -170,10 +170,8 @@ async def get_many_posts(
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,
-            total_records=len(filtered_posts),
-            total_pages=math.ceil(
-                len(filtered_posts) / request_pagination.records_per_page
-            ),
+            total_records=post_count,
+            total_pages=math.ceil(post_count / request_pagination.records_per_page),
         ),
     )
 
@@ -196,3 +194,95 @@ async def delete_post(
         ).invalid_resource_id()
 
     await posts_repo.delete(post_id=post_id)
+
+
+async def get_and_add_replies(
+    posts_list: List[posts.PostInfoFromDB],
+    posts_repo: IPostsRepo,
+    user_id: int,
+    user_block_data: users.BlockData,
+    get_max_levels=False,
+) -> List[posts.PostInfoFromDB]:
+    """This function grabs up to 3 levels of replies (if get_max_levels is True).
+    Else, it will grab 1 level or replies"""
+
+    for post in posts_list:
+        if post.comment_count > 0:
+            first_order_replies, _ = await posts_repo.retrieve_many_with_filter(
+                query_params=posts.PostQueryRepoAdapter(
+                    requesting_user_id=user_id, is_post_comment_on=post.post_id
+                ),
+                page_number=1,
+                page_size=15,
+            )
+            # Filter blocked content and save
+            filtered_first_order_replies = await filter_blocked_content(
+                posts_list=first_order_replies, user_block_data=user_block_data
+            )
+            post.replies = filtered_first_order_replies
+
+            # For PostDetail, grab all levels. For feed, stop after one level of replies
+            if get_max_levels:
+                for reply in post.replies:
+                    if reply.comment_count > 0:
+                        (
+                            second_order_replies,
+                            _,
+                        ) = await posts_repo.retrieve_many_with_filter(
+                            query_params=posts.PostQueryRepoAdapter(
+                                requesting_user_id=user_id,
+                                is_post_comment_on=reply.post_id,
+                            ),
+                            page_number=1,
+                            page_size=5,
+                        )
+
+                        # Filter blocked content and save
+                        filtered_second_order_replies = await filter_blocked_content(
+                            posts_list=second_order_replies,
+                            user_block_data=user_block_data,
+                        )
+                        reply.replies = filtered_second_order_replies
+
+                        for reply in reply.replies:
+                            if reply.comment_count > 0:
+                                (
+                                    third_order_replies,
+                                    _,
+                                ) = await posts_repo.retrieve_many_with_filter(
+                                    query_params=posts.PostQueryRepoAdapter(
+                                        requesting_user_id=user_id,
+                                        is_post_comment_on=reply.post_id,
+                                    ),
+                                    page_number=1,
+                                    page_size=5,
+                                )
+
+                                # Filter blocked content and save
+                                filtered_third_order_replies = (
+                                    await filter_blocked_content(
+                                        posts_list=third_order_replies,
+                                        user_block_data=user_block_data,
+                                    )
+                                )
+                                reply.replies = filtered_third_order_replies
+
+    return posts_list
+
+
+async def filter_blocked_content(
+    posts_list: List[posts.PostInfoFromDB], user_block_data: users.BlockData
+) -> List[posts.PostInfoFromDB]:
+    """Removes blocked content"""
+
+    if user_block_data.user_blocks or user_block_data.user_blocked_by:
+        filtered_posts = []
+        for post in posts_list:
+            if (
+                post.user_id not in user_block_data.user_blocks
+                and post.user_id not in user_block_data.user_blocked_by
+            ):
+                filtered_posts.append(post)
+        return filtered_posts
+    else:
+        return posts_list

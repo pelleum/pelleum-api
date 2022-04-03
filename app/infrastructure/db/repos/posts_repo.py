@@ -135,19 +135,39 @@ class PostsRepo(IPostsRepo):
             POST_REACTIONS.c.reaction.label("user_reaction_value"),
         ] + thesis_columns
 
-        query = (
+        # Gets posts
+        posts_query = (
             select(columns_to_select)
             .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(POSTS.c.created_at))
+            .subquery()
         )
+
+        # Gets number of likes per post
+        likes_count_query = (
+            select([func.count(POST_REACTIONS.table_valued())])
+            .where(POST_REACTIONS.c.post_id == posts_query.c.post_id)
+            .scalar_subquery()
+            .label("like_count")
+        )
+
+        # Gets number of comments per post
+        comment_count_query = (
+            select([func.count(POSTS.table_valued())])
+            .where(POSTS.c.is_post_comment_on == posts_query.c.post_id)
+            .scalar_subquery()
+            .label("comment_count")
+        )
+
+        compiled_query = select([posts_query, likes_count_query, comment_count_query])
 
         query_count = select([func.count()]).select_from(j).where(and_(*conditions))
 
         async with self.db.transaction():
-            query_results = await self.db.fetch_all(query)
+            query_results = await self.db.fetch_all(compiled_query)
             count_results = await self.db.fetch_all(query_count)
 
         theses_list = [posts.PostInfoFromDB(**result) for result in query_results]

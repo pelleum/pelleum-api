@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
+from typing import ForwardRef, List, Optional
 
 from pydantic import BaseModel, Field, constr
 
@@ -106,12 +106,21 @@ class PostThesis(BaseModel):
     thesis_updated_at: Optional[datetime]
 
 
-class PostWithReaction(PostInDB):
+PostWithReactionData = ForwardRef("PostWithReactionData")
+
+
+class PostWithReactionData(PostInDB):
 
     user_reaction_value: Optional[int] = None
+    like_count: Optional[int] = None
+    comment_count: Optional[int] = None
+    replies: Optional[List[PostWithReactionData]]
 
 
-class PostInfoFromDB(PostWithReaction):
+PostWithReactionData.update_forward_refs()
+
+
+class PostInfoFromDB(PostWithReactionData):
     """Returned from database via join"""
 
     thesis_title: Optional[str]
@@ -127,7 +136,7 @@ class PostInfoFromDB(PostWithReaction):
     thesis_updated_at: Optional[datetime]
 
 
-class PostResponse(PostWithReaction):
+class PostResponse(PostWithReactionData):
     """Response returned to user"""
 
     thesis: Optional[ThesisInDB]
