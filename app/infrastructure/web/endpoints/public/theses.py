@@ -134,6 +134,7 @@ async def get_many_theses(
     # 1. Retrieve theses based on query parameters
     theses_list, _ = await theses_repo.retrieve_many_with_filter(
         query_params=query_params,
+        user_id=authorized_user.user_id,
         page_number=request_pagination.page,
         page_size=request_pagination.records_per_page,
     )

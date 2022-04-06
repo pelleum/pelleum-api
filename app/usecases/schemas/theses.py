@@ -107,13 +107,16 @@ class ThesisInDB(ThesisBase):
     updated_at: Optional[datetime]
 
 
-class ThesisWithUserReaction(ThesisInDB):
+class ThesisWithInteractionData(ThesisInDB):
     """Returned from database via join"""
 
     user_reaction_value: Optional[int] = None
+    like_count: Optional[int] = None
+    dislike_count: Optional[int] = None
+    save_count: Optional[int] = None
 
 
-class ThesisResponse(ThesisWithUserReaction):
+class ThesisResponse(ThesisWithInteractionData):
     """Response returned to user"""
 
 

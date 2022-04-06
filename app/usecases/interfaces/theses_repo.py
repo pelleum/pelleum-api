@@ -22,7 +22,7 @@ class IThesesRepo(ABC):
     @abstractmethod
     async def retrieve_thesis_with_reaction(
         self, thesis_id: int, user_id: int
-    ) -> Optional[theses.ThesisWithUserReaction]:
+    ) -> Optional[theses.ThesisWithInteractionData]:
         """Retrieves a thesis with its corresponding user reaction"""
 
     @abstractmethod
@@ -36,9 +36,10 @@ class IThesesRepo(ABC):
     async def retrieve_many_with_filter(
         self,
         query_params: theses.ThesesQueryRepoAdapter,
+        user_id: int,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[theses.ThesisInDB], int]:
+    ) -> Tuple[List[theses.ThesisWithInteractionData], int]:
         pass
 
     @abstractmethod

@@ -4,6 +4,7 @@ import asyncpg
 from databases import Database
 from sqlalchemy import and_, delete, desc, func, select
 
+from app.infrastructure.db.models.public.rationales import RATIONALES
 from app.infrastructure.db.models.public.theses import THESES, THESES_REACTIONS
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.theses_repo import IThesesRepo
@@ -71,7 +72,7 @@ class ThesesRepo(IThesesRepo):
 
     async def retrieve_thesis_with_reaction(
         self, thesis_id: int, user_id: int
-    ) -> Optional[theses.ThesisWithUserReaction]:
+    ) -> Optional[theses.ThesisWithInteractionData]:
         """Retrieves a thesis with its corresponding user reaction"""
 
         j = THESES.join(
@@ -83,15 +84,52 @@ class ThesesRepo(IThesesRepo):
             isouter=True,
         )
 
-        query = (
+        thesis_query = (
             select([THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
             .select_from(j)
             .where(THESES.c.thesis_id == thesis_id)
+            .subquery()
         )
 
-        query_result = await self.db.fetch_one(query)
+        # Gets number of likes per post
+        likes_count_query = (
+            select([func.count(THESES_REACTIONS.table_valued())])
+            .where(and_(
+                THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
+                THESES_REACTIONS.c.reaction == 1
+                )   
+            )
+            .scalar_subquery()
+            .label("like_count")
+        )
 
-        return theses.ThesisWithUserReaction(**query_result) if query_result else None
+        # Gets number of dislikes per post
+        dislikes_count_query = (
+            select([func.count(THESES_REACTIONS.table_valued())])
+            .where(and_(
+                THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
+                THESES_REACTIONS.c.reaction == -1
+                )
+            )
+            .scalar_subquery()
+            .label("dislike_count")
+        )
+
+        # Gets number of comments per post
+        save_count_query = (
+            select([func.count(RATIONALES.table_valued())])
+            .where(RATIONALES.c.thesis_id == thesis_query.c.thesis_id)
+            .scalar_subquery()
+            .label("save_count")
+        )
+
+        compiled_query = select(
+            [thesis_query, likes_count_query, dislikes_count_query, save_count_query]
+        )
+
+        query_result = await self.db.fetch_one(compiled_query)
+
+        return theses.ThesisWithInteractionData(**query_result) if query_result else None
 
     async def update(
         self,
@@ -120,9 +158,10 @@ class ThesesRepo(IThesesRepo):
     async def retrieve_many_with_filter(
         self,
         query_params: theses.ThesesQueryRepoAdapter,
+        user_id: int,
         page_number: int = 1,
         page_size: int = 200,
-    ) -> Tuple[List[theses.ThesisInDB], int]:
+    ) -> Tuple[List[theses.ThesisWithInteractionData], int]:
 
         conditions = []
 
@@ -135,12 +174,60 @@ class ThesesRepo(IThesesRepo):
         if query_params.sentiment:
             conditions.append(THESES.c.sentiment == query_params.sentiment)
 
-        query = (
-            THESES.select()
+        j = THESES.join(
+            THESES_REACTIONS,
+            and_(
+                THESES.c.thesis_id == THESES_REACTIONS.c.thesis_id,
+                THESES_REACTIONS.c.user_id == user_id,
+            ),
+            isouter=True,
+        )
+
+        # Gets posts
+        theses_query = (
+            select([THESES, THESES_REACTIONS.c.reaction.label("user_reaction_value")])
+            .select_from(j)
             .where(and_(*conditions))
             .limit(page_size)
             .offset((page_number - 1) * page_size)
             .order_by(desc(THESES.c.created_at))
+            .subquery()
+        )
+
+        # Gets number of likes per post
+        likes_count_query = (
+            select([func.count(THESES_REACTIONS.table_valued())])
+            .where(and_(
+                THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
+                THESES_REACTIONS.c.reaction == 1
+                )   
+            )
+            .scalar_subquery()
+            .label("like_count")
+        )
+
+        # Gets number of dislikes per post
+        dislikes_count_query = (
+            select([func.count(THESES_REACTIONS.table_valued())])
+            .where(and_(
+                THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
+                THESES_REACTIONS.c.reaction == -1
+                )
+            )
+            .scalar_subquery()
+            .label("dislike_count")
+        )
+
+        # Gets number of comments per post
+        save_count_query = (
+            select([func.count(RATIONALES.table_valued())])
+            .where(RATIONALES.c.thesis_id == theses_query.c.thesis_id)
+            .scalar_subquery()
+            .label("save_count")
+        )
+
+        compiled_query = select(
+            [theses_query, likes_count_query, dislikes_count_query, save_count_query]
         )
 
         query_count = (
@@ -148,10 +235,10 @@ class ThesesRepo(IThesesRepo):
         )
 
         async with self.db.transaction():
-            query_results = await self.db.fetch_all(query)
+            query_results = await self.db.fetch_all(compiled_query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [theses.ThesisInDB(**result) for result in query_results]
+        theses_list = [theses.ThesisWithInteractionData(**result) for result in query_results]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count
