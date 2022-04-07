@@ -94,10 +94,11 @@ class ThesesRepo(IThesesRepo):
         # Gets number of likes per post
         likes_count_query = (
             select([func.count(THESES_REACTIONS.table_valued())])
-            .where(and_(
-                THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
-                THESES_REACTIONS.c.reaction == 1
-                )   
+            .where(
+                and_(
+                    THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
+                    THESES_REACTIONS.c.reaction == 1,
+                )
             )
             .scalar_subquery()
             .label("like_count")
@@ -106,9 +107,10 @@ class ThesesRepo(IThesesRepo):
         # Gets number of dislikes per post
         dislikes_count_query = (
             select([func.count(THESES_REACTIONS.table_valued())])
-            .where(and_(
-                THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
-                THESES_REACTIONS.c.reaction == -1
+            .where(
+                and_(
+                    THESES_REACTIONS.c.thesis_id == thesis_query.c.thesis_id,
+                    THESES_REACTIONS.c.reaction == -1,
                 )
             )
             .scalar_subquery()
@@ -129,7 +131,9 @@ class ThesesRepo(IThesesRepo):
 
         query_result = await self.db.fetch_one(compiled_query)
 
-        return theses.ThesisWithInteractionData(**query_result) if query_result else None
+        return (
+            theses.ThesisWithInteractionData(**query_result) if query_result else None
+        )
 
     async def update(
         self,
@@ -197,10 +201,11 @@ class ThesesRepo(IThesesRepo):
         # Gets number of likes per post
         likes_count_query = (
             select([func.count(THESES_REACTIONS.table_valued())])
-            .where(and_(
-                THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
-                THESES_REACTIONS.c.reaction == 1
-                )   
+            .where(
+                and_(
+                    THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
+                    THESES_REACTIONS.c.reaction == 1,
+                )
             )
             .scalar_subquery()
             .label("like_count")
@@ -209,9 +214,10 @@ class ThesesRepo(IThesesRepo):
         # Gets number of dislikes per post
         dislikes_count_query = (
             select([func.count(THESES_REACTIONS.table_valued())])
-            .where(and_(
-                THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
-                THESES_REACTIONS.c.reaction == -1
+            .where(
+                and_(
+                    THESES_REACTIONS.c.thesis_id == theses_query.c.thesis_id,
+                    THESES_REACTIONS.c.reaction == -1,
                 )
             )
             .scalar_subquery()
@@ -238,7 +244,9 @@ class ThesesRepo(IThesesRepo):
             query_results = await self.db.fetch_all(compiled_query)
             count_results = await self.db.fetch_all(query_count)
 
-        theses_list = [theses.ThesisWithInteractionData(**result) for result in query_results]
+        theses_list = [
+            theses.ThesisWithInteractionData(**result) for result in query_results
+        ]
         theses_count = count_results[0][0]
 
         return theses_list, theses_count

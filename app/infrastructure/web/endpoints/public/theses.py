@@ -132,7 +132,7 @@ async def get_many_theses(
     query_params = theses.ThesesQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve theses based on query parameters
-    theses_list, _ = await theses_repo.retrieve_many_with_filter(
+    theses_list, theses_count = await theses_repo.retrieve_many_with_filter(
         query_params=query_params,
         user_id=authorized_user.user_id,
         page_number=request_pagination.page,
@@ -156,10 +156,8 @@ async def get_many_theses(
         meta_data=MetaData(
             page=request_pagination.page,
             records_per_page=request_pagination.records_per_page,
-            total_records=len(filtered_theses),
-            total_pages=math.ceil(
-                len(filtered_theses) / request_pagination.records_per_page
-            ),
+            total_records=theses_count,
+            total_pages=math.ceil(theses_count / request_pagination.records_per_page),
         ),
     )
 
