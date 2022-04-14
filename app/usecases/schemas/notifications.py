@@ -46,7 +46,7 @@ class NotificationDbInfo(EventInDb):
     """Notifications joined events joined users"""
 
     notification_id: int
-    user_id: int
+    username: str
 
 
 class NotificationsResponse(BaseModel):
