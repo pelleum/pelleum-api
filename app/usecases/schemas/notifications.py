@@ -49,6 +49,7 @@ class NotificationDbInfo(EventInDb):
 
     notification_id: int
     username: str
+    user_id: int
 
 
 class NotifcationResponseObject(BaseModel):
@@ -57,6 +58,7 @@ class NotifcationResponseObject(BaseModel):
     affected_post_id: Optional[int]
     affected_thesis_id: Optional[int]
     notification_id: int
+    user_id: int
     username: str
     comment: Optional[PostWithReactionData]
 
