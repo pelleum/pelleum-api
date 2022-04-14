@@ -4,6 +4,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.usecases.schemas.posts import PostWithReactionData
+
 
 class EventType(str, Enum):
     COMMENT = "COMMENT"
@@ -49,7 +51,16 @@ class NotificationDbInfo(EventInDb):
     username: str
 
 
+class NotifcationResponseObject(BaseModel):
+    event_id: int
+    type: str
+    affected_post_id: Optional[int]
+    affected_thesis_id: Optional[int]
+    notification_id: int
+    username: str
+    comment: Optional[PostWithReactionData]
+
 class NotificationsResponse(BaseModel):
     """Same as NotificationDbInfo"""
 
-    notifications: List[NotificationDbInfo]
+    notifications: List[NotifcationResponseObject]

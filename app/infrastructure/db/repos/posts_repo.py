@@ -77,10 +77,29 @@ class PostsRepo(IPostsRepo):
             POSTS,
             POST_REACTIONS.c.reaction.label("user_reaction_value"),
         ] + thesis_columns
+        
+        # Get Post
+        query = select(columns_to_select).select_from(j).where(and_(*conditions)).subquery()
 
-        query = select(columns_to_select).select_from(j).where(and_(*conditions))
+        # Gets number of likes per post
+        likes_count_query = (
+            select([func.count(POST_REACTIONS.table_valued())])
+            .where(POST_REACTIONS.c.post_id == query.c.post_id)
+            .scalar_subquery()
+            .label("like_count")
+        )
 
-        result = await self.db.fetch_one(query)
+        # Gets number of comments per post
+        comment_count_query = (
+            select([func.count(POSTS.table_valued())])
+            .where(POSTS.c.is_post_comment_on == query.c.post_id)
+            .scalar_subquery()
+            .label("comment_count")
+        )
+
+        compiled_query = select([query, likes_count_query, comment_count_query])
+
+        result = await self.db.fetch_one(compiled_query)
         return posts.PostInfoFromDB(**result) if result else None
 
     async def retrieve_many_with_filter(

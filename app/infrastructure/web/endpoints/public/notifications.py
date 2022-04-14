@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, Path
 from pydantic import conint
 
-from app.dependencies import get_current_active_user, get_notifications_repo
+from app.dependencies import get_current_active_user, get_notifications_repo, get_posts_repo
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.notifications_repo import INotificationsRepo
+from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.schemas import notifications, users
 
 notifications_router = APIRouter(tags=["Notifications"])
@@ -16,6 +17,7 @@ notifications_router = APIRouter(tags=["Notifications"])
 )
 async def get_user_notifications(
     notifications_repo: INotificationsRepo = Depends(get_notifications_repo),
+    posts_repo: IPostsRepo = Depends(get_posts_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> notifications.NotificationsResponse:
     """Retrieves all of a user's unacknowledged notifications."""
@@ -24,7 +26,16 @@ async def get_user_notifications(
         user_id=authorized_user.user_id
     )
 
-    return notifications.NotificationsResponse(notifications=user_notifications)
+    notificatations_with_comments = []
+    for notification in user_notifications:
+        notification_raw = notification.dict()
+        if notification.comment_id:
+            comment_object = await posts_repo.retrieve_post_with_filter(post_id=notification.comment_id, user_id=authorized_user.user_id)
+            notification_raw["comment"] = comment_object
+        notificatations_with_comments.append(notifications.NotifcationResponseObject(**notification_raw))
+        
+
+    return notifications.NotificationsResponse(notifications=notificatations_with_comments)
 
 
 @notifications_router.patch(
