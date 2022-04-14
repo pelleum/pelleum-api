@@ -7,15 +7,17 @@ from pydantic import conint
 from app.dependencies import (
     get_block_data,
     get_current_active_user,
+    get_notifications_repo,
     get_posts_query_params,
     get_posts_repo,
     get_theses_repo,
     paginate,
 )
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.notifications_repo import INotificationsRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
-from app.usecases.schemas import posts, theses, users
+from app.usecases.schemas import notifications, posts, theses, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 posts_router = APIRouter(tags=["Posts"])
@@ -30,6 +32,7 @@ async def create_new_post(
     body: posts.CreatePostRequest = Body(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
+    notifications_repo: INotificationsRepo = Depends(get_notifications_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> posts.PostResponse:
     """Creates a new post. This can be a stand-alone post, a post comment, or a
@@ -50,6 +53,13 @@ async def create_new_post(
                 detail="The supplied is_post_comment_on ID is invalid."
             ).invalid_resource_id()
 
+        event = notifications.NewEventRepoAdapter(
+            type=notifications.EventType.COMMENT,
+            user_to_notify=post.user_id,
+            user_who_fired_event=authorized_user.user_id,
+            affected_post_id=post.post_id,
+        )
+
     if body.is_thesis_comment_on:
         thesis = await theses_repo.retrieve_thesis_with_filter(
             thesis_id=body.is_thesis_comment_on
@@ -59,14 +69,29 @@ async def create_new_post(
                 detail="The supplied is_thesis_comment_on ID is invalid."
             ).invalid_resource_id()
 
+        event = notifications.NewEventRepoAdapter(
+            type=notifications.EventType.COMMENT,
+            user_to_notify=thesis.user_id,
+            user_who_fired_event=authorized_user.user_id,
+            affected_thesis_id=thesis.thesis_id,
+        )
+
     create_post_request_raw = body.dict()
     create_post_request_raw.update(
         {"user_id": authorized_user.user_id, "username": authorized_user.username}
     )
 
-    new_post = posts.CreatePostRepoAdapter(**create_post_request_raw)
+    # Save post in database
+    created_post = await posts_repo.create(
+        new_post=posts.CreatePostRepoAdapter(**create_post_request_raw)
+    )
 
-    return await posts_repo.create(new_post=new_post)
+    # If post was a comment, insert comment notification
+    if body.is_post_comment_on or body.is_thesis_comment_on:
+        event.comment_id = created_post.post_id
+        await notifications_repo.create(new_event=event)
+
+    return created_post
 
 
 @posts_router.get(

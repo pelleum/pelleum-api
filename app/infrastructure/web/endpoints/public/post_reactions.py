@@ -5,15 +5,17 @@ from pydantic import conint
 
 from app.dependencies import (
     get_current_active_user,
+    get_notifications_repo,
     get_post_reactions_query_params,
     get_post_reactions_repo,
     get_posts_repo,
     paginate,
 )
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.notifications_repo import INotificationsRepo
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
-from app.usecases.schemas import post_reactions, users
+from app.usecases.schemas import notifications, post_reactions, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 post_reactions_router = APIRouter(tags=["Post Reactions"])
@@ -25,6 +27,7 @@ async def create_post_reaction(
     body: post_reactions.PostReactionRequest = Body(...),
     post_reactions_repo: IPostReactionRepo = Depends(get_post_reactions_repo),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
+    notifications_repo: INotificationsRepo = Depends(get_notifications_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
@@ -39,7 +42,18 @@ async def create_post_reaction(
         post_id=post_id, user_id=authorized_user.user_id, reaction=body.reaction
     )
 
+    # Like the post
     await post_reactions_repo.create(post_reaction=post_reaction)
+
+    # Insert Notification
+    await notifications_repo.create(
+        new_event=notifications.NewEventRepoAdapter(
+            type=notifications.EventType.POST_REACTION,
+            user_to_notify=post.user_id,
+            user_who_fired_event=authorized_user.user_id,
+            affected_post_id=post.post_id,
+        )
+    )
 
 
 @post_reactions_router.get(

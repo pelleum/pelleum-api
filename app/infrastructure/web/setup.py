@@ -8,6 +8,7 @@ from app.infrastructure.web.endpoints import health
 from app.infrastructure.web.endpoints.private import example as example_private
 from app.infrastructure.web.endpoints.public import (
     account_connections,
+    notifications,
     portfolio,
     post_reactions,
     posts,
@@ -45,6 +46,9 @@ def setup_app():
     app.include_router(health.health_router, prefix="/health")
     app.include_router(
         subscriptions.subscriptions_router, prefix="/public/subscriptions"
+    )
+    app.include_router(
+        notifications.notifications_router, prefix="/public/notifications"
     )
 
     return app

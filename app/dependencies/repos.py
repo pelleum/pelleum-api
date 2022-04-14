@@ -1,4 +1,5 @@
 from app.infrastructure.db.core import get_or_create_database
+from app.infrastructure.db.repos.notifications_repo import NotificationsRepo
 from app.infrastructure.db.repos.portfolio_repo import PortfolioRepo
 from app.infrastructure.db.repos.post_reaction_repo import PostReactionRepo
 from app.infrastructure.db.repos.posts_repo import PostsRepo
@@ -7,6 +8,7 @@ from app.infrastructure.db.repos.subscriptions_repo import SubscriptionsRepo
 from app.infrastructure.db.repos.theses_repo import ThesesRepo
 from app.infrastructure.db.repos.thesis_reaction_repo import ThesisReactionRepo
 from app.infrastructure.db.repos.user_repo import UsersRepo
+from app.usecases.interfaces.notifications_repo import INotificationsRepo
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
 from app.usecases.interfaces.post_reaction_repo import IPostReactionRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
@@ -46,3 +48,7 @@ async def get_rationales_repo() -> IRationalesRepo:
 
 async def get_subscriptions_repo() -> ISubscriptionsRepo:
     return SubscriptionsRepo(db=await get_or_create_database())
+
+
+async def get_notifications_repo() -> INotificationsRepo:
+    return NotificationsRepo(db=await get_or_create_database())

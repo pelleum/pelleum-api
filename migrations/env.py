@@ -20,6 +20,7 @@ from app.infrastructure.db.models.account_connections.institutions import (
     INSTITUTIONS,
     ROBINHOOD_INSTRUMENTS,
 )
+from app.infrastructure.db.models.public.notifications import EVENTS, NOTIFICATIONS
 
 # Public Schema
 from app.infrastructure.db.models.public.portfolio import ASSETS

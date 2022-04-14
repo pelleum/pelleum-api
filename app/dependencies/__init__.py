@@ -8,6 +8,7 @@ from .repos import (
     get_portfolio_repo,
     get_rationales_repo,
     get_subscriptions_repo,
+    get_notifications_repo,
 )
 from .event_loop import get_event_loop
 from .http_client import get_client_session

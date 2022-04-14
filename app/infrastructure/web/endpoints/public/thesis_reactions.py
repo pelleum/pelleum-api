@@ -5,15 +5,17 @@ from pydantic import conint
 
 from app.dependencies import (
     get_current_active_user,
+    get_notifications_repo,
     get_theses_repo,
     get_thesis_reactions_query_params,
     get_thesis_reactions_repo,
     paginate,
 )
 from app.libraries import pelleum_errors
+from app.usecases.interfaces.notifications_repo import INotificationsRepo
 from app.usecases.interfaces.theses_repo import IThesesRepo
 from app.usecases.interfaces.thesis_reaction_repo import IThesisReactionRepo
-from app.usecases.schemas import theses, thesis_reactions, users
+from app.usecases.schemas import notifications, thesis_reactions, users
 from app.usecases.schemas.request_pagination import MetaData, RequestPagination
 
 thesis_reactions_router = APIRouter(tags=["Thesis Reactions"])
@@ -25,6 +27,7 @@ async def create_thesis_reaction(
     body: thesis_reactions.ThesisReactionRequest = Body(...),
     thesis_reactions_repo: IThesisReactionRepo = Depends(get_thesis_reactions_repo),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
+    notifications_repo: INotificationsRepo = Depends(get_notifications_repo),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> None:
 
@@ -57,7 +60,18 @@ async def create_thesis_reaction(
         thesis_id=thesis_id, user_id=authorized_user.user_id, reaction=body.reaction
     )
 
+    # Insert Reaction
     await thesis_reactions_repo.create(thesis_reaction=thesis_reaction)
+
+    # Insert Notification
+    await notifications_repo.create(
+        new_event=notifications.NewEventRepoAdapter(
+            type=notifications.EventType.THESIS_REACTION,
+            user_to_notify=thesis.user_id,
+            user_who_fired_event=authorized_user.user_id,
+            affected_thesis_id=thesis.thesis_id,
+        )
+    )
 
 
 @thesis_reactions_router.patch("/{thesis_id}", status_code=200)
