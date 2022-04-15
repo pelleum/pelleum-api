@@ -48,6 +48,7 @@ class EventInDb(BaseModel):
 class NotificationDbInfo(EventInDb):
     """Notifications joined events joined users"""
 
+    acknowledged: bool
     notification_id: int
     username: str
     user_id: int
@@ -56,6 +57,7 @@ class NotificationDbInfo(EventInDb):
 class NotifcationResponseObject(BaseModel):
     event_id: int
     type: str
+    acknowledged: bool
     affected_post_id: Optional[int]
     affected_thesis_id: Optional[int]
     notification_id: int

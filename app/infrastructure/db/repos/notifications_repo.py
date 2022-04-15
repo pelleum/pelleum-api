@@ -1,4 +1,5 @@
-from typing import List, Optional, Tuple
+from datetime import datetime, timedelta
+from typing import List, Optional
 
 from databases import Database
 from sqlalchemy import and_, desc, select
@@ -61,6 +62,7 @@ class NotificationsRepo(INotificationsRepo):
 
         columns_to_select = [
             NOTIFICATIONS.c.notification_id,
+            NOTIFICATIONS.c.acknowledged,
             EVENTS,
             USERS.c.username,
             USERS.c.user_id,
@@ -71,7 +73,7 @@ class NotificationsRepo(INotificationsRepo):
             .select_from(j)
             .where(
                 and_(
-                    NOTIFICATIONS.c.acknowledged == False,
+                    NOTIFICATIONS.c.created_at > datetime.utcnow() - timedelta(days=2),
                     NOTIFICATIONS.c.user_to_notify == user_id,
                 )
             )
