@@ -62,10 +62,17 @@ async def test_get_thesis(
     expected_response_fields = [field for field in ThesisResponse.__fields__]
 
     # Assertions
+    non_inserted_thesis_object_keys = {
+        "created_at",
+        "updated_at",
+        "like_count",
+        "dislike_count",
+        "save_count",
+    }
     assert response.status_code == 200
     for key, value in response_data.items():
         assert key in expected_response_fields
-        if key != "created_at" and key != "updated_at":
+        if key not in non_inserted_thesis_object_keys:
             assert value == inserted_thesis_object.dict().get(key)
 
 

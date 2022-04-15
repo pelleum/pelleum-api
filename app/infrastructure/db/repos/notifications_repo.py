@@ -73,7 +73,7 @@ class NotificationsRepo(INotificationsRepo):
             .select_from(j)
             .where(
                 and_(
-                    NOTIFICATIONS.c.created_at > datetime.utcnow() - timedelta(days=2),
+                    NOTIFICATIONS.c.created_at > datetime.utcnow() - timedelta(days=5),
                     NOTIFICATIONS.c.user_to_notify == user_id,
                 )
             )
