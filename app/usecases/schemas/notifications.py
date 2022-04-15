@@ -5,6 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from app.usecases.schemas.posts import PostWithReactionData
+from app.usecases.schemas.theses import ThesisInDB
 
 
 class EventType(str, Enum):
@@ -62,6 +63,7 @@ class NotifcationResponseObject(BaseModel):
     username: str
     comment: Optional[PostWithReactionData]
     post: Optional[PostWithReactionData]
+    thesis: Optional[ThesisInDB]
 
 
 class NotificationsResponse(BaseModel):
