@@ -172,8 +172,7 @@ async def get_many_posts(
         if query_params.is_post_comment_on or query_params.is_thesis_comment_on
         else False,
     )
-    
-    
+
     # 3. Format the data
     formatted_posts = []
     for post in posts_with_replies:

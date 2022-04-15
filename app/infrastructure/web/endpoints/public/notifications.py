@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends, Path
 from pydantic import conint
 
-from app.dependencies import get_current_active_user, get_notifications_repo, get_posts_repo
+from app.dependencies import (
+    get_current_active_user,
+    get_notifications_repo,
+    get_posts_repo,
+)
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.notifications_repo import INotificationsRepo
 from app.usecases.interfaces.posts_repo import IPostsRepo
@@ -30,12 +34,22 @@ async def get_user_notifications(
     for notification in user_notifications:
         notification_raw = notification.dict()
         if notification.comment_id:
-            comment_object = await posts_repo.retrieve_post_with_filter(post_id=notification.comment_id, user_id=authorized_user.user_id)
+            comment_object = await posts_repo.retrieve_post_with_filter(
+                post_id=notification.comment_id, user_id=authorized_user.user_id
+            )
             notification_raw["comment"] = comment_object
-        notificatations_with_comments.append(notifications.NotifcationResponseObject(**notification_raw))
-        
+        elif notification.type == "POST_REACTION":
+            post_object = await posts_repo.retrieve_post_with_filter(
+                post_id=notification.affected_post_id, user_id=authorized_user.user_id
+            )
+            notification_raw["post"] = post_object
+        notificatations_with_comments.append(
+            notifications.NotifcationResponseObject(**notification_raw)
+        )
 
-    return notifications.NotificationsResponse(notifications=notificatations_with_comments)
+    return notifications.NotificationsResponse(
+        notifications=notificatations_with_comments
+    )
 
 
 @notifications_router.patch(

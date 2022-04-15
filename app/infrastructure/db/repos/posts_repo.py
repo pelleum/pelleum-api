@@ -77,9 +77,11 @@ class PostsRepo(IPostsRepo):
             POSTS,
             POST_REACTIONS.c.reaction.label("user_reaction_value"),
         ] + thesis_columns
-        
+
         # Get Post
-        query = select(columns_to_select).select_from(j).where(and_(*conditions)).subquery()
+        query = (
+            select(columns_to_select).select_from(j).where(and_(*conditions)).subquery()
+        )
 
         # Gets number of likes per post
         likes_count_query = (

@@ -59,7 +59,12 @@ class NotificationsRepo(INotificationsRepo):
             EVENTS, NOTIFICATIONS.c.event_id == EVENTS.c.event_id
         ).join(USERS, NOTIFICATIONS.c.user_who_fired_event == USERS.c.user_id)
 
-        columns_to_select = [NOTIFICATIONS.c.notification_id, EVENTS, USERS.c.username, USERS.c.user_id]
+        columns_to_select = [
+            NOTIFICATIONS.c.notification_id,
+            EVENTS,
+            USERS.c.username,
+            USERS.c.user_id,
+        ]
 
         query = (
             select(columns_to_select)

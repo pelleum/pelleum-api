@@ -61,6 +61,8 @@ class NotifcationResponseObject(BaseModel):
     user_id: int
     username: str
     comment: Optional[PostWithReactionData]
+    post: Optional[PostWithReactionData]
+
 
 class NotificationsResponse(BaseModel):
     """Same as NotificationDbInfo"""
