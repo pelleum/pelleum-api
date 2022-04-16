@@ -14,19 +14,19 @@ EVENTS = sa.Table(
     sa.Column(
         "affected_post_id",
         sa.Integer,
-        sa.ForeignKey("posts.post_id"),
+        sa.ForeignKey("posts.post_id", ondelete="cascade"),
         nullable=True,
     ),
     sa.Column(
         "affected_thesis_id",
         sa.Integer,
-        sa.ForeignKey("theses.thesis_id"),
+        sa.ForeignKey("theses.thesis_id", ondelete="cascade"),
         nullable=True,
     ),
     sa.Column(
         "comment_id",
         sa.Integer,
-        sa.ForeignKey("posts.post_id"),
+        sa.ForeignKey("posts.post_id", ondelete="cascade"),
         nullable=True,
     ),
 )
