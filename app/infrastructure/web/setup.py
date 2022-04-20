@@ -1,6 +1,7 @@
 import click
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.dependencies import get_client_session, get_event_loop
 from app.infrastructure.db.core import get_or_create_database
@@ -49,6 +50,16 @@ def setup_app():
     )
     app.include_router(
         notifications.notifications_router, prefix="/public/notifications"
+    )
+
+    # CORS (Cross-Origin Resource Sharing)
+    origins = ["*"]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     return app
