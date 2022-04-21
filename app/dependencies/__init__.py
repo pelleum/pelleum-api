@@ -19,6 +19,7 @@ from .auth import (
     get_current_active_user,
     validate_password,
     validate_email,
+    get_optional_user,
 )
 from .request_pagination import paginate
 from .query_params import (

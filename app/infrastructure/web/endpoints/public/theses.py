@@ -6,6 +6,7 @@ from pydantic import conint
 from app.dependencies import (
     get_block_data,
     get_current_active_user,
+    get_optional_user,
     get_theses_query_params,
     get_theses_repo,
     paginate,
@@ -88,11 +89,11 @@ async def get_thesis(
     thesis_id: conint(gt=0, lt=100000000000) = Path(...),
     theses_repo: IThesesRepo = Depends(get_theses_repo),
     user_block_data: users.BlockData = Depends(get_block_data),
-    authorized_user: users.UserInDB = Depends(get_current_active_user),
+    optional_user: users.UserInDB = Depends(get_optional_user),
 ) -> theses.ThesisResponse:
 
     thesis = await theses_repo.retrieve_thesis_with_reaction(
-        thesis_id=thesis_id, user_id=authorized_user.user_id
+        thesis_id=thesis_id, user_id=optional_user.user_id if optional_user else -1
     )
 
     # 1. Ensure resource exists

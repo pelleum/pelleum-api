@@ -1,7 +1,8 @@
 import re
 from datetime import datetime, timedelta
+from typing import Optional
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -9,10 +10,24 @@ from passlib.context import CryptContext
 from app.dependencies import get_users_repo  # pylint: disable = cyclic-import
 from app.libraries import pelleum_errors
 from app.settings import settings
+from app.usecases.interfaces.user_repo import IUsersRepo
 from app.usecases.schemas import auth
 from app.usecases.schemas.users import UserInDB
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_url)
+
+class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
+    def __init__(self, tokenUrl: str):
+        OAuth2PasswordBearer.__init__(self, tokenUrl=tokenUrl)
+
+    async def __call__(self, request: Request) -> Optional[str]:
+        try:
+            return await super().__call__(request=request)
+        except Exception:
+            print("we got here in exception")
+            return
+
+
+oauth2_scheme = CustomOAuth2PasswordBearer(tokenUrl=settings.token_url)
 
 
 async def get_password_context():
@@ -120,3 +135,29 @@ async def validate_email(email: str) -> None:
         raise await pelleum_errors.PelleumErrors(
             detail="Email format is invalid. Please submit a valid email."
         ).invalid_email()
+
+
+# Optional User Flow
+async def get_optional_user(
+    token: str = Depends(oauth2_scheme),
+    users_repo: IUsersRepo = Depends(get_users_repo),
+) -> UserInDB:
+    """Validates token sent in"""
+
+    if token:
+        try:
+            payload = jwt.decode(
+                token,
+                settings.json_web_token_secret,
+                algorithms=[settings.json_web_token_algorithm],
+            )
+            username: str = payload.get("sub")
+            if username is None:
+                return
+            token_data = auth.JWTData(username=username)
+        except JWTError:
+            # a token was supplied, but it was invalid
+            return
+
+        return await users_repo.retrieve_user_with_filter(username=token_data.username)
+    return

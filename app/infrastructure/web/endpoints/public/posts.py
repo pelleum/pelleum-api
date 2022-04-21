@@ -8,6 +8,7 @@ from app.dependencies import (
     get_block_data,
     get_current_active_user,
     get_notifications_repo,
+    get_optional_user,
     get_posts_query_params,
     get_posts_repo,
     get_theses_repo,
@@ -103,12 +104,12 @@ async def get_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     user_block_data: users.BlockData = Depends(get_block_data),
-    authorized_user: users.UserInDB = Depends(get_current_active_user),
+    optional_user: Optional[users.UserInDB] = Depends(get_optional_user),
 ) -> posts.PostResponse:
 
-    # 1. Retrieve the post
+    # 1. Retrieve the post (if not optional user, user_id = 1... something that does not exist)
     post = await posts_repo.retrieve_post_with_filter(
-        post_id=post_id, user_id=authorized_user.user_id
+        post_id=post_id, user_id=optional_user.user_id if optional_user else -1
     )
 
     if not post:
@@ -147,12 +148,14 @@ async def get_many_posts(
     request_pagination: RequestPagination = Depends(paginate),
     posts_repo: IPostsRepo = Depends(get_posts_repo),
     user_block_data: users.BlockData = Depends(get_block_data),
-    authorized_user: users.UserInDB = Depends(get_current_active_user),
+    optional_user: users.UserInDB = Depends(get_optional_user),
 ) -> posts.ManyPostsResponse:
     """This endpoint returns many posts based on query parameters that were sent to it."""
 
     query_params_raw = query_params.dict()
-    query_params_raw.update({"requesting_user_id": authorized_user.user_id})
+    query_params_raw.update(
+        {"requesting_user_id": optional_user.user_id if optional_user else -1}
+    )
     query_params = posts.PostQueryRepoAdapter(**query_params_raw)
 
     # 1. Retrieve posts based on query parameters
@@ -166,7 +169,7 @@ async def get_many_posts(
     posts_with_replies = await get_and_add_replies(
         posts_list=posts_list,
         posts_repo=posts_repo,
-        user_id=authorized_user.user_id,
+        user_id=optional_user.user_id if optional_user else -1,
         user_block_data=user_block_data,
         get_max_levels=True
         if query_params.is_post_comment_on or query_params.is_thesis_comment_on
