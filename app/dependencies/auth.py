@@ -23,12 +23,11 @@ class CustomOAuth2PasswordBearer(OAuth2PasswordBearer):
         try:
             return await super().__call__(request=request)
         except Exception:
-            print("we got here in exception")
             return
 
 
-oauth2_scheme = CustomOAuth2PasswordBearer(tokenUrl=settings.token_url)
-
+custom_oauth2_scheme = CustomOAuth2PasswordBearer(tokenUrl=settings.token_url)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=settings.token_url)
 
 async def get_password_context():
     return CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -139,7 +138,7 @@ async def validate_email(email: str) -> None:
 
 # Optional User Flow
 async def get_optional_user(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(custom_oauth2_scheme),
     users_repo: IUsersRepo = Depends(get_users_repo),
 ) -> UserInDB:
     """Validates token sent in"""
