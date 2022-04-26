@@ -15,6 +15,7 @@ from app.dependencies import (
     validate_email,
     validate_password,
     verify_password,
+    get_optional_user
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
@@ -120,6 +121,24 @@ async def get_current_user(
     authorized_user: users.UserInDB = Depends(get_current_active_user),
 ) -> users.UserResponse:
     return users.UserResponse(**authorized_user.dict())
+
+
+@auth_router.get("/{user_id}", response_model=users.UserByIdResponse)
+async def get_user_by_id(
+    user_id: conint(gt=0, lt=100000000000) = Path(...),
+    users_repo: IUsersRepo = Depends(get_users_repo),
+    optional_user: users.UserInDB = Depends(get_optional_user),
+) -> users.UserByIdResponse:
+
+    user = await users_repo.retrieve_user_with_filter(user_id=user_id)
+    
+    if not user:
+        raise await pelleum_errors.PelleumErrors(
+            detail="The supplied user_id is invalid."
+        ).invalid_resource_id()
+
+
+    return users.UserByIdResponse(**user.dict())
 
 
 async def validate_inputs(
