@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Response
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     get_current_active_user,
@@ -62,14 +63,14 @@ async def get_user_notifications(
 
 @notifications_router.patch(
     "/{notification_id}",
-    status_code=200,
-    response_model=notifications.NotificationsResponse,
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def acknowledge_notification(
     notifications_repo: INotificationsRepo = Depends(get_notifications_repo),
     notification_id: conint(gt=0, lt=100000000000) = Path(...),
     authorized_user: users.UserInDB = Depends(get_current_active_user),
-) -> notifications.NotificationsResponse:
+) -> None:
     """Acknowledges a notification."""
 
     notification = await notifications_repo.retrieve_single(
