@@ -1,7 +1,8 @@
 import math
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Response
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     get_current_active_user,
@@ -74,7 +75,9 @@ async def create_thesis_reaction(
     )
 
 
-@thesis_reactions_router.patch("/{thesis_id}", status_code=200)
+@thesis_reactions_router.patch(
+    "/{thesis_id}", status_code=HTTP_204_NO_CONTENT, response_class=Response
+)
 async def update_thesis_reaction(
     thesis_id: conint(gt=0, lt=100000000000) = Path(...),
     body: thesis_reactions.UpdateThesisReactionRequest = Body(...),
@@ -164,7 +167,8 @@ async def get_many_thesis_reactions(
 
 @thesis_reactions_router.delete(
     "/{thesis_id}",
-    status_code=200,
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def delete_thesis_reaction(
     thesis_id: conint(gt=0, lt=100000000000) = Path(...),

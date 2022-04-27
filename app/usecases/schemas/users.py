@@ -62,10 +62,11 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
 
+
 class UserByIdResponse(BaseModel):
     username: str
     user_id: int
-    
+
 
 class UserWithAuthTokenResponse(UserResponse):
     access_token: str

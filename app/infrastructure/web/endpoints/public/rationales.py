@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import APIRouter, Body, Depends, Path, Response
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     get_current_active_user,
@@ -140,7 +141,8 @@ async def get_many_rationales(
 
 @rationale_router.delete(
     "/{rationale_id}",
-    status_code=200,
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def delete_rationale(
     rationale_id: conint(gt=0, lt=100000000000) = Path(...),

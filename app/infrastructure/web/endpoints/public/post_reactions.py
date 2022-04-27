@@ -1,7 +1,8 @@
 import math
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Response
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     get_current_active_user,
@@ -96,7 +97,8 @@ async def get_many_post_reactions(
 
 @post_reactions_router.delete(
     "/{post_id}",
-    status_code=200,
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def delete_post_reaction(
     post_id: conint(gt=0, lt=100000000000) = Path(...),

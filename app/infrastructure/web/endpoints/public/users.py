@@ -1,21 +1,22 @@
 from turtle import update
 from typing import Union
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     create_access_token,
     get_block_data,
     get_current_active_user,
+    get_optional_user,
     get_password_context,
     get_portfolio_repo,
     get_users_repo,
     validate_email,
     validate_password,
     verify_password,
-    get_optional_user
 )
 from app.libraries import pelleum_errors
 from app.usecases.interfaces.portfolio_repo import IPortfolioRepo
@@ -131,12 +132,11 @@ async def get_user_by_id(
 ) -> users.UserByIdResponse:
 
     user = await users_repo.retrieve_user_with_filter(user_id=user_id)
-    
+
     if not user:
         raise await pelleum_errors.PelleumErrors(
             detail="The supplied user_id is invalid."
         ).invalid_resource_id()
-
 
     return users.UserByIdResponse(**user.dict())
 
@@ -198,7 +198,11 @@ async def block_user(
     )
 
 
-@auth_router.delete("/block/{blocked_user_id}", status_code=200)
+@auth_router.delete(
+    "/block/{blocked_user_id}",
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
+)
 async def unblock_user(
     blocked_user_id: conint(gt=0, lt=100000000000) = Path(...),
     users_repo: IUsersRepo = Depends(get_users_repo),

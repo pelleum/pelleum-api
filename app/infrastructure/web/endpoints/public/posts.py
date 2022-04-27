@@ -1,8 +1,9 @@
 import math
 from typing import List, Optional
 
-from fastapi import APIRouter, Body, Depends, Path
+from fastapi import APIRouter, Body, Depends, Path, Response
 from pydantic import conint
+from starlette.status import HTTP_204_NO_CONTENT
 
 from app.dependencies import (
     get_block_data,
@@ -206,7 +207,8 @@ async def get_many_posts(
 
 @posts_router.delete(
     "/{post_id}",
-    status_code=200,
+    status_code=HTTP_204_NO_CONTENT,
+    response_class=Response,
 )
 async def delete_post(
     post_id: conint(gt=0, lt=100000000000) = Path(...),
