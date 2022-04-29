@@ -166,9 +166,14 @@ async def get_many_posts(
         page_size=request_pagination.records_per_page,
     )
 
-    # 2. For each post, retrieve comments and update post object along the way
+    # 2. Filter blocked parent posts
+    filtered_parent_posts = await filter_blocked_content(
+        posts_list=posts_list, user_block_data=user_block_data
+    )
+
+    # 3. For each post, retrieve comments and update post object along the way
     posts_with_replies = await get_and_add_replies(
-        posts_list=posts_list,
+        posts_list=filtered_parent_posts,
         posts_repo=posts_repo,
         user_id=optional_user.user_id if optional_user else -1,
         user_block_data=user_block_data,
@@ -177,7 +182,7 @@ async def get_many_posts(
         else False,
     )
 
-    # 3. Format the data
+    # 4. Format the data
     formatted_posts = []
     for post in posts_with_replies:
         post_raw = post.dict()
